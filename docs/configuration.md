@@ -106,7 +106,7 @@ TEAMS_LOGIC_APP_URL="<Azure Logic App HTTP trigger callback URL>"
 TEAMS_LOGIC_APP_TEAM_ID="<Microsoft Teams team ID>"
 TEAMS_LOGIC_APP_CHANNEL_ID="<Microsoft Teams channel ID>"
 EXAMPLE_ASSET_BASE_URL="<direct HTTPS base URL for committed example images>"
-TEAMS_ASSET_BASE_URL="<direct HTTPS base URL for committed gallery images>"
+TEAMS_ASSET_BASE_URL="<legacy fallback; leave blank for new configuration>"
 TEAMS_TEST_USER_ID="<test member Microsoft Entra object ID or UPN>"
 TEAMS_TEST_USER_NAME="<test member display name>"
 ```
@@ -131,9 +131,12 @@ from the explicit Team and channel IDs. Follow the
 [Logic App runbook](../infra/azure/logic-apps/README.md); a Logic App callback
 cannot replace `TEAMS_WORKFLOW_URL` because its request schema is different.
 
-The asset base and two `TEAMS_TEST_*` values are optional and used only by the
-standalone Adaptive Card image and mention examples. Do not set them in shared
-production notification configuration.
+The provider-neutral asset base is used by image-led paired scenarios and
+standalone Adaptive Card examples for both Workflow and Logic App delivery.
+`TEAMS_ASSET_BASE_URL` is read only as a compatible fallback when
+`EXAMPLE_ASSET_BASE_URL` is blank. The two `TEAMS_TEST_*` values are optional
+and used only by the standalone mention example. Do not set these example
+values in shared production notification configuration.
 
 Create the Workflow using the
 [Microsoft Teams Incoming Webhooks and Workflows documentation](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook).

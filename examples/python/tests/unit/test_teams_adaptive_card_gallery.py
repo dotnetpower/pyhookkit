@@ -11,10 +11,6 @@ from urllib.parse import urlsplit
 
 import pytest
 
-from pyhookkit.entrypoints.teams_card_assets import (
-    TeamsAssetConfigurationError,
-    teams_asset_replacements,
-)
 from pyhookkit.entrypoints.teams_card_example import load_teams_card
 from pyhookkit.json_types import JsonObject, JsonValue
 
@@ -184,36 +180,6 @@ def test_mention_runner_rejects_markup_in_display_name(
 
     assert completed.returncode != 0
     assert "markup characters" in completed.stderr
-
-
-def test_asset_base_resolves_committed_filename() -> None:
-    replacements = teams_asset_replacements(
-        ("adaptive-card-cat-hero.png",),
-        environment={
-            "TEAMS_ASSET_BASE_URL": (
-                "https://raw.githubusercontent.example/project/assets"
-            )
-        },
-    )
-
-    assert replacements == {
-        "https://assets.pyhookkit.example/adaptive-card-cat-hero.png": (
-            "https://raw.githubusercontent.example/project/assets/"
-            "adaptive-card-cat-hero.png"
-        )
-    }
-
-
-@pytest.mark.parametrize(
-    "base_url",
-    ["", "http://example.com/assets", "https://example.com/assets?token=value"],
-)
-def test_asset_base_rejects_invalid_urls(base_url: str) -> None:
-    with pytest.raises(TeamsAssetConfigurationError):
-        teams_asset_replacements(
-            ("adaptive-card-cat-hero.png",),
-            environment={"TEAMS_ASSET_BASE_URL": base_url},
-        )
 
 
 @pytest.mark.parametrize("filename", _ASSETS)

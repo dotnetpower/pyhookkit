@@ -118,6 +118,10 @@ def test_raw_teams_logic_app_payload_extracts_card(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     namespace = _load_script("teams", monkeypatch)
+    build_payload = cast(
+        Callable[[], dict[str, object]],
+        namespace["build_payload"],
+    )
     build_logic_app_payload = cast(
         Callable[[str, str], dict[str, object]],
         namespace["build_logic_app_payload"],
@@ -131,3 +135,11 @@ def test_raw_teams_logic_app_payload_extracts_card(
     card = payload["card"]
     assert isinstance(card, dict)
     assert card["type"] == "AdaptiveCard"
+    workflow_payload = build_payload()
+    attachments_value = workflow_payload["attachments"]
+    assert isinstance(attachments_value, list)
+    attachments = cast(list[object], attachments_value)
+    attachment_value = attachments[0]
+    assert isinstance(attachment_value, dict)
+    attachment = cast(dict[str, object], attachment_value)
+    assert card == attachment["content"]

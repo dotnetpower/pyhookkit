@@ -28,6 +28,10 @@ requested Team and channel. A successful workflow returns HTTP `201`. Connector
 and validation failures must return non-2xx responses so callers cannot mistake
 them for successful delivery.
 
+PyHookKit treats any 2xx response as success and returns only the
+provider-neutral delivery state and attempt count. It does not expose the
+connector response body or Teams message identifiers.
+
 ## Local configuration
 
 Store runtime values only in the ignored repository `.env`:
@@ -51,4 +55,5 @@ uv run python scenarios/deployment_result/teams.py --send-logic-app
 
 The rendered card is identical to the Power Automate path. Only the outbound
 request adapter differs: it removes the Teams Workflow envelope and adds Logic
-App routing fields.
+App routing fields. This invariant is exercised for every library-backed Teams
+example; F00 separately compares its two standard-library request builders.

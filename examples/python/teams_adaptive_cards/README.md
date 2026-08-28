@@ -37,8 +37,8 @@ minimum Teams host version is raised and mobile rendering is verified.
 Cards use the host's default background for primary content and reserve the
 brighter `accent` style for focused callouts and grouped metrics.
 
-T00, T02, and T06 require a public asset base with `--send`. After the assets
-are published to the default branch, configure:
+T00, T02, and T06 require a public asset base with either delivery option. After
+the assets are published to the default branch, configure:
 
 ```dotenv
 EXAMPLE_ASSET_BASE_URL="https://raw.githubusercontent.com/dotnetpower/pyhookkit/main/examples/python/teams_adaptive_cards/assets"

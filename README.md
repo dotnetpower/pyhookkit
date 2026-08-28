@@ -42,8 +42,11 @@ different payload shapes; visual identity is not treated as parity.
 
 ## Scenario screenshots
 
-Capture the actual message card in each client, save it under
-`docs/assets/card-previews/`, and replace the corresponding placeholder.
+No client screenshots are currently committed. The PNG files under
+`examples/python/teams_adaptive_cards/assets/` are card content, not client
+captures. Add only actual Slack or Teams client captures under
+[`docs/assets/card-previews/`](docs/assets/card-previews/README.md); do not use
+synthetic HTML or renderer previews to fill this gallery.
 
 | Scenario | Slack | Microsoft Teams |
 |---|---|---|

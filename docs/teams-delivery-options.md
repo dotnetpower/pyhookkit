@@ -16,14 +16,17 @@ are different:
 |---|---|---|
 | Request body | Teams `message` envelope with `attachments` | `teamId`, `channelId`, optional `eventId`, and inner `card` |
 | Routing | Fixed in the Workflow action | Explicit in every request |
-| Success | Workflow HTTP status | `201` with Teams message identifiers |
+| Endpoint success | Workflow 2xx status | `post-card` returns `201` with Teams message identifiers |
 | Authentication | Signed Workflow callback URL | Signed Logic App trigger URL plus authorized Teams API connection |
 
 PyHookKit keeps one `TeamsMessageRenderer` and adapts only the delivery boundary.
 Use `--send-logic-app`; do not place a Logic App URL in `TEAMS_WORKFLOW_URL`.
 The adapter validates and redacts the callback URL, extracts exactly one
 Adaptive Card attachment, adds configured routing, and returns the same redacted
-provider-neutral delivery result used by Workflow delivery.
+provider-neutral delivery result used by Workflow delivery. Both adapters treat
+any 2xx response as success. They intentionally discard the provider response
+body and message identifiers rather than leaking provider payloads into the
+result contract.
 
 ```shell
 uv run python scenarios/deployment_result/teams.py --send-logic-app
@@ -31,6 +34,10 @@ uv run python scenarios/deployment_result/teams.py --send-logic-app
 
 See the [Logic App runbook](../infra/azure/logic-apps/README.md) for the trigger
 schema and required environment values.
+
+Contract tests execute every library-backed Teams example through both adapters
+and assert that the resolved inner Adaptive Card is unchanged. The raw F00
+example has the equivalent assertion for its standard-library request builders.
 
 ## Workflow lifecycle
 

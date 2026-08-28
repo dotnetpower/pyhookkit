@@ -1,0 +1,1 @@
+"""Inbound Slack request adapters."""

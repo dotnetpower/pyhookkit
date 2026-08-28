@@ -1,0 +1,18 @@
+{
+  "text": "Synthetic follow-up completed.",
+  "attachments": [
+    {
+      "color": "#2EB67D",
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "Synthetic follow-up completed."
+          }
+        }
+      ]
+    }
+  ],
+  "thread_ts": "1724811000.000001"
+}

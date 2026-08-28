@@ -1,0 +1,30 @@
+"""Render or send the incident alert and acknowledgment link for Slack."""
+
+from example_notification import build_notification
+
+from pyhookkit.adapters.outbound.slack.identity import (
+    SlackIdentity,
+    SlackIdentityDirectory,
+)
+from pyhookkit.adapters.outbound.slack.message_renderer import SlackMessageRenderer
+from pyhookkit.domain.notification import MentionKind
+from pyhookkit.entrypoints.slack_webhook_example import run_slack_webhook_example
+
+
+def main() -> None:
+    identities = SlackIdentityDirectory(
+        {
+            "example-responders": SlackIdentity(
+                MentionKind.GROUP,
+                "S00000204",
+            )
+        }
+    )
+    run_slack_webhook_example(
+        build_notification(),
+        SlackMessageRenderer(identities),
+    )
+
+
+if __name__ == "__main__":
+    main()

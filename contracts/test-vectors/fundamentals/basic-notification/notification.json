@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "example-basic-001",
+  "route": "basic-notification",
+  "title": "Service status",
+  "body": "The example service is operating normally.",
+  "severity": "success",
+  "sourceTimestamp": "2026-08-28T02:00:00Z"
+}

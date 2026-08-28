@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "example-rich-card-001",
+  "route": "rich-card",
+  "title": "Deployment completed",
+  "body": "The synthetic deployment completed successfully.",
+  "severity": "success",
+  "facts": [
+    {
+      "key": "Application",
+      "value": "example-api"
+    },
+    {
+      "key": "Environment",
+      "value": "staging"
+    },
+    {
+      "key": "Revision",
+      "value": "abc1234"
+    }
+  ],
+  "sourceTimestamp": "2026-08-28T02:05:00Z",
+  "metadata": {
+    "source": "synthetic-deployer"
+  }
+}

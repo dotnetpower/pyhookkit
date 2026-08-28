@@ -148,6 +148,7 @@ activemq-data/
 *.sage.py
 
 # Environments
+# Keep .env.example committed as the variable contract.
 .env
 .envrc
 .venv

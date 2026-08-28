@@ -1,0 +1,31 @@
+{
+  "text": "Action required: Review the synthetic alert.",
+  "attachments": [
+    {
+      "color": "#ECB22E",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Action required"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "Review the synthetic alert."
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "<@U00000001> <!subteam^S00000001>"
+          }
+        }
+      ]
+    }
+  ]
+}

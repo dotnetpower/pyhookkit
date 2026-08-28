@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "scenario-maintenance-notice-001",
+  "route": "service-announcements",
+  "title": "Scheduled maintenance notice",
+  "body": "INFO: Scheduled maintenance notice. Maintenance affects example-api and example-worker from 2026-08-30T01:00:00Z to 2026-08-30T02:00:00Z. Expected impact: Brief request retries. Owner: example-operations. Status page: https://status.example.com/notices/maintenance-118",
+  "severity": "info",
+  "facts": [
+    {
+      "key": "Window",
+      "value": "2026-08-30T01:00:00Z - 2026-08-30T02:00:00Z"
+    },
+    {
+      "key": "Affected services",
+      "value": "example-api, example-worker"
+    },
+    {
+      "key": "Expected impact",
+      "value": "Brief request retries"
+    }
+  ],
+  "links": [
+    {
+      "label": "Open status page",
+      "url": "https://status.example.com/notices/maintenance-118"
+    }
+  ],
+  "mentions": [
+    {
+      "kind": "group",
+      "alias": "example-operations"
+    }
+  ],
+  "sourceTimestamp": "2026-08-28T06:00:00+00:00",
+  "metadata": {
+    "source": "synthetic-maintenance-service",
+    "correlationId": "maintenance-118"
+  }
+}

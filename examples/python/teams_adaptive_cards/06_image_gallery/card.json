@@ -1,0 +1,107 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Three licensed Adaptive Cards sample images.",
+        "speak": "Three licensed Adaptive Cards sample images.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "🐈  Adaptive Cards image gallery",
+            "weight": "Bolder",
+            "size": "Large",
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": "Repository-hosted sample images with attribution, alt text, and flexible columns.",
+            "wrap": true,
+            "spacing": "Small"
+          },
+          {
+            "type": "ColumnSet",
+            "spacing": "Medium",
+            "columns": [
+              {
+                "type": "Column",
+                "width": "stretch",
+                "items": [
+                  {
+                    "type": "Image",
+                    "url": "https://assets.pyhookkit.example/adaptive-card-cat-hero.png",
+                    "altText": "Gray cat wearing a yellow headband",
+                    "size": "Stretch"
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "Hero",
+                    "horizontalAlignment": "Center",
+                    "weight": "Bolder"
+                  }
+                ]
+              },
+              {
+                "type": "Column",
+                "width": "stretch",
+                "items": [
+                  {
+                    "type": "Image",
+                    "url": "https://assets.pyhookkit.example/adaptive-card-cat-glasses.png",
+                    "altText": "Gray cat wearing glasses",
+                    "size": "Stretch"
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "Glasses",
+                    "horizontalAlignment": "Center",
+                    "weight": "Bolder"
+                  }
+                ]
+              },
+              {
+                "type": "Column",
+                "width": "stretch",
+                "items": [
+                  {
+                    "type": "Image",
+                    "url": "https://assets.pyhookkit.example/adaptive-card-cat-portrait.png",
+                    "altText": "Portrait of a gray cat",
+                    "size": "Stretch"
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "Portrait",
+                    "horizontalAlignment": "Center",
+                    "weight": "Bolder"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "Images: MicrosoftDocs/AdaptiveCards · CC BY 4.0 · renamed only",
+            "isSubtle": true,
+            "size": "Small",
+            "wrap": true,
+            "separator": true,
+            "spacing": "Medium"
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.OpenUrl",
+            "title": "View attribution",
+            "url": "https://docs.pyhookkit.example/adaptive-card-assets"
+          }
+        ]
+      }
+    }
+  ]
+}

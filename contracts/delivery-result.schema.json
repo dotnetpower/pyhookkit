@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.pyhookkit.example/delivery-result.schema.json",
+  "title": "Delivery result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "state",
+    "attempts"
+  ],
+  "properties": {
+    "state": {
+      "enum": [
+        "succeeded",
+        "failed"
+      ]
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "error": {
+      "$ref": "#/$defs/error"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "const": "failed"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "error"
+        ]
+      },
+      "else": {
+        "not": {
+          "required": [
+            "error"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "retryable"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "authentication",
+            "permission",
+            "rate_limited",
+            "invalid_payload",
+            "transient_provider",
+            "transport",
+            "permanent_provider"
+          ]
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "statusCode": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 599
+        }
+      }
+    }
+  }
+}

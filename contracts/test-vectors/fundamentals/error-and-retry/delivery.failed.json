@@ -1,0 +1,9 @@
+{
+  "state": "failed",
+  "attempts": 3,
+  "error": {
+    "kind": "rate_limited",
+    "retryable": true,
+    "statusCode": 429
+  }
+}

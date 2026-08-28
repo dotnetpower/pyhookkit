@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "example-mutation-001",
+  "route": "platform-alerts",
+  "title": "Status corrected",
+  "body": "The synthetic status has been corrected.",
+  "severity": "success"
+}

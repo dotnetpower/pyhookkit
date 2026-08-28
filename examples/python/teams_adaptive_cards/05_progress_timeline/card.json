@@ -1,0 +1,78 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Synthetic release is deploying.",
+        "speak": "Synthetic release is deploying. Validation and build completed. Deployment is in progress.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "🚀  Release progress",
+            "weight": "Bolder",
+            "size": "Large",
+            "wrap": true
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "✅  **Validate**  ·  Completed",
+                "wrap": true
+              },
+              {
+                "type": "TextBlock",
+                "text": "✅  **Build**  ·  Completed",
+                "wrap": true,
+                "separator": true,
+                "spacing": "Medium"
+              },
+              {
+                "type": "Container",
+                "style": "accent",
+                "separator": true,
+                "spacing": "Medium",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "⏳  **Deploy**  ·  In progress",
+                    "weight": "Bolder",
+                    "wrap": true
+                  },
+                  {
+                    "type": "TextBlock",
+                    "text": "Deploying example-api to the synthetic staging environment.",
+                    "wrap": true,
+                    "spacing": "Small"
+                  }
+                ]
+              },
+              {
+                "type": "TextBlock",
+                "text": "○  **Verify**  ·  Waiting",
+                "isSubtle": true,
+                "wrap": true,
+                "separator": true,
+                "spacing": "Medium"
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.OpenUrl",
+            "title": "View release",
+            "url": "https://releases.example.com/runs/example-001"
+          }
+        ]
+      }
+    }
+  ]
+}

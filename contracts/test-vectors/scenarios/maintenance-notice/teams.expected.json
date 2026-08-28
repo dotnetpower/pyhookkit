@@ -1,0 +1,227 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Scheduled maintenance notice: INFO: Scheduled maintenance notice. Maintenance affects example-api and example-worker from 2026-08-30T01:00:00Z to 2026-08-30T02:00:00Z. Expected impact: Brief request retries. Owner: example-operations. Status page: https://status.example.com/notices/maintenance-118",
+        "speak": "Scheduled maintenance notice: INFO: Scheduled maintenance notice. Maintenance affects example-api and example-worker from 2026-08-30T01:00:00Z to 2026-08-30T02:00:00Z. Expected impact: Brief request retries. Owner: example-operations. Status page: https://status.example.com/notices/maintenance-118",
+        "body": [
+          {
+            "type": "Container",
+            "style": "emphasis",
+            "bleed": true,
+            "items": [
+              {
+                "type": "ColumnSet",
+                "spacing": "None",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "auto",
+                    "verticalContentAlignment": "Center",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "💡",
+                        "size": "ExtraLarge",
+                        "spacing": "None"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "INFO",
+                        "weight": "Bolder",
+                        "size": "Small",
+                        "color": "Accent",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "Scheduled maintenance notice",
+                        "weight": "Bolder",
+                        "size": "Large",
+                        "wrap": true,
+                        "spacing": "Small"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "PyHookKit  •  service-announcements",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "INFO: Scheduled maintenance notice. Maintenance affects example-api and example-worker from 2026-08-30T01:00:00Z to 2026-08-30T02:00:00Z. Expected impact: Brief request retries. Owner: example-operations. Status page: https://status.example.com/notices/maintenance-118",
+                "wrap": true,
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "emphasis",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "ColumnSet",
+                "spacing": "None",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "WINDOW",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "weight": "Bolder",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "2026-08-30T01:00:00Z - 2026-08-30T02:00:00Z",
+                        "wrap": true,
+                        "weight": "Bolder",
+                        "spacing": "Small"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "AFFECTED SERVICES",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "weight": "Bolder",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "example-api, example-worker",
+                        "wrap": true,
+                        "weight": "Bolder",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "ColumnSet",
+                "spacing": "Medium",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "EXPECTED IMPACT",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "weight": "Bolder",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "Brief request retries",
+                        "wrap": true,
+                        "weight": "Bolder",
+                        "spacing": "Small"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": []
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "accent",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "👥  example-operations (Teams Workflow group notification unavailable)",
+                "wrap": true,
+                "weight": "Bolder",
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "ColumnSet",
+            "separator": true,
+            "spacing": "Medium",
+            "columns": [
+              {
+                "type": "Column",
+                "width": "stretch",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "🔗  synthetic-maintenance-service",
+                    "wrap": true,
+                    "isSubtle": true,
+                    "size": "Small"
+                  }
+                ]
+              },
+              {
+                "type": "Column",
+                "width": "auto",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "🕒  2026-08-28T06:00:00+00:00",
+                    "wrap": true,
+                    "isSubtle": true,
+                    "size": "Small",
+                    "horizontalAlignment": "Right"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.OpenUrl",
+            "title": "↗  Open status page",
+            "url": "https://status.example.com/notices/maintenance-118"
+          }
+        ]
+      }
+    }
+  ]
+}

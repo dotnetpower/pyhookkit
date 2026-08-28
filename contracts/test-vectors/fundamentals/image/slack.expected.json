@@ -1,0 +1,29 @@
+{
+  "text": "Service topology: The synthetic service topology is attached.",
+  "attachments": [
+    {
+      "color": "#36C5F0",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Service topology"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "The synthetic service topology is attached."
+          }
+        },
+        {
+          "type": "image",
+          "image_url": "https://images.example.com/status/example-service.png",
+          "alt_text": "Synthetic service topology"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,248 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Incident alert: elevated latency: ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency",
+        "speak": "Incident alert: elevated latency: ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency",
+        "body": [
+          {
+            "type": "Container",
+            "style": "emphasis",
+            "bleed": true,
+            "items": [
+              {
+                "type": "ColumnSet",
+                "spacing": "None",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "auto",
+                    "verticalContentAlignment": "Center",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "🚨",
+                        "size": "ExtraLarge",
+                        "spacing": "None"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "CRITICAL",
+                        "weight": "Bolder",
+                        "size": "Small",
+                        "color": "Attention",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "Incident alert: elevated latency",
+                        "weight": "Bolder",
+                        "size": "Large",
+                        "wrap": true,
+                        "spacing": "Small"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "PyHookKit  •  incident-response",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency",
+                "wrap": true,
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "emphasis",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "ColumnSet",
+                "spacing": "None",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "INCIDENT",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "weight": "Bolder",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "INC-204",
+                        "wrap": true,
+                        "weight": "Bolder",
+                        "spacing": "Small"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "SERVICE",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "weight": "Bolder",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "example-checkout",
+                        "wrap": true,
+                        "weight": "Bolder",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "ColumnSet",
+                "spacing": "Medium",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "STARTED",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "weight": "Bolder",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "2026-08-28T04:20:00Z",
+                        "wrap": true,
+                        "weight": "Bolder",
+                        "spacing": "Small"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "STATUS",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "weight": "Bolder",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "Unacknowledged",
+                        "wrap": true,
+                        "weight": "Bolder",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "accent",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "👥  example-responders (Teams Workflow group notification unavailable)",
+                "wrap": true,
+                "weight": "Bolder",
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "ColumnSet",
+            "separator": true,
+            "spacing": "Medium",
+            "columns": [
+              {
+                "type": "Column",
+                "width": "stretch",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "🔗  synthetic-incident-service",
+                    "wrap": true,
+                    "isSubtle": true,
+                    "size": "Small"
+                  }
+                ]
+              },
+              {
+                "type": "Column",
+                "width": "auto",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "🕒  2026-08-28T04:20:00+00:00",
+                    "wrap": true,
+                    "isSubtle": true,
+                    "size": "Small",
+                    "horizontalAlignment": "Right"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.OpenUrl",
+            "title": "↗  Acknowledge incident",
+            "url": "https://incidents.example.com/incidents/inc-204/acknowledge"
+          },
+          {
+            "type": "Action.OpenUrl",
+            "title": "↗  Open runbook",
+            "url": "https://runbooks.example.com/services/example-checkout/latency"
+          }
+        ]
+      }
+    }
+  ]
+}

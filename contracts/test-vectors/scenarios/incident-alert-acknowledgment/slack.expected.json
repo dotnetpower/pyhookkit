@@ -1,0 +1,88 @@
+{
+  "text": "Incident alert: elevated latency: ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency",
+  "attachments": [
+    {
+      "color": "#E01E5A",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Incident alert: elevated latency"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Incident*\nINC-204"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Service*\nexample-checkout"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Started*\n2026-08-28T04:20:00Z"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Status*\nUnacknowledged"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "<!subteam^S00000204>"
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "Acknowledge incident"
+              },
+              "url": "https://incidents.example.com/incidents/inc-204/acknowledge",
+              "action_id": "open_link_1"
+            },
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "Open runbook"
+              },
+              "url": "https://runbooks.example.com/services/example-checkout/latency",
+              "action_id": "open_link_2"
+            }
+          ]
+        },
+        {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": "Source: synthetic-incident-service"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "2026-08-28T04:20:00+00:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

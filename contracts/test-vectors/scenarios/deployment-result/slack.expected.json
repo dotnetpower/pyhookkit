@@ -1,0 +1,72 @@
+{
+  "text": "Deployment succeeded: SUCCESS: Deployment succeeded. example-api revision 9f3a2c1 deployed to staging in 2m 18s at 2026-08-28T03:15:00Z. View deployment: https://deployments.example.com/runs/run-1042",
+  "attachments": [
+    {
+      "color": "#2EB67D",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Deployment succeeded"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "SUCCESS: Deployment succeeded. example-api revision 9f3a2c1 deployed to staging in 2m 18s at 2026-08-28T03:15:00Z. View deployment: https://deployments.example.com/runs/run-1042"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Service*\nexample-api"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Environment*\nstaging"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Revision*\n9f3a2c1"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Duration*\n2m 18s"
+            }
+          ]
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "View deployment"
+              },
+              "url": "https://deployments.example.com/runs/run-1042",
+              "action_id": "open_link_1"
+            }
+          ]
+        },
+        {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": "Source: synthetic-release-service"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "2026-08-28T03:15:00+00:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

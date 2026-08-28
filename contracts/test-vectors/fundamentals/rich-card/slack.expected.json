@@ -1,0 +1,54 @@
+{
+  "text": "Deployment completed: The synthetic deployment completed successfully.",
+  "attachments": [
+    {
+      "color": "#2EB67D",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Deployment completed"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "The synthetic deployment completed successfully."
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Application*\nexample-api"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Environment*\nstaging"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Revision*\nabc1234"
+            }
+          ]
+        },
+        {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": "Source: synthetic-deployer"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "2026-08-28T02:05:00+00:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

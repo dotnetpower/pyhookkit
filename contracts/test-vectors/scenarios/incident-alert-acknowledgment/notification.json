@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "scenario-incident-alert-001",
+  "route": "incident-response",
+  "title": "Incident alert: elevated latency",
+  "body": "ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency",
+  "severity": "error",
+  "facts": [
+    {
+      "key": "Incident",
+      "value": "INC-204"
+    },
+    {
+      "key": "Service",
+      "value": "example-checkout"
+    },
+    {
+      "key": "Started",
+      "value": "2026-08-28T04:20:00Z"
+    },
+    {
+      "key": "Status",
+      "value": "Unacknowledged"
+    }
+  ],
+  "links": [
+    {
+      "label": "Acknowledge incident",
+      "url": "https://incidents.example.com/incidents/inc-204/acknowledge"
+    },
+    {
+      "label": "Open runbook",
+      "url": "https://runbooks.example.com/services/example-checkout/latency"
+    }
+  ],
+  "mentions": [
+    {
+      "kind": "group",
+      "alias": "example-responders"
+    }
+  ],
+  "threadKey": "scenario-incident-inc-204",
+  "sourceTimestamp": "2026-08-28T04:20:00+00:00",
+  "metadata": {
+    "source": "synthetic-incident-service",
+    "correlationId": "incident-inc-204"
+  }
+}

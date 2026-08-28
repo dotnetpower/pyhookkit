@@ -1,0 +1,135 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Synthetic service metrics are healthy.",
+        "speak": "Synthetic service metrics are healthy.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "📊  Service health",
+            "weight": "Bolder",
+            "size": "Large",
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": "All synthetic indicators are within target.",
+            "color": "Good",
+            "weight": "Bolder",
+            "spacing": "Small"
+          },
+          {
+            "type": "Container",
+            "style": "emphasis",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "ColumnSet",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "AVAILABILITY",
+                        "isSubtle": true,
+                        "size": "Small"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "99.99%",
+                        "color": "Good",
+                        "weight": "Bolder",
+                        "size": "ExtraLarge",
+                        "spacing": "Small"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "P95 LATENCY",
+                        "isSubtle": true,
+                        "size": "Small"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "142 ms",
+                        "weight": "Bolder",
+                        "size": "ExtraLarge",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "ColumnSet",
+                "spacing": "Medium",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "REQUEST RATE",
+                        "isSubtle": true,
+                        "size": "Small"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "2.4k / min",
+                        "weight": "Bolder",
+                        "size": "Large",
+                        "spacing": "Small"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "ERROR RATE",
+                        "isSubtle": true,
+                        "size": "Small"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "0.08%",
+                        "color": "Good",
+                        "weight": "Bolder",
+                        "size": "Large",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.OpenUrl",
+            "title": "Open dashboard",
+            "url": "https://metrics.example.com/services/example-api"
+          }
+        ]
+      }
+    }
+  ]
+}

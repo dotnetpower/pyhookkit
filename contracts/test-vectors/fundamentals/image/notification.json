@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "example-image-001",
+  "route": "platform-alerts",
+  "title": "Service topology",
+  "body": "The synthetic service topology is attached.",
+  "severity": "info",
+  "image": {
+    "url": "https://images.example.com/status/example-service.png",
+    "altText": "Synthetic service topology"
+  }
+}

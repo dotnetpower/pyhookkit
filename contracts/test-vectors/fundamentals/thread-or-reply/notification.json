@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "example-reply-001",
+  "route": "platform-alerts",
+  "body": "Synthetic follow-up completed.",
+  "severity": "success",
+  "threadKey": "example-deployment-001"
+}

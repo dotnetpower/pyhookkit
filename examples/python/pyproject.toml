@@ -1,0 +1,85 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyhookkit"
+version = "0.1.0"
+description = "Typed Slack and Microsoft Teams notification delivery with semantic parity"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+keywords = [
+  "adaptive-cards",
+  "microsoft-teams",
+  "notifications",
+  "slack",
+  "webhooks",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Typing :: Typed",
+]
+dependencies = [
+  "httpx>=0.28,<1",
+]
+
+[project.urls]
+Documentation = "https://github.com/dotnetpower/pyhookkit/tree/main/docs"
+Issues = "https://github.com/dotnetpower/pyhookkit/issues"
+Repository = "https://github.com/dotnetpower/pyhookkit"
+
+[project.optional-dependencies]
+dev = [
+  "jsonschema[format]>=4.23",
+  "pyright>=1.1.390",
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "ruff>=0.9",
+  "websockets>=15,<16",
+]
+
+slack-operations = [
+  "websockets>=15,<16",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+pyhookkit = ["py.typed"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+include = [
+  "src",
+  "fundamentals",
+  "scenarios",
+  "slack_operations",
+  "teams_adaptive_cards",
+  "tests",
+]
+extraPaths = ["src"]
+
+[tool.pytest.ini_options]
+addopts = [
+  "--strict-config",
+  "--strict-markers",
+  "--cov=pyhookkit",
+  "--cov-branch",
+  "--cov-fail-under=90",
+]
+pythonpath = ["src"]
+testpaths = ["tests"]

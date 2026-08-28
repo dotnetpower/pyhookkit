@@ -1,0 +1,38 @@
+{
+  "text": "Investigation available: Open the synthetic investigation details.",
+  "attachments": [
+    {
+      "color": "#36C5F0",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Investigation available"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "Open the synthetic investigation details."
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "View details"
+              },
+              "url": "https://example.com/notifications/example-001",
+              "action_id": "open_link_1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

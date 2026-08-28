@@ -1,0 +1,79 @@
+{
+  "text": "Approval requested: WARNING: Approval requested. Request APR-307 from example-requester is for release example-api 2026.08.28 before 2026-08-28T07:00:00Z. Approver: example-approver. Review request: https://approvals.example.com/requests/apr-307",
+  "attachments": [
+    {
+      "color": "#ECB22E",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Approval requested"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "WARNING: Approval requested. Request APR-307 from example-requester is for release example-api 2026.08.28 before 2026-08-28T07:00:00Z. Approver: example-approver. Review request: https://approvals.example.com/requests/apr-307"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Request*\nAPR-307"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Subject*\nexample-api 2026.08.28"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Requester*\nexample-requester"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Deadline*\n2026-08-28T07:00:00Z"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "<@U00000307>"
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "Review request"
+              },
+              "url": "https://approvals.example.com/requests/apr-307",
+              "action_id": "open_link_1"
+            }
+          ]
+        },
+        {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": "Source: synthetic-change-service"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "2026-08-28T05:10:00+00:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

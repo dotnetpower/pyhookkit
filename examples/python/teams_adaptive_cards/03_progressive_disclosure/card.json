@@ -1,0 +1,71 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Synthetic deployment completed with optional details.",
+        "speak": "Synthetic deployment completed with optional details.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "✅  Deployment completed",
+            "weight": "Bolder",
+            "size": "Large",
+            "wrap": true
+          },
+          {
+            "type": "TextBlock",
+            "text": "Keep the default view concise and reveal diagnostics only when needed.",
+            "wrap": true,
+            "spacing": "Small"
+          },
+          {
+            "type": "Container",
+            "id": "diagnostics",
+            "isVisible": false,
+            "style": "emphasis",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "FactSet",
+                "facts": [
+                  {
+                    "title": "Revision",
+                    "value": "abc1234"
+                  },
+                  {
+                    "title": "Duration",
+                    "value": "2m 18s"
+                  },
+                  {
+                    "title": "Region",
+                    "value": "example-region"
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.ToggleVisibility",
+            "title": "Show diagnostics",
+            "targetElements": [
+              "diagnostics"
+            ]
+          },
+          {
+            "type": "Action.OpenUrl",
+            "title": "Open deployment",
+            "url": "https://deployments.example.com/runs/example-001"
+          }
+        ]
+      }
+    }
+  ]
+}

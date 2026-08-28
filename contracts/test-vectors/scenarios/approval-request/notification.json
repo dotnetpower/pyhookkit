@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "scenario-approval-request-001",
+  "route": "change-approvals",
+  "title": "Approval requested",
+  "body": "WARNING: Approval requested. Request APR-307 from example-requester is for release example-api 2026.08.28 before 2026-08-28T07:00:00Z. Approver: example-approver. Review request: https://approvals.example.com/requests/apr-307",
+  "severity": "warning",
+  "facts": [
+    {
+      "key": "Request",
+      "value": "APR-307"
+    },
+    {
+      "key": "Subject",
+      "value": "example-api 2026.08.28"
+    },
+    {
+      "key": "Requester",
+      "value": "example-requester"
+    },
+    {
+      "key": "Deadline",
+      "value": "2026-08-28T07:00:00Z"
+    }
+  ],
+  "links": [
+    {
+      "label": "Review request",
+      "url": "https://approvals.example.com/requests/apr-307"
+    }
+  ],
+  "mentions": [
+    {
+      "kind": "user",
+      "alias": "example-approver"
+    }
+  ],
+  "sourceTimestamp": "2026-08-28T05:10:00+00:00",
+  "metadata": {
+    "source": "synthetic-change-service",
+    "correlationId": "approval-apr-307"
+  }
+}

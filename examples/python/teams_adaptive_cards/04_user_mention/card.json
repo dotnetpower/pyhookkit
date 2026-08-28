@@ -1,0 +1,64 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "A synthetic review requires attention.",
+        "speak": "A synthetic review requires attention.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "👋  Review requested",
+            "weight": "Bolder",
+            "size": "Large",
+            "wrap": true
+          },
+          {
+            "type": "Container",
+            "style": "accent",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "Hello <at>{{TEAMS_TEST_USER_NAME}}</at>, the synthetic release is ready for review.",
+                "weight": "Bolder",
+                "wrap": true
+              }
+            ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "The identity is injected from the local environment only when sending.",
+            "isSubtle": true,
+            "size": "Small",
+            "wrap": true
+          }
+        ],
+        "actions": [
+          {
+            "type": "Action.OpenUrl",
+            "title": "Review release",
+            "url": "https://reviews.example.com/releases/example-001"
+          }
+        ],
+        "msteams": {
+          "entities": [
+            {
+              "type": "mention",
+              "text": "<at>{{TEAMS_TEST_USER_NAME}}</at>",
+              "mentioned": {
+                "id": "{{TEAMS_TEST_USER_ID}}",
+                "name": "{{TEAMS_TEST_USER_NAME}}"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "text": "Status corrected: The synthetic status has been corrected.",
+  "attachments": [
+    {
+      "color": "#2EB67D",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Status corrected"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "The synthetic status has been corrected."
+          }
+        }
+      ]
+    }
+  ],
+  "channel": "C00000001",
+  "ts": "1724811000.000001"
+}

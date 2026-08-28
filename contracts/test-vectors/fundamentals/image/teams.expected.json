@@ -1,0 +1,108 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Service topology: The synthetic service topology is attached.",
+        "speak": "Service topology: The synthetic service topology is attached.",
+        "body": [
+          {
+            "type": "Container",
+            "style": "emphasis",
+            "bleed": true,
+            "items": [
+              {
+                "type": "ColumnSet",
+                "spacing": "None",
+                "columns": [
+                  {
+                    "type": "Column",
+                    "width": "auto",
+                    "verticalContentAlignment": "Center",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "💡",
+                        "size": "ExtraLarge",
+                        "spacing": "None"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Column",
+                    "width": "stretch",
+                    "items": [
+                      {
+                        "type": "TextBlock",
+                        "text": "INFO",
+                        "weight": "Bolder",
+                        "size": "Small",
+                        "color": "Accent",
+                        "spacing": "None"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "Service topology",
+                        "weight": "Bolder",
+                        "size": "Large",
+                        "wrap": true,
+                        "spacing": "Small"
+                      },
+                      {
+                        "type": "TextBlock",
+                        "text": "PyHookKit  •  platform-alerts",
+                        "isSubtle": true,
+                        "size": "Small",
+                        "spacing": "Small"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "The synthetic service topology is attached.",
+                "wrap": true,
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "emphasis",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "Image",
+                "url": "https://images.example.com/status/example-service.png",
+                "altText": "Synthetic service topology",
+                "size": "Stretch",
+                "horizontalAlignment": "Center"
+              },
+              {
+                "type": "TextBlock",
+                "text": "Synthetic service topology",
+                "wrap": true,
+                "isSubtle": true,
+                "size": "Small",
+                "horizontalAlignment": "Center",
+                "spacing": "Small"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

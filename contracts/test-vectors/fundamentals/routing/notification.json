@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "example-routing-001",
+  "route": "platform-alerts",
+  "title": "Routed notification",
+  "body": "This notification uses a logical destination.",
+  "severity": "info"
+}

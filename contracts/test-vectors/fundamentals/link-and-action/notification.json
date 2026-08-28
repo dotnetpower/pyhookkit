@@ -1,0 +1,14 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "example-action-001",
+  "route": "platform-alerts",
+  "title": "Investigation available",
+  "body": "Open the synthetic investigation details.",
+  "severity": "info",
+  "links": [
+    {
+      "label": "View details",
+      "url": "https://example.com/notifications/example-001"
+    }
+  ]
+}

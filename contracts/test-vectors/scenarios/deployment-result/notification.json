@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "scenario-deployment-result-001",
+  "route": "release-notifications",
+  "title": "Deployment succeeded",
+  "body": "SUCCESS: Deployment succeeded. example-api revision 9f3a2c1 deployed to staging in 2m 18s at 2026-08-28T03:15:00Z. View deployment: https://deployments.example.com/runs/run-1042",
+  "severity": "success",
+  "facts": [
+    {
+      "key": "Service",
+      "value": "example-api"
+    },
+    {
+      "key": "Environment",
+      "value": "staging"
+    },
+    {
+      "key": "Revision",
+      "value": "9f3a2c1"
+    },
+    {
+      "key": "Duration",
+      "value": "2m 18s"
+    }
+  ],
+  "links": [
+    {
+      "label": "View deployment",
+      "url": "https://deployments.example.com/runs/run-1042"
+    }
+  ],
+  "sourceTimestamp": "2026-08-28T03:15:00+00:00",
+  "metadata": {
+    "source": "synthetic-release-service",
+    "correlationId": "deploy-run-1042"
+  }
+}

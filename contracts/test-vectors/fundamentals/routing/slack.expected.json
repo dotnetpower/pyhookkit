@@ -1,0 +1,24 @@
+{
+  "text": "Routed notification: This notification uses a logical destination.",
+  "attachments": [
+    {
+      "color": "#36C5F0",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Routed notification"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "This notification uses a logical destination."
+          }
+        }
+      ]
+    }
+  ]
+}

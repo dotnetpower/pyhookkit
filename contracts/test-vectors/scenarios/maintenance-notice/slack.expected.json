@@ -1,0 +1,75 @@
+{
+  "text": "Scheduled maintenance notice: INFO: Scheduled maintenance notice. Maintenance affects example-api and example-worker from 2026-08-30T01:00:00Z to 2026-08-30T02:00:00Z. Expected impact: Brief request retries. Owner: example-operations. Status page: https://status.example.com/notices/maintenance-118",
+  "attachments": [
+    {
+      "color": "#36C5F0",
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "Scheduled maintenance notice"
+          }
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "INFO: Scheduled maintenance notice. Maintenance affects example-api and example-worker from 2026-08-30T01:00:00Z to 2026-08-30T02:00:00Z. Expected impact: Brief request retries. Owner: example-operations. Status page: https://status.example.com/notices/maintenance-118"
+          }
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Window*\n2026-08-30T01:00:00Z - 2026-08-30T02:00:00Z"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Affected services*\nexample-api, example-worker"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Expected impact*\nBrief request retries"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "<!subteam^S00000118>"
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "Open status page"
+              },
+              "url": "https://status.example.com/notices/maintenance-118",
+              "action_id": "open_link_1"
+            }
+          ]
+        },
+        {
+          "type": "context",
+          "elements": [
+            {
+              "type": "mrkdwn",
+              "text": "Source: synthetic-maintenance-service"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "2026-08-28T06:00:00+00:00"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

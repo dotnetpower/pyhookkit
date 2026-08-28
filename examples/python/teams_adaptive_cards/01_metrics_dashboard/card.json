@@ -13,21 +13,23 @@
         "body": [
           {
             "type": "TextBlock",
-            "text": "📊  Service health",
+            "text": "Service health",
             "weight": "Bolder",
             "size": "Large",
-            "wrap": true
+            "wrap": true,
+            "horizontalAlignment": "Center"
           },
           {
             "type": "TextBlock",
             "text": "All synthetic indicators are within target.",
             "color": "Good",
             "weight": "Bolder",
+            "horizontalAlignment": "Center",
             "spacing": "Small"
           },
           {
             "type": "Container",
-            "style": "emphasis",
+            "style": "accent",
             "spacing": "Medium",
             "items": [
               {

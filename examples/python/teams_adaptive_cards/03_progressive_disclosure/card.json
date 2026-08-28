@@ -13,10 +13,11 @@
         "body": [
           {
             "type": "TextBlock",
-            "text": "✅  Deployment completed",
+            "text": "Deployment completed",
             "weight": "Bolder",
             "size": "Large",
-            "wrap": true
+            "wrap": true,
+            "horizontalAlignment": "Center"
           },
           {
             "type": "TextBlock",
@@ -28,7 +29,7 @@
             "type": "Container",
             "id": "diagnostics",
             "isVisible": false,
-            "style": "emphasis",
+            "style": "accent",
             "spacing": "Medium",
             "items": [
               {

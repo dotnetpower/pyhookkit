@@ -13,31 +13,34 @@
         "body": [
           {
             "type": "Image",
-            "url": "https://assets.pyhookkit.example/adaptive-card-cat-hero.png",
-            "altText": "Gray cat wearing a yellow headband",
+            "url": "https://assets.pyhookkit.example/samples/editorial/assets/editorialHero.png",
+            "altText": "Colorful architectural illustration from the Microsoft Adaptive Cards editorial sample",
             "size": "Stretch",
             "horizontalAlignment": "Center"
           },
           {
             "type": "TextBlock",
-            "text": "🐈  Sample image spotlight",
+            "text": "Editorial image spotlight",
             "weight": "Bolder",
             "size": "Large",
             "wrap": true,
+            "horizontalAlignment": "Center",
             "spacing": "Medium"
           },
           {
             "type": "TextBlock",
             "text": "A repository-hosted sample with attribution, alt text, and one clear action.",
             "wrap": true,
+            "horizontalAlignment": "Center",
             "spacing": "Small"
           },
           {
             "type": "TextBlock",
-            "text": "Image: Gray cat wearing a yellow headband",
+            "text": "Image: Microsoft Teams Adaptive Card editorial sample",
             "isSubtle": true,
             "size": "Small",
-            "wrap": true
+            "wrap": true,
+            "horizontalAlignment": "Center"
           }
         ],
         "actions": [

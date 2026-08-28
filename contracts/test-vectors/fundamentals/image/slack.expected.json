@@ -1,5 +1,5 @@
 {
-  "text": "Service topology: The synthetic service topology is attached.",
+  "text": "Sample image: A publicly hosted sample image is attached.",
   "attachments": [
     {
       "color": "#36C5F0",
@@ -8,20 +8,20 @@
           "type": "header",
           "text": {
             "type": "plain_text",
-            "text": "Service topology"
+            "text": "Sample image"
           }
         },
         {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text": "The synthetic service topology is attached."
+            "text": "A publicly hosted sample image is attached."
           }
         },
         {
           "type": "image",
-          "image_url": "https://images.example.com/status/example-service.png",
-          "alt_text": "Synthetic service topology"
+          "image_url": "https://assets.pyhookkit.example/samples/recipe/assets/recipe_image.png",
+          "alt_text": "Glazed chicken with broccoli from the Microsoft Adaptive Cards recipe sample"
         }
       ]
     }

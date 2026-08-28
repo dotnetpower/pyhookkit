@@ -13,10 +13,11 @@
         "body": [
           {
             "type": "TextBlock",
-            "text": "👋  Review requested",
+            "text": "Review requested",
             "weight": "Bolder",
             "size": "Large",
-            "wrap": true
+            "wrap": true,
+            "horizontalAlignment": "Center"
           },
           {
             "type": "Container",

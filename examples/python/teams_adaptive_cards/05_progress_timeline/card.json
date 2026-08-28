@@ -13,10 +13,11 @@
         "body": [
           {
             "type": "TextBlock",
-            "text": "🚀  Release progress",
+            "text": "Release progress",
             "weight": "Bolder",
             "size": "Large",
-            "wrap": true
+            "wrap": true,
+            "horizontalAlignment": "Center"
           },
           {
             "type": "Container",
@@ -24,13 +25,15 @@
             "items": [
               {
                 "type": "TextBlock",
-                "text": "✅  **Validate**  ·  Completed",
-                "wrap": true
+                "text": "**Validate**  —  Completed",
+                "wrap": true,
+                "color": "Good"
               },
               {
                 "type": "TextBlock",
-                "text": "✅  **Build**  ·  Completed",
+                "text": "**Build**  —  Completed",
                 "wrap": true,
+                "color": "Good",
                 "separator": true,
                 "spacing": "Medium"
               },
@@ -42,7 +45,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "⏳  **Deploy**  ·  In progress",
+                    "text": "**Deploy**  —  In progress",
                     "weight": "Bolder",
                     "wrap": true
                   },
@@ -56,7 +59,7 @@
               },
               {
                 "type": "TextBlock",
-                "text": "○  **Verify**  ·  Waiting",
+                "text": "**Verify**  —  Waiting",
                 "isSubtle": true,
                 "wrap": true,
                 "separator": true,

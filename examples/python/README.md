@@ -23,6 +23,14 @@ Teams-specific presentation patterns live under `teams_adaptive_cards`. The
 gallery demonstrates hierarchy, metrics, images, progressive disclosure,
 mentions, and progress timelines without expanding the provider-neutral domain.
 
+All library-backed Teams examples render by default. Use `--send` for a Power
+Automate Workflow callback, or `--send-logic-app` for the routed Azure Logic App
+contract:
+
+```shell
+uv run python scenarios/deployment_result/teams.py --send-logic-app
+```
+
 ## Install locally
 
 From this directory:

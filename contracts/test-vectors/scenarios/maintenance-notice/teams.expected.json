@@ -13,58 +13,50 @@
         "body": [
           {
             "type": "Container",
-            "style": "emphasis",
+            "backgroundImage": {
+              "url": "https://assets.pyhookkit.example/samples/book-a-room/assets/room_hero.png",
+              "fillMode": "Cover",
+              "horizontalAlignment": "Center",
+              "verticalAlignment": "Center"
+            },
             "bleed": true,
+            "minHeight": "180px",
+            "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "ColumnSet",
-                "spacing": "None",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "verticalContentAlignment": "Center",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "💡",
-                        "size": "ExtraLarge",
-                        "spacing": "None"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "INFO",
-                        "weight": "Bolder",
-                        "size": "Small",
-                        "color": "Accent",
-                        "spacing": "None"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "Scheduled maintenance notice",
-                        "weight": "Bolder",
-                        "size": "Large",
-                        "wrap": true,
-                        "spacing": "Small"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "PyHookKit  •  service-announcements",
-                        "isSubtle": true,
-                        "size": "Small",
-                        "spacing": "Small"
-                      }
-                    ]
-                  }
-                ]
+                "type": "TextBlock",
+                "text": "PYHOOKKIT NOTIFICATION",
+                "wrap": true,
+                "weight": "Bolder",
+                "color": "Dark"
               }
             ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "INFORMATION",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Accent",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Scheduled maintenance notice",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 service-announcements",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
           },
           {
             "type": "Container",
@@ -74,13 +66,16 @@
                 "type": "TextBlock",
                 "text": "INFO: Scheduled maintenance notice. Maintenance affects example-api and example-worker from 2026-08-30T01:00:00Z to 2026-08-30T02:00:00Z. Expected impact: Brief request retries. Owner: example-operations. Status page: https://status.example.com/notices/maintenance-118",
                 "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
                 "spacing": "None"
               }
             ]
           },
           {
             "type": "Container",
-            "style": "emphasis",
+            "separator": true,
             "spacing": "Medium",
             "items": [
               {
@@ -172,9 +167,11 @@
             "items": [
               {
                 "type": "TextBlock",
-                "text": "👥  example-operations (Teams Workflow group notification unavailable)",
+                "text": "example-operations (Teams Workflow group notification unavailable)",
                 "wrap": true,
                 "weight": "Bolder",
+                "color": "Accent",
+                "horizontalAlignment": "Center",
                 "spacing": "None"
               }
             ]
@@ -190,7 +187,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🔗  synthetic-maintenance-service",
+                    "text": "synthetic-maintenance-service",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small"
@@ -203,7 +200,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🕒  2026-08-28T06:00:00+00:00",
+                    "text": "2026-08-28T06:00:00+00:00",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small",
@@ -217,7 +214,7 @@
         "actions": [
           {
             "type": "Action.OpenUrl",
-            "title": "↗  Open status page",
+            "title": "Open status page",
             "url": "https://status.example.com/notices/maintenance-118"
           }
         ]

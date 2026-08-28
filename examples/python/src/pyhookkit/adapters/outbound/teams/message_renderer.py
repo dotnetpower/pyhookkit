@@ -1,5 +1,7 @@
 """Canonical notification to rich Microsoft Teams Adaptive Card rendering."""
 
+from urllib.parse import urlsplit
+
 from pyhookkit.adapters.outbound.teams.identity import TeamsIdentityDirectory
 from pyhookkit.domain.notification import (
     CanonicalNotification,
@@ -9,11 +11,18 @@ from pyhookkit.domain.notification import (
 from pyhookkit.json_types import JsonObject, JsonValue
 
 _SEVERITY_PRESENTATION = {
-    Severity.INFO: ("💡", "INFO", "Accent"),
-    Severity.SUCCESS: ("✅", "SUCCESS", "Good"),
-    Severity.WARNING: ("⚠️", "ATTENTION", "Warning"),
-    Severity.ERROR: ("🚨", "CRITICAL", "Attention"),
+    Severity.INFO: ("INFORMATION", "Accent"),
+    Severity.SUCCESS: ("SUCCESS", "Good"),
+    Severity.WARNING: ("ATTENTION", "Warning"),
+    Severity.ERROR: ("CRITICAL", "Attention"),
 }
+_DEFAULT_HERO_URL = (
+    "https://assets.pyhookkit.example/samples/editorial/assets/editorialHero.png"
+)
+
+
+class TeamsHeroImageUrlError(ValueError):
+    """The Teams presentation hero URL is invalid."""
 
 
 class TeamsMessageRenderer:
@@ -22,25 +31,20 @@ class TeamsMessageRenderer:
     def __init__(
         self,
         identity_directory: TeamsIdentityDirectory | None = None,
+        *,
+        hero_image_url: str = _DEFAULT_HERO_URL,
     ) -> None:
+        parsed_url = urlsplit(hero_image_url)
+        if parsed_url.scheme != "https" or not parsed_url.netloc:
+            raise TeamsHeroImageUrlError(
+                "Teams hero image URL must be an absolute HTTPS URL"
+            )
         self._identity_directory = identity_directory
+        self._hero_image_url = hero_image_url
 
     def render(self, notification: CanonicalNotification) -> JsonObject:
-        body: list[JsonValue] = [self._render_header(notification)]
-        body.append(
-            {
-                "type": "Container",
-                "spacing": "Medium",
-                "items": [
-                    {
-                        "type": "TextBlock",
-                        "text": notification.body,
-                        "wrap": True,
-                        "spacing": "None",
-                    }
-                ],
-            }
-        )
+        body = self._render_header(notification)
+        body.append(self._render_body(notification))
         if notification.facts:
             body.append(self._render_facts(notification))
 
@@ -54,9 +58,11 @@ class TeamsMessageRenderer:
                     "items": [
                         {
                             "type": "TextBlock",
-                            "text": f"👥  {' '.join(mentions)}",
+                            "text": " ".join(mentions),
                             "wrap": True,
                             "weight": "Bolder",
+                            "color": "Accent",
+                            "horizontalAlignment": "Center",
                             "spacing": "None",
                         }
                     ],
@@ -66,7 +72,7 @@ class TeamsMessageRenderer:
             body.append(
                 {
                     "type": "Container",
-                    "style": "emphasis",
+                    "separator": True,
                     "spacing": "Medium",
                     "items": [
                         {
@@ -105,7 +111,7 @@ class TeamsMessageRenderer:
             card["actions"] = [
                 {
                     "type": "Action.OpenUrl",
-                    "title": f"↗  {link.label}",
+                    "title": link.label,
                     "url": link.url,
                 }
                 for link in notification.links
@@ -123,62 +129,76 @@ class TeamsMessageRenderer:
             ],
         }
 
-    @staticmethod
-    def _render_header(notification: CanonicalNotification) -> JsonObject:
-        emoji, label, color = _SEVERITY_PRESENTATION[notification.severity]
+    def _render_header(
+        self,
+        notification: CanonicalNotification,
+    ) -> list[JsonValue]:
+        label, color = _SEVERITY_PRESENTATION[notification.severity]
         title = notification.title or "Notification"
+        return [
+            {
+                "type": "Container",
+                "backgroundImage": {
+                    "url": self._hero_image_url,
+                    "fillMode": "Cover",
+                    "horizontalAlignment": "Center",
+                    "verticalAlignment": "Center",
+                },
+                "bleed": True,
+                "minHeight": "180px",
+                "verticalContentAlignment": "Bottom",
+                "items": [
+                    {
+                        "type": "TextBlock",
+                        "text": "PYHOOKKIT NOTIFICATION",
+                        "wrap": True,
+                        "weight": "Bolder",
+                        "color": "Dark",
+                    }
+                ],
+            },
+            {
+                "type": "TextBlock",
+                "text": label,
+                "weight": "Bolder",
+                "size": "Small",
+                "color": color,
+                "horizontalAlignment": "Center",
+                "spacing": "Medium",
+            },
+            {
+                "type": "TextBlock",
+                "text": title,
+                "weight": "Bolder",
+                "size": "ExtraLarge",
+                "wrap": True,
+                "horizontalAlignment": "Center",
+                "spacing": "Small",
+            },
+            {
+                "type": "TextBlock",
+                "text": f"PyHookKit · {notification.route}",
+                "isSubtle": True,
+                "size": "Small",
+                "horizontalAlignment": "Center",
+                "spacing": "Small",
+            },
+        ]
+
+    @staticmethod
+    def _render_body(notification: CanonicalNotification) -> JsonObject:
         return {
             "type": "Container",
-            "style": "emphasis",
-            "bleed": True,
+            "spacing": "Medium",
             "items": [
                 {
-                    "type": "ColumnSet",
+                    "type": "TextBlock",
+                    "text": notification.body,
+                    "wrap": True,
+                    "horizontalAlignment": "Center",
+                    "isSubtle": True,
+                    "size": "Medium",
                     "spacing": "None",
-                    "columns": [
-                        {
-                            "type": "Column",
-                            "width": "auto",
-                            "verticalContentAlignment": "Center",
-                            "items": [
-                                {
-                                    "type": "TextBlock",
-                                    "text": emoji,
-                                    "size": "ExtraLarge",
-                                    "spacing": "None",
-                                }
-                            ],
-                        },
-                        {
-                            "type": "Column",
-                            "width": "stretch",
-                            "items": [
-                                {
-                                    "type": "TextBlock",
-                                    "text": label,
-                                    "weight": "Bolder",
-                                    "size": "Small",
-                                    "color": color,
-                                    "spacing": "None",
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": title,
-                                    "weight": "Bolder",
-                                    "size": "Large",
-                                    "wrap": True,
-                                    "spacing": "Small",
-                                },
-                                {
-                                    "type": "TextBlock",
-                                    "text": f"PyHookKit  •  {notification.route}",
-                                    "isSubtle": True,
-                                    "size": "Small",
-                                    "spacing": "Small",
-                                },
-                            ],
-                        },
-                    ],
                 }
             ],
         }
@@ -223,7 +243,7 @@ class TeamsMessageRenderer:
             )
         return {
             "type": "Container",
-            "style": "emphasis",
+            "separator": True,
             "spacing": "Medium",
             "items": rows,
         }
@@ -263,7 +283,7 @@ class TeamsMessageRenderer:
                     "items": [
                         {
                             "type": "TextBlock",
-                            "text": f"🔗  {source}",
+                            "text": source,
                             "wrap": True,
                             "isSubtle": True,
                             "size": "Small",
@@ -279,9 +299,7 @@ class TeamsMessageRenderer:
                     "items": [
                         {
                             "type": "TextBlock",
-                            "text": (
-                                f"🕒  {notification.source_timestamp.isoformat()}"
-                            ),
+                            "text": notification.source_timestamp.isoformat(),
                             "wrap": True,
                             "isSubtle": True,
                             "size": "Small",

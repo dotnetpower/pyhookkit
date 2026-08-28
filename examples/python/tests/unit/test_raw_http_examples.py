@@ -112,3 +112,22 @@ def test_send_rejects_non_https_destinations(
 
     with pytest.raises(ValueError, match="must be an HTTPS URL"):
         send("http://provider.example/hooks/test")
+
+
+def test_raw_teams_logic_app_payload_extracts_card(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    namespace = _load_script("teams", monkeypatch)
+    build_logic_app_payload = cast(
+        Callable[[str, str], dict[str, object]],
+        namespace["build_logic_app_payload"],
+    )
+
+    payload = build_logic_app_payload("team-example", "channel-example")
+
+    assert payload["teamId"] == "team-example"
+    assert payload["channelId"] == "channel-example"
+    assert payload["eventId"] == "example-http-001"
+    card = payload["card"]
+    assert isinstance(card, dict)
+    assert card["type"] == "AdaptiveCard"

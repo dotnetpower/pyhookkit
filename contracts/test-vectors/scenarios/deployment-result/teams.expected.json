@@ -13,58 +13,50 @@
         "body": [
           {
             "type": "Container",
-            "style": "emphasis",
+            "backgroundImage": {
+              "url": "https://assets.pyhookkit.example/samples/list/assets/ResourceImage_1_Horizontal.png",
+              "fillMode": "Cover",
+              "horizontalAlignment": "Center",
+              "verticalAlignment": "Center"
+            },
             "bleed": true,
+            "minHeight": "180px",
+            "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "ColumnSet",
-                "spacing": "None",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "verticalContentAlignment": "Center",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "✅",
-                        "size": "ExtraLarge",
-                        "spacing": "None"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "SUCCESS",
-                        "weight": "Bolder",
-                        "size": "Small",
-                        "color": "Good",
-                        "spacing": "None"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "Deployment succeeded",
-                        "weight": "Bolder",
-                        "size": "Large",
-                        "wrap": true,
-                        "spacing": "Small"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "PyHookKit  •  release-notifications",
-                        "isSubtle": true,
-                        "size": "Small",
-                        "spacing": "Small"
-                      }
-                    ]
-                  }
-                ]
+                "type": "TextBlock",
+                "text": "PYHOOKKIT NOTIFICATION",
+                "wrap": true,
+                "weight": "Bolder",
+                "color": "Dark"
               }
             ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "SUCCESS",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Good",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Deployment succeeded",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 release-notifications",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
           },
           {
             "type": "Container",
@@ -74,13 +66,16 @@
                 "type": "TextBlock",
                 "text": "SUCCESS: Deployment succeeded. example-api revision 9f3a2c1 deployed to staging in 2m 18s at 2026-08-28T03:15:00Z. View deployment: https://deployments.example.com/runs/run-1042",
                 "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
                 "spacing": "None"
               }
             ]
           },
           {
             "type": "Container",
-            "style": "emphasis",
+            "separator": true,
             "spacing": "Medium",
             "items": [
               {
@@ -192,7 +187,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🔗  synthetic-release-service",
+                    "text": "synthetic-release-service",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small"
@@ -205,7 +200,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🕒  2026-08-28T03:15:00+00:00",
+                    "text": "2026-08-28T03:15:00+00:00",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small",
@@ -219,7 +214,7 @@
         "actions": [
           {
             "type": "Action.OpenUrl",
-            "title": "↗  View deployment",
+            "title": "View deployment",
             "url": "https://deployments.example.com/runs/run-1042"
           }
         ]

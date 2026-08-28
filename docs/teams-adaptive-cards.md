@@ -59,7 +59,8 @@ Send it through the configured from-blank Workflow:
 uv run python teams_adaptive_cards/01_metrics_dashboard/teams.py --send
 ```
 
-T02 and T06 require `TEAMS_ASSET_BASE_URL` when sending. Point it at the
+Image-led examples require `EXAMPLE_ASSET_BASE_URL` when sending; the existing
+`TEAMS_ASSET_BASE_URL` name remains a compatible fallback. Point it at the
 published `teams_adaptive_cards/assets` directory through a direct HTTPS CDN or
 GitHub raw URL. T04 requires `TEAMS_TEST_USER_ID` and
 `TEAMS_TEST_USER_NAME`. These runtime values belong in the ignored `.env` or an
@@ -70,6 +71,8 @@ value must match the Adaptive Card `<at>` token and Teams mention entity.
 The committed cat images come from the MicrosoftDocs/AdaptiveCards repository
 under CC BY 4.0. Their source paths, modifications, and license link are in the
 [asset attribution](../examples/python/teams_adaptive_cards/assets/ATTRIBUTION.md).
+The editorial hero is redistributed unchanged from the official
+OfficeDev/Microsoft-Teams-Adaptive-Card-Samples repository under the MIT License.
 
 ## Workflow attribution
 

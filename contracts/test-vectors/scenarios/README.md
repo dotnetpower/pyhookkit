@@ -11,11 +11,11 @@ Each directory contains one provider-neutral `notification.json` plus frozen
 | `maintenance-notice` | notice, severity, window, affected services, expected impact, owner alias, status-page link |
 
 Slack snapshots use structured Block Kit facts, native mapped mentions, and
-link buttons. Teams snapshots freeze polished Adaptive Card emoji headers,
-responsive fact columns, source context, user mention entities, image treatment,
-and `Action.OpenUrl` buttons. Teams Workflow group notification remains an
-explicit degradation. Required meaning and navigation URLs also remain in
-fallback text. Parity is semantic rather than payload-shape equality.
+link buttons. Teams snapshots freeze an image-led editorial header, semantic
+severity labels, responsive fact columns, source context, user mention entities,
+image treatment, and `Action.OpenUrl` buttons. Teams Workflow group notification
+remains an explicit degradation. Required meaning and navigation URLs also
+remain in fallback text. Parity is semantic rather than payload-shape equality.
 
 Every fixture uses synthetic values and validates against
 `contracts/notification.schema.json`.

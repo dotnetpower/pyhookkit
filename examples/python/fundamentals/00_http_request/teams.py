@@ -10,8 +10,26 @@ from urllib.parse import urlsplit
 
 from example_message import MESSAGE
 
-_ENVIRONMENT_VARIABLE = "TEAMS_WORKFLOW_URL"
+_WORKFLOW_URL_VARIABLE = "TEAMS_WORKFLOW_URL"
+_LOGIC_APP_URL_VARIABLE = "TEAMS_LOGIC_APP_URL"
+_LOGIC_APP_TEAM_VARIABLE = "TEAMS_LOGIC_APP_TEAM_ID"
+_LOGIC_APP_CHANNEL_VARIABLE = "TEAMS_LOGIC_APP_CHANNEL_ID"
 _TIMEOUT_SECONDS = 10.0
+
+
+def build_card() -> dict[str, object]:
+    return {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "body": [
+            {
+                "type": "TextBlock",
+                "text": MESSAGE,
+                "wrap": True,
+            }
+        ],
+    }
 
 
 def build_payload() -> dict[str, object]:
@@ -21,28 +39,30 @@ def build_payload() -> dict[str, object]:
             {
                 "contentType": "application/vnd.microsoft.card.adaptive",
                 "contentUrl": None,
-                "content": {
-                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-                    "type": "AdaptiveCard",
-                    "version": "1.4",
-                    "body": [
-                        {
-                            "type": "TextBlock",
-                            "text": MESSAGE,
-                            "wrap": True,
-                        }
-                    ],
-                },
+                "content": build_card(),
             }
         ],
     }
 
 
-def send(workflow_url: str) -> int:
-    _require_https_url(workflow_url)
+def build_logic_app_payload(team_id: str, channel_id: str) -> dict[str, object]:
+    return {
+        "teamId": team_id,
+        "channelId": channel_id,
+        "eventId": "example-http-001",
+        "card": build_card(),
+    }
+
+
+def send(
+    url: str,
+    payload: dict[str, object] | None = None,
+) -> int:
+    _require_https_url(url)
+    active_payload = build_payload() if payload is None else payload
     request = urllib.request.Request(
-        workflow_url,
-        data=json.dumps(build_payload()).encode(),
+        url,
+        data=json.dumps(active_payload).encode(),
         headers={"Content-Type": "application/json"},
         method="POST",
     )
@@ -57,24 +77,39 @@ def send(workflow_url: str) -> int:
 
 def main(arguments: Sequence[str] | None = None) -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--send", action="store_true")
+    action = parser.add_mutually_exclusive_group()
+    action.add_argument("--send", action="store_true")
+    action.add_argument("--send-logic-app", action="store_true")
     parsed = parser.parse_args(arguments)
 
-    if not parsed.send:
+    if not parsed.send and not parsed.send_logic_app:
         print(json.dumps(build_payload(), indent=2))
         return
 
-    workflow_url = os.environ.get(_ENVIRONMENT_VARIABLE, "").strip()
-    if not workflow_url:
-        raise ValueError(f"{_ENVIRONMENT_VARIABLE} is required with --send")
-    status_code = send(workflow_url)
+    if parsed.send_logic_app:
+        url = _required(_LOGIC_APP_URL_VARIABLE, "--send-logic-app")
+        payload = build_logic_app_payload(
+            _required(_LOGIC_APP_TEAM_VARIABLE, "--send-logic-app"),
+            _required(_LOGIC_APP_CHANNEL_VARIABLE, "--send-logic-app"),
+        )
+    else:
+        url = _required(_WORKFLOW_URL_VARIABLE, "--send")
+        payload = build_payload()
+    status_code = send(url, payload)
     print(json.dumps({"state": "succeeded", "statusCode": status_code}, indent=2))
 
 
 def _require_https_url(url: str) -> None:
     parsed = urlsplit(url)
     if parsed.scheme != "https" or not parsed.netloc:
-        raise ValueError(f"{_ENVIRONMENT_VARIABLE} must be an HTTPS URL")
+        raise ValueError("Teams destination must be an HTTPS URL")
+
+
+def _required(variable_name: str, option: str) -> str:
+    value = os.environ.get(variable_name, "").strip()
+    if not value:
+        raise ValueError(f"{variable_name} is required with {option}")
+    return value
 
 
 if __name__ == "__main__":

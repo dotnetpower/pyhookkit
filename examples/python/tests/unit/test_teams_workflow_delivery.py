@@ -92,3 +92,32 @@ def test_entrypoint_renders_and_sends(
         environment={"TEAMS_WORKFLOW_URL": _URL},
     )
     assert json.loads(capsys.readouterr().out)["state"] == "succeeded"
+
+
+def test_entrypoint_routes_logic_app_delivery(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def send_logic_app(
+        payload: JsonObject,
+        *,
+        event_id: str | None,
+        environment: dict[str, str],
+    ) -> None:
+        captured["payload"] = payload
+        captured["event_id"] = event_id
+        captured["environment"] = environment
+
+    monkeypatch.setattr(entrypoint, "send_teams_logic_app_example", send_logic_app)
+    environment = {"TEAMS_LOGIC_APP_URL": "synthetic"}
+
+    entrypoint.run_teams_workflow_example(
+        _notification(),
+        TeamsTextRenderer(),
+        arguments=["--send-logic-app"],
+        environment=environment,
+    )
+
+    assert captured["event_id"] == "example-teams-entrypoint-001"
+    assert captured["environment"] is environment

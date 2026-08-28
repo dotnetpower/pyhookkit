@@ -8,63 +8,55 @@
         "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
         "type": "AdaptiveCard",
         "version": "1.4",
-        "fallbackText": "Service topology: The synthetic service topology is attached.",
-        "speak": "Service topology: The synthetic service topology is attached.",
+        "fallbackText": "Sample image: A publicly hosted sample image is attached.",
+        "speak": "Sample image: A publicly hosted sample image is attached.",
         "body": [
           {
             "type": "Container",
-            "style": "emphasis",
+            "backgroundImage": {
+              "url": "https://assets.pyhookkit.example/samples/standard-video/assets/video_image.png",
+              "fillMode": "Cover",
+              "horizontalAlignment": "Center",
+              "verticalAlignment": "Center"
+            },
             "bleed": true,
+            "minHeight": "180px",
+            "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "ColumnSet",
-                "spacing": "None",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "verticalContentAlignment": "Center",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "💡",
-                        "size": "ExtraLarge",
-                        "spacing": "None"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "INFO",
-                        "weight": "Bolder",
-                        "size": "Small",
-                        "color": "Accent",
-                        "spacing": "None"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "Service topology",
-                        "weight": "Bolder",
-                        "size": "Large",
-                        "wrap": true,
-                        "spacing": "Small"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "PyHookKit  •  platform-alerts",
-                        "isSubtle": true,
-                        "size": "Small",
-                        "spacing": "Small"
-                      }
-                    ]
-                  }
-                ]
+                "type": "TextBlock",
+                "text": "PYHOOKKIT NOTIFICATION",
+                "wrap": true,
+                "weight": "Bolder",
+                "color": "Dark"
               }
             ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "INFORMATION",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Accent",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Sample image",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 platform-alerts",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
           },
           {
             "type": "Container",
@@ -72,27 +64,30 @@
             "items": [
               {
                 "type": "TextBlock",
-                "text": "The synthetic service topology is attached.",
+                "text": "A publicly hosted sample image is attached.",
                 "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
                 "spacing": "None"
               }
             ]
           },
           {
             "type": "Container",
-            "style": "emphasis",
+            "separator": true,
             "spacing": "Medium",
             "items": [
               {
                 "type": "Image",
-                "url": "https://images.example.com/status/example-service.png",
-                "altText": "Synthetic service topology",
+                "url": "https://assets.pyhookkit.example/samples/recipe/assets/recipe_image.png",
+                "altText": "Glazed chicken with broccoli from the Microsoft Adaptive Cards recipe sample",
                 "size": "Stretch",
                 "horizontalAlignment": "Center"
               },
               {
                 "type": "TextBlock",
-                "text": "Synthetic service topology",
+                "text": "Glazed chicken with broccoli from the Microsoft Adaptive Cards recipe sample",
                 "wrap": true,
                 "isSubtle": true,
                 "size": "Small",

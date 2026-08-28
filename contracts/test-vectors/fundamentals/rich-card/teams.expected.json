@@ -13,58 +13,50 @@
         "body": [
           {
             "type": "Container",
-            "style": "emphasis",
+            "backgroundImage": {
+              "url": "https://assets.pyhookkit.example/samples/cafe-menu/assets/hero.png",
+              "fillMode": "Cover",
+              "horizontalAlignment": "Center",
+              "verticalAlignment": "Center"
+            },
             "bleed": true,
+            "minHeight": "180px",
+            "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "ColumnSet",
-                "spacing": "None",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "verticalContentAlignment": "Center",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "✅",
-                        "size": "ExtraLarge",
-                        "spacing": "None"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "SUCCESS",
-                        "weight": "Bolder",
-                        "size": "Small",
-                        "color": "Good",
-                        "spacing": "None"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "Deployment completed",
-                        "weight": "Bolder",
-                        "size": "Large",
-                        "wrap": true,
-                        "spacing": "Small"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "PyHookKit  •  rich-card",
-                        "isSubtle": true,
-                        "size": "Small",
-                        "spacing": "Small"
-                      }
-                    ]
-                  }
-                ]
+                "type": "TextBlock",
+                "text": "PYHOOKKIT NOTIFICATION",
+                "wrap": true,
+                "weight": "Bolder",
+                "color": "Dark"
               }
             ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "SUCCESS",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Good",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Deployment completed",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 rich-card",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
           },
           {
             "type": "Container",
@@ -74,13 +66,16 @@
                 "type": "TextBlock",
                 "text": "The synthetic deployment completed successfully.",
                 "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
                 "spacing": "None"
               }
             ]
           },
           {
             "type": "Container",
-            "style": "emphasis",
+            "separator": true,
             "spacing": "Medium",
             "items": [
               {
@@ -176,7 +171,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🔗  synthetic-deployer",
+                    "text": "synthetic-deployer",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small"
@@ -189,7 +184,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🕒  2026-08-28T02:05:00+00:00",
+                    "text": "2026-08-28T02:05:00+00:00",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small",

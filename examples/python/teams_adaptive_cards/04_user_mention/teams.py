@@ -15,12 +15,13 @@ _USER_NAME_MARKER = "{{TEAMS_TEST_USER_NAME}}"
 
 def main() -> None:
     replacements: dict[str, str] | None = None
-    if "--send" in sys.argv[1:]:
+    sending = any(option in sys.argv[1:] for option in ("--send", "--send-logic-app"))
+    if sending:
         user_id = os.environ.get("TEAMS_TEST_USER_ID", "").strip()
         user_name = os.environ.get("TEAMS_TEST_USER_NAME", "").strip()
         if not user_id or not user_name:
             raise TeamsCardExampleError(
-                "TEAMS_TEST_USER_ID and TEAMS_TEST_USER_NAME are required with --send"
+                "TEAMS_TEST_USER_ID and TEAMS_TEST_USER_NAME are required when sending"
             )
         if any(character in user_name for character in "<>&"):
             raise TeamsCardExampleError(

@@ -13,58 +13,50 @@
         "body": [
           {
             "type": "Container",
-            "style": "emphasis",
+            "backgroundImage": {
+              "url": "https://assets.pyhookkit.example/samples/author-highlight-video/assets/video_image.png",
+              "fillMode": "Cover",
+              "horizontalAlignment": "Center",
+              "verticalAlignment": "Center"
+            },
             "bleed": true,
+            "minHeight": "180px",
+            "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "ColumnSet",
-                "spacing": "None",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "verticalContentAlignment": "Center",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "🚨",
-                        "size": "ExtraLarge",
-                        "spacing": "None"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "CRITICAL",
-                        "weight": "Bolder",
-                        "size": "Small",
-                        "color": "Attention",
-                        "spacing": "None"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "Incident alert: elevated latency",
-                        "weight": "Bolder",
-                        "size": "Large",
-                        "wrap": true,
-                        "spacing": "Small"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "PyHookKit  •  incident-response",
-                        "isSubtle": true,
-                        "size": "Small",
-                        "spacing": "Small"
-                      }
-                    ]
-                  }
-                ]
+                "type": "TextBlock",
+                "text": "PYHOOKKIT NOTIFICATION",
+                "wrap": true,
+                "weight": "Bolder",
+                "color": "Dark"
               }
             ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "CRITICAL",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Attention",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Incident alert: elevated latency",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 incident-response",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
           },
           {
             "type": "Container",
@@ -74,13 +66,16 @@
                 "type": "TextBlock",
                 "text": "ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency",
                 "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
                 "spacing": "None"
               }
             ]
           },
           {
             "type": "Container",
-            "style": "emphasis",
+            "separator": true,
             "spacing": "Medium",
             "items": [
               {
@@ -188,9 +183,11 @@
             "items": [
               {
                 "type": "TextBlock",
-                "text": "👥  example-responders (Teams Workflow group notification unavailable)",
+                "text": "example-responders (Teams Workflow group notification unavailable)",
                 "wrap": true,
                 "weight": "Bolder",
+                "color": "Accent",
+                "horizontalAlignment": "Center",
                 "spacing": "None"
               }
             ]
@@ -206,7 +203,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🔗  synthetic-incident-service",
+                    "text": "synthetic-incident-service",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small"
@@ -219,7 +216,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🕒  2026-08-28T04:20:00+00:00",
+                    "text": "2026-08-28T04:20:00+00:00",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small",
@@ -233,12 +230,12 @@
         "actions": [
           {
             "type": "Action.OpenUrl",
-            "title": "↗  Acknowledge incident",
+            "title": "Acknowledge incident",
             "url": "https://incidents.example.com/incidents/inc-204/acknowledge"
           },
           {
             "type": "Action.OpenUrl",
-            "title": "↗  Open runbook",
+            "title": "Open runbook",
             "url": "https://runbooks.example.com/services/example-checkout/latency"
           }
         ]

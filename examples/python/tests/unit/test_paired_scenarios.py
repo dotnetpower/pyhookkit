@@ -17,6 +17,9 @@ from pyhookkit.json_types import JsonObject, JsonValue
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 _PYTHON_ROOT = _REPOSITORY_ROOT / "examples" / "python"
 _VECTOR_ROOT = _REPOSITORY_ROOT / "contracts" / "test-vectors" / "scenarios"
+_FUNDAMENTAL_VECTOR_ROOT = (
+    _REPOSITORY_ROOT / "contracts" / "test-vectors" / "fundamentals"
+)
 _SCHEMA_PATH = _REPOSITORY_ROOT / "contracts" / "notification.schema.json"
 _SCENARIOS = (
     ("deployment-result", "deployment_result"),
@@ -97,6 +100,22 @@ def _as_json_value(value: object, path: Path) -> JsonValue:
             cast(str, key): _as_json_value(item, path) for key, item in mapping.items()
         }
     raise TypeError(f"{path} contains a non-JSON value")
+
+
+def _background_image_urls(value: JsonValue) -> tuple[str, ...]:
+    urls: list[str] = []
+    if isinstance(value, dict):
+        background = value.get("backgroundImage")
+        if isinstance(background, dict):
+            url = background.get("url")
+            if isinstance(url, str):
+                urls.append(url)
+        for item in value.values():
+            urls.extend(_background_image_urls(item))
+    elif isinstance(value, list):
+        for item in value:
+            urls.extend(_background_image_urls(item))
+    return tuple(urls)
 
 
 def _validator() -> Validator:
@@ -201,3 +220,19 @@ def test_scenario_renderers_preserve_required_semantics(
     for semantic_value in _REQUIRED_SEMANTICS[vector_name]:
         assert semantic_value in slack_payload
         assert semantic_value in teams_payload
+
+
+def test_paired_teams_examples_use_distinct_hero_images() -> None:
+    payloads = [
+        _load_json(_FUNDAMENTAL_VECTOR_ROOT / capability / "teams.expected.json")
+        for capability in ("rich-card", "image")
+    ]
+    payloads.extend(
+        _load_json(_VECTOR_ROOT / vector_name / "teams.expected.json")
+        for vector_name, _ in _SCENARIOS
+    )
+
+    hero_urls = [url for payload in payloads for url in _background_image_urls(payload)]
+
+    assert len(hero_urls) == len(payloads)
+    assert len(set(hero_urls)) == len(payloads)

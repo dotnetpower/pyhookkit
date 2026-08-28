@@ -16,3 +16,23 @@ Copyright Microsoft Corporation.
 
 The images are examples only and do not imply Microsoft endorsement of
 PyHookKit.
+
+## Microsoft Teams Adaptive Card sample images
+
+The following files are redistributed unchanged from
+`OfficeDev/Microsoft-Teams-Adaptive-Card-Samples` under the MIT License. Local
+paths below `assets/` preserve their upstream repository paths.
+
+| Local and upstream path |
+|---|
+| `samples/author-highlight-video/assets/video_image.png` |
+| `samples/book-a-room/assets/room_hero.png` |
+| `samples/cafe-menu/assets/hero.png` |
+| `samples/editorial/assets/editorialHero.png` |
+| `samples/list/assets/ResourceImage_1_Horizontal.png` |
+| `samples/recipe/assets/recipe_image.png` |
+| `samples/simple-event/assets/eventHero.png` |
+| `samples/simple-time-off-request/assets/hero.png` |
+| `samples/standard-video/assets/video_image.png` |
+
+Copyright Microsoft Corporation.

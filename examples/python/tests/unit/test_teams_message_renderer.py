@@ -13,7 +13,10 @@ from pyhookkit.adapters.outbound.teams.identity import (
     TeamsIdentityDirectory,
     TeamsIdentityNotFoundError,
 )
-from pyhookkit.adapters.outbound.teams.message_renderer import TeamsMessageRenderer
+from pyhookkit.adapters.outbound.teams.message_renderer import (
+    TeamsHeroImageUrlError,
+    TeamsMessageRenderer,
+)
 from pyhookkit.domain.notification import (
     CanonicalNotification,
     Fact,
@@ -58,12 +61,18 @@ def test_rich_card_preserves_structured_content() -> None:
     assert '"ColumnSet"' in serialized
     assert '"Action.OpenUrl"' in serialized
     assert '"Image"' in serialized
-    assert "🚨" in serialized
     assert "CRITICAL" in serialized
     assert "PyHookKit" in serialized
     assert "Synthetic service alert" in serialized
     assert "synthetic-monitor" in serialized
     assert '"speak"' in serialized
+    assert '"backgroundImage"' in serialized
+    assert (
+        "https://assets.pyhookkit.example/samples/editorial/assets/editorialHero.png"
+    ) in serialized
+    assert '"style": "emphasis"' not in serialized
+    assert "🚨" not in serialized
+    assert "↗" not in serialized
     assert (
         "Synthetic service alert: The synthetic service needs attention." in serialized
     )
@@ -96,7 +105,7 @@ def test_group_mention_is_explicitly_degraded() -> None:
 
     serialized = json.dumps(payload, ensure_ascii=False)
     assert "group notification unavailable" in serialized
-    assert "👥" in serialized
+    assert "👥" not in serialized
 
 
 def test_missing_user_identity_is_rejected() -> None:
@@ -107,6 +116,11 @@ def test_missing_user_identity_is_rejected() -> None:
         TeamsMessageRenderer(TeamsIdentityDirectory({})).render(
             _notification(mention_kind=MentionKind.USER)
         )
+
+
+def test_renderer_rejects_insecure_hero_image() -> None:
+    with pytest.raises(TeamsHeroImageUrlError, match="absolute HTTPS"):
+        TeamsMessageRenderer(hero_image_url="http://assets.example.com/hero.png")
 
 
 @pytest.mark.parametrize(

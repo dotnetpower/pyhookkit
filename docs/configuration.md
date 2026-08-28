@@ -102,6 +102,10 @@ Set:
 
 ```dotenv
 TEAMS_WORKFLOW_URL="<Teams Workflow HTTP POST callback URL>"
+TEAMS_LOGIC_APP_URL="<Azure Logic App HTTP trigger callback URL>"
+TEAMS_LOGIC_APP_TEAM_ID="<Microsoft Teams team ID>"
+TEAMS_LOGIC_APP_CHANNEL_ID="<Microsoft Teams channel ID>"
+EXAMPLE_ASSET_BASE_URL="<direct HTTPS base URL for committed example images>"
 TEAMS_ASSET_BASE_URL="<direct HTTPS base URL for committed gallery images>"
 TEAMS_TEST_USER_ID="<test member Microsoft Entra object ID or UPN>"
 TEAMS_TEST_USER_NAME="<test member display name>"
@@ -121,6 +125,11 @@ You need:
 Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`. The
 Workflow owns its target team, channel, connection, and authentication policy,
 so those values do not belong in this initial environment contract.
+
+For Azure Logic App delivery, configure the signed HTTP trigger URL separately
+from the explicit Team and channel IDs. Follow the
+[Logic App runbook](../infra/azure/logic-apps/README.md); a Logic App callback
+cannot replace `TEAMS_WORKFLOW_URL` because its request schema is different.
 
 The asset base and two `TEAMS_TEST_*` values are optional and used only by the
 standalone Adaptive Card image and mention examples. Do not set them in shared
@@ -153,6 +162,7 @@ Check that a value exists without printing the credential:
 ```shell
 test -n "$SLACK_WEBHOOK_URL" && echo "Slack destination configured"
 test -n "$TEAMS_WORKFLOW_URL" && echo "Teams destination configured"
+test -n "$TEAMS_LOGIC_APP_URL" && echo "Teams Logic App configured"
 ```
 
 Fundamental examples render payloads by default. Slack operations are also

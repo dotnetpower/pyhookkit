@@ -13,58 +13,50 @@
         "body": [
           {
             "type": "Container",
-            "style": "emphasis",
+            "backgroundImage": {
+              "url": "https://assets.pyhookkit.example/samples/simple-time-off-request/assets/hero.png",
+              "fillMode": "Cover",
+              "horizontalAlignment": "Center",
+              "verticalAlignment": "Center"
+            },
             "bleed": true,
+            "minHeight": "180px",
+            "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "ColumnSet",
-                "spacing": "None",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "verticalContentAlignment": "Center",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "⚠️",
-                        "size": "ExtraLarge",
-                        "spacing": "None"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "ATTENTION",
-                        "weight": "Bolder",
-                        "size": "Small",
-                        "color": "Warning",
-                        "spacing": "None"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "Approval requested",
-                        "weight": "Bolder",
-                        "size": "Large",
-                        "wrap": true,
-                        "spacing": "Small"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "PyHookKit  •  change-approvals",
-                        "isSubtle": true,
-                        "size": "Small",
-                        "spacing": "Small"
-                      }
-                    ]
-                  }
-                ]
+                "type": "TextBlock",
+                "text": "PYHOOKKIT NOTIFICATION",
+                "wrap": true,
+                "weight": "Bolder",
+                "color": "Dark"
               }
             ]
+          },
+          {
+            "type": "TextBlock",
+            "text": "ATTENTION",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Warning",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Approval requested",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 change-approvals",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
           },
           {
             "type": "Container",
@@ -74,13 +66,16 @@
                 "type": "TextBlock",
                 "text": "WARNING: Approval requested. Request APR-307 from example-requester is for release example-api 2026.08.28 before 2026-08-28T07:00:00Z. Approver: example-approver. Review request: https://approvals.example.com/requests/apr-307",
                 "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
                 "spacing": "None"
               }
             ]
           },
           {
             "type": "Container",
-            "style": "emphasis",
+            "separator": true,
             "spacing": "Medium",
             "items": [
               {
@@ -188,9 +183,11 @@
             "items": [
               {
                 "type": "TextBlock",
-                "text": "👥  <at>Example Approver</at>",
+                "text": "<at>Example Approver</at>",
                 "wrap": true,
                 "weight": "Bolder",
+                "color": "Accent",
+                "horizontalAlignment": "Center",
                 "spacing": "None"
               }
             ]
@@ -206,7 +203,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🔗  synthetic-change-service",
+                    "text": "synthetic-change-service",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small"
@@ -219,7 +216,7 @@
                 "items": [
                   {
                     "type": "TextBlock",
-                    "text": "🕒  2026-08-28T05:10:00+00:00",
+                    "text": "2026-08-28T05:10:00+00:00",
                     "wrap": true,
                     "isSubtle": true,
                     "size": "Small",
@@ -233,7 +230,7 @@
         "actions": [
           {
             "type": "Action.OpenUrl",
-            "title": "↗  Review request",
+            "title": "Review request",
             "url": "https://approvals.example.com/requests/apr-307"
           }
         ],

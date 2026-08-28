@@ -2,11 +2,11 @@
   "schemaVersion": "1.0",
   "eventId": "example-image-001",
   "route": "platform-alerts",
-  "title": "Service topology",
-  "body": "The synthetic service topology is attached.",
+  "title": "Sample image",
+  "body": "A publicly hosted sample image is attached.",
   "severity": "info",
   "image": {
-    "url": "https://images.example.com/status/example-service.png",
-    "altText": "Synthetic service topology"
+    "url": "https://assets.pyhookkit.example/samples/recipe/assets/recipe_image.png",
+    "altText": "Glazed chicken with broccoli from the Microsoft Adaptive Cards recipe sample"
   }
 }

@@ -7,6 +7,31 @@ that a Workflow webhook cannot provide.
 The selected adapter must expose its supported capabilities and ownership
 requirements.
 
+## Azure Logic App delivery
+
+Logic App delivery is not an endpoint-only substitution. The two HTTP contracts
+are different:
+
+| Surface | Power Automate Workflow | Azure Logic App `post-card` |
+|---|---|---|
+| Request body | Teams `message` envelope with `attachments` | `teamId`, `channelId`, optional `eventId`, and inner `card` |
+| Routing | Fixed in the Workflow action | Explicit in every request |
+| Success | Workflow HTTP status | `201` with Teams message identifiers |
+| Authentication | Signed Workflow callback URL | Signed Logic App trigger URL plus authorized Teams API connection |
+
+PyHookKit keeps one `TeamsMessageRenderer` and adapts only the delivery boundary.
+Use `--send-logic-app`; do not place a Logic App URL in `TEAMS_WORKFLOW_URL`.
+The adapter validates and redacts the callback URL, extracts exactly one
+Adaptive Card attachment, adds configured routing, and returns the same redacted
+provider-neutral delivery result used by Workflow delivery.
+
+```shell
+uv run python scenarios/deployment_result/teams.py --send-logic-app
+```
+
+See the [Logic App runbook](../infra/azure/logic-apps/README.md) for the trigger
+schema and required environment values.
+
 ## Workflow lifecycle
 
 The initial test Workflow is created manually because selecting a Microsoft
@@ -46,17 +71,19 @@ group labels because the webhook flow cannot guarantee group notification.
 
 The visual hierarchy uses:
 
-- a severity-specific emoji and color header;
-- the PyHookKit route as subtle context;
+- a full-bleed Microsoft editorial sample image;
+- a centered severity label and title without emoji;
+- the PyHookKit route as subtle centered context;
 - responsive two-column fact tiles;
-- an emphasized mention panel;
-- a framed image with accessible alt text and caption;
-- compact source and timestamp icons;
+- a bright mention panel;
+- an image with accessible alt text and caption;
+- compact source and timestamp text;
 - clearly labeled `Action.OpenUrl` buttons.
 
 Image URLs must be publicly reachable over HTTPS for Teams to render them.
-Committed examples use synthetic URLs, so live visual tests must inject an
-approved public test image without committing that runtime URL.
+Committed payloads use synthetic markers. Live sends resolve those markers from
+`EXAMPLE_ASSET_BASE_URL`, with `TEAMS_ASSET_BASE_URL` retained as a compatible
+fallback.
 
 See [Teams Adaptive Card design](teams-adaptive-cards.md) for the official
 best-practice baseline and standalone example gallery.

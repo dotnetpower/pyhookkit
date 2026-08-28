@@ -151,11 +151,13 @@ def _identity_directory() -> SlackIdentityDirectory:
             "image",
             lambda: _base_notification(
                 event_id="example-image-001",
-                title="Service topology",
-                body="The synthetic service topology is attached.",
+                title="Sample image",
+                body="A publicly hosted sample image is attached.",
                 image=Image(
-                    "https://images.example.com/status/example-service.png",
-                    "Synthetic service topology",
+                    "https://assets.pyhookkit.example/samples/recipe/assets/"
+                    "recipe_image.png",
+                    "Glazed chicken with broccoli from the Microsoft Adaptive "
+                    "Cards recipe sample",
                 ),
             ),
         ),

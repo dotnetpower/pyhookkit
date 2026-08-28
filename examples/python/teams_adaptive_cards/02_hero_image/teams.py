@@ -6,7 +6,7 @@ from pathlib import Path
 from pyhookkit.entrypoints.teams_card_assets import teams_asset_replacements
 from pyhookkit.entrypoints.teams_card_example import run_teams_card_file_example
 
-_ASSET = "adaptive-card-cat-hero.png"
+_ASSET = "samples/editorial/assets/editorialHero.png"
 
 
 def main() -> None:

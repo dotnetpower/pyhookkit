@@ -13,54 +13,51 @@
         "body": [
           {
             "type": "Container",
-            "style": "emphasis",
             "bleed": true,
+            "backgroundImage": {
+              "url": "https://assets.pyhookkit.example/samples/simple-event/assets/eventHero.png",
+              "fillMode": "Cover",
+              "horizontalAlignment": "Center",
+              "verticalAlignment": "Center"
+            },
+            "minHeight": "180px",
+            "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "ColumnSet",
-                "columns": [
-                  {
-                    "type": "Column",
-                    "width": "auto",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "🎯",
-                        "size": "ExtraLarge"
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Column",
-                    "width": "stretch",
-                    "items": [
-                      {
-                        "type": "TextBlock",
-                        "text": "READY FOR REVIEW",
-                        "color": "Accent",
-                        "weight": "Bolder",
-                        "size": "Small",
-                        "spacing": "None"
-                      },
-                      {
-                        "type": "TextBlock",
-                        "text": "Design review",
-                        "weight": "Bolder",
-                        "size": "Large",
-                        "wrap": true,
-                        "spacing": "Small"
-                      }
-                    ]
-                  }
-                ]
+                "type": "TextBlock",
+                "text": "DESIGN REVIEW SERIES",
+                "weight": "Bolder",
+                "color": "Dark",
+                "wrap": true
               }
             ]
           },
           {
             "type": "TextBlock",
+            "text": "READY FOR REVIEW",
+            "color": "Good",
+            "weight": "Bolder",
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Design review",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
             "text": "The synthetic release is ready for a focused design review.",
             "wrap": true,
-            "spacing": "Medium"
+            "isSubtle": true,
+            "size": "Medium",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
           },
           {
             "type": "Container",
@@ -69,14 +66,16 @@
             "items": [
               {
                 "type": "TextBlock",
-                "text": "💡 **Review focus**",
+                "text": "Review focus",
                 "weight": "Bolder",
-                "wrap": true
+                "wrap": true,
+                "horizontalAlignment": "Center"
               },
               {
                 "type": "TextBlock",
                 "text": "Confirm readability, action clarity, and mobile behavior.",
                 "wrap": true,
+                "horizontalAlignment": "Center",
                 "spacing": "Small"
               }
             ]

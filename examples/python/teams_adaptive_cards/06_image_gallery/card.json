@@ -13,10 +13,11 @@
         "body": [
           {
             "type": "TextBlock",
-            "text": "🐈  Adaptive Cards image gallery",
+            "text": "Adaptive Cards image gallery",
             "weight": "Bolder",
             "size": "Large",
-            "wrap": true
+            "wrap": true,
+            "horizontalAlignment": "Center"
           },
           {
             "type": "TextBlock",

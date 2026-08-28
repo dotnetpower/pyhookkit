@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+import pyhookkit.entrypoints.teams_card_example as entrypoint
 from pyhookkit.entrypoints.teams_card_example import (
     TeamsCardExampleError,
     load_teams_card,
@@ -61,3 +62,32 @@ def test_loader_rejects_non_object(tmp_path: Path) -> None:
 
     with pytest.raises(TeamsCardExampleError, match="JSON object"):
         load_teams_card(path)
+
+
+def test_card_entrypoint_routes_logic_app_delivery(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    captured: dict[str, object] = {}
+
+    def send_logic_app(
+        payload: JsonObject,
+        *,
+        event_id: str | None,
+        environment: dict[str, str],
+    ) -> None:
+        captured["payload"] = payload
+        captured["event_id"] = event_id
+        captured["environment"] = environment
+
+    monkeypatch.setattr(entrypoint, "send_teams_logic_app_example", send_logic_app)
+    environment = {"TEAMS_LOGIC_APP_URL": "synthetic"}
+
+    run_teams_card_example(
+        _payload(),
+        arguments=["--send-logic-app"],
+        environment=environment,
+        event_id="gallery-example",
+    )
+
+    assert captured["event_id"] == "gallery-example"
+    assert captured["environment"] is environment

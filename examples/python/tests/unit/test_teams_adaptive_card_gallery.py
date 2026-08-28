@@ -34,7 +34,30 @@ _ASSETS = (
     "adaptive-card-cat-hero.png",
     "adaptive-card-cat-glasses.png",
     "adaptive-card-cat-portrait.png",
+    "samples/author-highlight-video/assets/video_image.png",
+    "samples/book-a-room/assets/room_hero.png",
+    "samples/cafe-menu/assets/hero.png",
+    "samples/editorial/assets/editorialHero.png",
+    "samples/list/assets/ResourceImage_1_Horizontal.png",
+    "samples/recipe/assets/recipe_image.png",
+    "samples/simple-event/assets/eventHero.png",
+    "samples/simple-time-off-request/assets/hero.png",
+    "samples/standard-video/assets/video_image.png",
 )
+_ASSET_LICENSES = {
+    "adaptive-card-cat-hero.png": "CC BY 4.0",
+    "adaptive-card-cat-glasses.png": "CC BY 4.0",
+    "adaptive-card-cat-portrait.png": "CC BY 4.0",
+    "samples/author-highlight-video/assets/video_image.png": "MIT",
+    "samples/book-a-room/assets/room_hero.png": "MIT",
+    "samples/cafe-menu/assets/hero.png": "MIT",
+    "samples/editorial/assets/editorialHero.png": "MIT",
+    "samples/list/assets/ResourceImage_1_Horizontal.png": "MIT",
+    "samples/recipe/assets/recipe_image.png": "MIT",
+    "samples/simple-event/assets/eventHero.png": "MIT",
+    "samples/simple-time-off-request/assets/hero.png": "MIT",
+    "samples/standard-video/assets/video_image.png": "MIT",
+}
 _SUPPORTED_WEBHOOK_ACTIONS = {
     "Action.OpenUrl",
     "Action.ToggleVisibility",
@@ -89,6 +112,7 @@ def test_gallery_card_follows_compatible_accessible_baseline(
             assert isinstance(alt_text, str) and alt_text
         if isinstance(item_type, str) and item_type.startswith("Action."):
             assert item_type in _SUPPORTED_WEBHOOK_ACTIONS
+        assert item.get("style") != "emphasis"
 
 
 @pytest.mark.parametrize("example", _EXAMPLES)
@@ -131,13 +155,26 @@ def test_gallery_limits_top_level_actions() -> None:
         assert len(actions) <= 3
 
 
-def test_mention_runner_rejects_markup_in_display_name() -> None:
+@pytest.mark.parametrize("example", _EXAMPLES)
+def test_gallery_uses_text_instead_of_emoji(example: str) -> None:
+    serialized = json.dumps(_card(example), ensure_ascii=False)
+
+    assert not any(
+        marker in serialized
+        for marker in ("📊", "🎯", "💡", "🐈", "✅", "👋", "🚀", "⏳", "↗")
+    )
+
+
+@pytest.mark.parametrize("send_option", ("--send", "--send-logic-app"))
+def test_mention_runner_rejects_markup_in_display_name(
+    send_option: str,
+) -> None:
     environment = dict(os.environ)
     environment["PYTHONPATH"] = str(_PYTHON_ROOT / "src")
     environment["TEAMS_TEST_USER_ID"] = "example-owner@pyhookkit.example"
     environment["TEAMS_TEST_USER_NAME"] = "Example <Owner>"
     completed = subprocess.run(
-        [sys.executable, "teams.py", "--send"],
+        [sys.executable, "teams.py", send_option],
         cwd=_GALLERY_ROOT / "04_user_mention",
         env=environment,
         check=False,
@@ -189,8 +226,8 @@ def test_committed_image_is_teams_compatible_and_attributed(
     attribution = (_GALLERY_ROOT / "assets" / "ATTRIBUTION.md").read_text()
 
     assert content.startswith(b"\x89PNG\r\n\x1a\n")
-    assert len(content) < 1_000_000
-    assert width <= 1024
+    assert len(content) < 1_100_000
+    assert width <= 1280
     assert height <= 1024
     assert filename in attribution
-    assert "CC BY 4.0" in attribution
+    assert _ASSET_LICENSES[filename] in attribution

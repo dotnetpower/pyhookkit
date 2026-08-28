@@ -7,6 +7,7 @@ from pyhookkit.adapters.outbound.teams.identity import (
     TeamsIdentityDirectory,
 )
 from pyhookkit.adapters.outbound.teams.message_renderer import TeamsMessageRenderer
+from pyhookkit.entrypoints.example_asset import example_asset_marker
 from pyhookkit.entrypoints.teams_workflow_example import run_teams_workflow_example
 
 
@@ -21,7 +22,12 @@ def main() -> None:
     )
     run_teams_workflow_example(
         build_notification(),
-        TeamsMessageRenderer(identities),
+        TeamsMessageRenderer(
+            identities,
+            hero_image_url=example_asset_marker(
+                "samples/simple-time-off-request/assets/hero.png"
+            ),
+        ),
     )
 
 

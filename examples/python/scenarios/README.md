@@ -29,9 +29,13 @@ No Graph permission is required. The renderer produces Adaptive Card 1.4
 headings, severity colors, facts, images, source context, and `Action.OpenUrl`
 buttons. User aliases can map to native Teams mention entities. Logical group
 mentions remain visible but explicitly report that Workflow group notification
-is unavailable. Live sends also resolve each scenario's distinct Microsoft
-sample hero image from `EXAMPLE_ASSET_BASE_URL` or the compatible
-`TEAMS_ASSET_BASE_URL` fallback.
+requires additional Graph member-expansion configuration. Hero labels use a
+theme-aware solid overlay for reliable contrast across mixed photography.
+Scenario cards use distinct PyHookKit-created static banners with no video
+controls or third-party imagery. Their compact visual body avoids repeating the
+long canonical fallback; title, severity, facts, mentions, context, and actions
+remain visible. Live sends resolve these banners from `EXAMPLE_ASSET_BASE_URL`
+or the compatible `TEAMS_ASSET_BASE_URL` fallback.
 
 The top-level canonical body remains the card's fallback text so required
 meaning survives hosts that cannot render one of the rich elements.

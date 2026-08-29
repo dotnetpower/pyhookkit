@@ -1,5 +1,6 @@
 """Canonical notification to rich Microsoft Teams Adaptive Card rendering."""
 
+from enum import StrEnum
 from urllib.parse import urlsplit
 
 from pyhookkit.adapters.outbound.teams.identity import TeamsIdentityDirectory
@@ -25,6 +26,20 @@ class TeamsHeroImageUrlError(ValueError):
     """The Teams presentation hero URL is invalid."""
 
 
+class TeamsGroupMentionPolicy(StrEnum):
+    """How a Teams card represents canonical group mentions."""
+
+    CONFIGURATION_NOTICE = "configuration_notice"
+    OMIT = "omit"
+
+
+class TeamsActionPresentation(StrEnum):
+    """How canonical links are presented in a Teams card."""
+
+    STANDARD = "standard"
+    EDGE_TO_EDGE = "edge_to_edge"
+
+
 class TeamsMessageRenderer:
     """Render polished canonical notifications for a Teams Workflow."""
 
@@ -32,19 +47,43 @@ class TeamsMessageRenderer:
         self,
         identity_directory: TeamsIdentityDirectory | None = None,
         *,
-        hero_image_url: str = _DEFAULT_HERO_URL,
+        hero_image_url: str | None = _DEFAULT_HERO_URL,
+        capability_notice: str | None = None,
+        group_mention_policy: TeamsGroupMentionPolicy = (
+            TeamsGroupMentionPolicy.CONFIGURATION_NOTICE
+        ),
+        action_presentation: TeamsActionPresentation = (
+            TeamsActionPresentation.STANDARD
+        ),
+        show_body_in_card: bool = True,
+        show_hero_label: bool = True,
+        hero_min_height: int = 180,
     ) -> None:
-        parsed_url = urlsplit(hero_image_url)
-        if parsed_url.scheme != "https" or not parsed_url.netloc:
-            raise TeamsHeroImageUrlError(
-                "Teams hero image URL must be an absolute HTTPS URL"
-            )
+        if hero_image_url is not None:
+            parsed_url = urlsplit(hero_image_url)
+            if parsed_url.scheme != "https" or not parsed_url.netloc:
+                raise TeamsHeroImageUrlError(
+                    "Teams hero image URL must be an absolute HTTPS URL"
+                )
+        if capability_notice is not None and not capability_notice.strip():
+            raise ValueError("Teams capability notice must not be blank")
+        if hero_min_height < 1:
+            raise ValueError("Teams hero minimum height must be positive")
         self._identity_directory = identity_directory
         self._hero_image_url = hero_image_url
+        self._capability_notice = capability_notice
+        self._group_mention_policy = group_mention_policy
+        self._action_presentation = action_presentation
+        self._show_body_in_card = show_body_in_card
+        self._show_hero_label = show_hero_label
+        self._hero_min_height = hero_min_height
 
     def render(self, notification: CanonicalNotification) -> JsonObject:
         body = self._render_header(notification)
-        body.append(self._render_body(notification))
+        if self._show_body_in_card:
+            body.append(self._render_body(notification))
+        if self._capability_notice is not None:
+            body.append(self._render_capability_notice(notification))
         if notification.facts:
             body.append(self._render_facts(notification))
 
@@ -98,16 +137,34 @@ class TeamsMessageRenderer:
         context = self._render_context(notification)
         if context is not None:
             body.append(context)
+        if (
+            notification.links
+            and self._action_presentation is TeamsActionPresentation.EDGE_TO_EDGE
+        ):
+            body.append(self._render_edge_to_edge_actions(notification))
+
+        fallback_text = _fallback_text(notification)
+        if self._capability_notice is not None:
+            fallback_text = (
+                f"{fallback_text} Teams Workflow capability: {self._capability_notice}"
+            )
+            if notification.thread_key is not None:
+                fallback_text = (
+                    f"{fallback_text} Requested thread key: {notification.thread_key}."
+                )
 
         card: JsonObject = {
             "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
             "type": "AdaptiveCard",
             "version": "1.4",
-            "fallbackText": _fallback_text(notification),
-            "speak": _fallback_text(notification),
+            "fallbackText": fallback_text,
+            "speak": fallback_text,
             "body": body,
         }
-        if notification.links:
+        if (
+            notification.links
+            and self._action_presentation is TeamsActionPresentation.STANDARD
+        ):
             card["actions"] = [
                 {
                     "type": "Action.OpenUrl",
@@ -135,8 +192,9 @@ class TeamsMessageRenderer:
     ) -> list[JsonValue]:
         label, color = _SEVERITY_PRESENTATION[notification.severity]
         title = notification.title or "Notification"
-        return [
-            {
+        header: list[JsonValue] = []
+        if self._hero_image_url is not None:
+            hero: JsonObject = {
                 "type": "Container",
                 "backgroundImage": {
                     "url": self._hero_image_url,
@@ -145,45 +203,132 @@ class TeamsMessageRenderer:
                     "verticalAlignment": "Center",
                 },
                 "bleed": True,
-                "minHeight": "180px",
-                "verticalContentAlignment": "Bottom",
-                "items": [
+                "minHeight": f"{self._hero_min_height}px",
+            }
+            if self._show_hero_label:
+                hero["verticalContentAlignment"] = "Bottom"
+                hero["items"] = [
                     {
-                        "type": "TextBlock",
-                        "text": "PYHOOKKIT NOTIFICATION",
-                        "wrap": True,
-                        "weight": "Bolder",
-                        "color": "Dark",
+                        "type": "Container",
+                        "style": "accent",
+                        "bleed": True,
+                        "spacing": "None",
+                        "items": [
+                            {
+                                "type": "TextBlock",
+                                "text": "PYHOOKKIT NOTIFICATION",
+                                "wrap": True,
+                                "weight": "Bolder",
+                                "horizontalAlignment": "Center",
+                                "spacing": "None",
+                            }
+                        ],
                     }
-                ],
-            },
+                ]
+            header.append(hero)
+        header.extend(
+            [
+                {
+                    "type": "TextBlock",
+                    "text": label,
+                    "weight": "Bolder",
+                    "size": "Small",
+                    "color": color,
+                    "horizontalAlignment": "Center",
+                    "spacing": "Medium",
+                },
+                {
+                    "type": "TextBlock",
+                    "text": title,
+                    "weight": "Bolder",
+                    "size": "ExtraLarge",
+                    "wrap": True,
+                    "horizontalAlignment": "Center",
+                    "spacing": "Small",
+                },
+                {
+                    "type": "TextBlock",
+                    "text": f"PyHookKit · {notification.route}",
+                    "isSubtle": True,
+                    "size": "Small",
+                    "horizontalAlignment": "Center",
+                    "spacing": "Small",
+                },
+            ]
+        )
+        return header
+
+    @staticmethod
+    def _render_edge_to_edge_actions(
+        notification: CanonicalNotification,
+    ) -> JsonObject:
+        return {
+            "type": "Container",
+            "style": "accent",
+            "bleed": True,
+            "spacing": "Medium",
+            "items": [
+                {
+                    "type": "TextBlock",
+                    "text": "Continue to the investigation details",
+                    "wrap": True,
+                    "weight": "Bolder",
+                    "horizontalAlignment": "Center",
+                    "spacing": "None",
+                },
+                {
+                    "type": "ActionSet",
+                    "horizontalAlignment": "Center",
+                    "spacing": "Small",
+                    "actions": [
+                        {
+                            "type": "Action.OpenUrl",
+                            "title": link.label,
+                            "url": link.url,
+                        }
+                        for link in notification.links
+                    ],
+                },
+            ],
+        }
+
+    def _render_capability_notice(
+        self,
+        notification: CanonicalNotification,
+    ) -> JsonObject:
+        items: list[JsonValue] = [
             {
                 "type": "TextBlock",
-                "text": label,
+                "text": "TEAMS WORKFLOW CAPABILITY",
                 "weight": "Bolder",
                 "size": "Small",
-                "color": color,
-                "horizontalAlignment": "Center",
-                "spacing": "Medium",
+                "color": "Warning",
+                "spacing": "None",
             },
             {
                 "type": "TextBlock",
-                "text": title,
-                "weight": "Bolder",
-                "size": "ExtraLarge",
+                "text": self._capability_notice,
                 "wrap": True,
-                "horizontalAlignment": "Center",
-                "spacing": "Small",
-            },
-            {
-                "type": "TextBlock",
-                "text": f"PyHookKit · {notification.route}",
-                "isSubtle": True,
-                "size": "Small",
-                "horizontalAlignment": "Center",
                 "spacing": "Small",
             },
         ]
+        if notification.thread_key is not None:
+            items.append(
+                {
+                    "type": "TextBlock",
+                    "text": f"Requested thread key · {notification.thread_key}",
+                    "wrap": True,
+                    "isSubtle": True,
+                    "size": "Small",
+                    "spacing": "Small",
+                }
+            )
+        return {
+            "type": "Container",
+            "style": "accent",
+            "spacing": "Medium",
+            "items": items,
+        }
 
     @staticmethod
     def _render_body(notification: CanonicalNotification) -> JsonObject:
@@ -256,9 +401,14 @@ class TeamsMessageRenderer:
         entities: list[JsonValue] = []
         for mention in notification.mentions:
             if mention.kind is MentionKind.GROUP:
-                rendered.append(
-                    f"{mention.alias} (Teams Workflow group notification unavailable)"
-                )
+                if (
+                    self._group_mention_policy
+                    is TeamsGroupMentionPolicy.CONFIGURATION_NOTICE
+                ):
+                    rendered.append(
+                        f"{mention.alias} (additional Graph member-expansion "
+                        "configuration required)"
+                    )
                 continue
             if self._identity_directory is None:
                 raise ValueError(

@@ -88,6 +88,6 @@ def test_card_entrypoint_routes_logic_app_delivery(
         environment=environment,
         event_id="gallery-example",
     )
-
+    assert captured["event_id"] == "gallery-example"
     assert captured["event_id"] == "gallery-example"
     assert captured["environment"] is environment

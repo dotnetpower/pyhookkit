@@ -1,0 +1,80 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Status corrected: The synthetic status has been corrected. Teams Workflow capability: Teams Workflow webhooks cannot update or delete an existing channel message. Sending this example creates a new limitation notice; use a bot or Microsoft Graph adapter for message mutation.",
+        "speak": "Status corrected: The synthetic status has been corrected. Teams Workflow capability: Teams Workflow webhooks cannot update or delete an existing channel message. Sending this example creates a new limitation notice; use a bot or Microsoft Graph adapter for message mutation.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "SUCCESS",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Good",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Status corrected",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 platform-alerts",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "The synthetic status has been corrected.",
+                "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "accent",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "TEAMS WORKFLOW CAPABILITY",
+                "weight": "Bolder",
+                "size": "Small",
+                "color": "Warning",
+                "spacing": "None"
+              },
+              {
+                "type": "TextBlock",
+                "text": "Teams Workflow webhooks cannot update or delete an existing channel message. Sending this example creates a new limitation notice; use a bot or Microsoft Graph adapter for message mutation.",
+                "wrap": true,
+                "spacing": "Small"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

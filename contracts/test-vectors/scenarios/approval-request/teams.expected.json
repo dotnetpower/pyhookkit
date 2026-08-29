@@ -14,23 +14,13 @@
           {
             "type": "Container",
             "backgroundImage": {
-              "url": "https://assets.pyhookkit.example/samples/simple-time-off-request/assets/hero.png",
+              "url": "https://assets.pyhookkit.example/samples/scenarios/assets/approval.png",
               "fillMode": "Cover",
               "horizontalAlignment": "Center",
               "verticalAlignment": "Center"
             },
             "bleed": true,
-            "minHeight": "180px",
-            "verticalContentAlignment": "Bottom",
-            "items": [
-              {
-                "type": "TextBlock",
-                "text": "PYHOOKKIT NOTIFICATION",
-                "wrap": true,
-                "weight": "Bolder",
-                "color": "Dark"
-              }
-            ]
+            "minHeight": "136px"
           },
           {
             "type": "TextBlock",
@@ -57,21 +47,6 @@
             "size": "Small",
             "horizontalAlignment": "Center",
             "spacing": "Small"
-          },
-          {
-            "type": "Container",
-            "spacing": "Medium",
-            "items": [
-              {
-                "type": "TextBlock",
-                "text": "WARNING: Approval requested. Request APR-307 from example-requester is for release example-api 2026.08.28 before 2026-08-28T07:00:00Z. Approver: example-approver. Review request: https://approvals.example.com/requests/apr-307",
-                "wrap": true,
-                "horizontalAlignment": "Center",
-                "isSubtle": true,
-                "size": "Medium",
-                "spacing": "None"
-              }
-            ]
           },
           {
             "type": "Container",

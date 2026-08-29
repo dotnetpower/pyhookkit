@@ -11,6 +11,7 @@ import pytest
 import pyhookkit.entrypoints.teams_card_example as card_entrypoint
 import pyhookkit.entrypoints.teams_logic_app_example as logic_app_entrypoint
 import pyhookkit.entrypoints.teams_workflow_example as workflow_entrypoint
+from pyhookkit.adapters.outbound.teams.identity import TeamsIdentityNotFoundError
 from pyhookkit.adapters.outbound.teams.logic_app_url import TeamsLogicAppUrl
 from pyhookkit.adapters.outbound.teams.workflow_url import TeamsWorkflowUrl
 from pyhookkit.domain.delivery import DeliveryResult, DeliveryState
@@ -20,8 +21,15 @@ _REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 _PYTHON_ROOT = _REPOSITORY_ROOT / "examples" / "python"
 _EXAMPLES = (
     "fundamentals/01_hello_world/teams.py",
+    "fundamentals/02_basic_notification/teams.py",
     "fundamentals/03_rich_card/teams.py",
+    "fundamentals/04_mention/teams.py",
+    "fundamentals/05_link_and_action/teams.py",
     "fundamentals/06_image/teams.py",
+    "fundamentals/07_routing/teams.py",
+    "fundamentals/08_thread_or_reply/teams.py",
+    "fundamentals/09_update_and_delete/teams.py",
+    "fundamentals/10_error_and_retry/teams.py",
     "scenarios/deployment_result/teams.py",
     "scenarios/incident_alert_acknowledgment/teams.py",
     "scenarios/approval_request/teams.py",
@@ -151,3 +159,17 @@ def test_example_preserves_card_between_delivery_adapters(
     serialized_request = json.dumps(logic_app_request)
     assert "assets.pyhookkit.example" not in serialized_request
     assert "legacy.pyhookkit.example" not in serialized_request
+
+
+def test_mention_example_requires_runtime_identity_when_sending(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    path = _PYTHON_ROOT / "fundamentals" / "04_mention" / "teams.py"
+    monkeypatch.setattr(sys, "path", [str(path.parent), *sys.path])
+    monkeypatch.setattr(sys, "argv", [str(path), "--send"])
+    monkeypatch.delitem(sys.modules, "example_notification", raising=False)
+    monkeypatch.delenv("TEAMS_TEST_USER_ID", raising=False)
+    monkeypatch.delenv("TEAMS_TEST_USER_NAME", raising=False)
+
+    with pytest.raises(TeamsIdentityNotFoundError, match="TEAMS_TEST_USER_NAME"):
+        runpy.run_path(str(path), run_name="__main__")

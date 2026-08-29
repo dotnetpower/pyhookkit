@@ -224,8 +224,7 @@ def test_scenario_renderers_preserve_required_semantics(
 
 def test_paired_teams_examples_use_distinct_hero_images() -> None:
     payloads = [
-        _load_json(_FUNDAMENTAL_VECTOR_ROOT / capability / "teams.expected.json")
-        for capability in ("rich-card", "image")
+        _load_json(_FUNDAMENTAL_VECTOR_ROOT / "rich-card" / "teams.expected.json")
     ]
     payloads.extend(
         _load_json(_VECTOR_ROOT / vector_name / "teams.expected.json")
@@ -236,3 +235,23 @@ def test_paired_teams_examples_use_distinct_hero_images() -> None:
 
     assert len(hero_urls) == len(payloads)
     assert len(set(hero_urls)) == len(payloads)
+
+
+def test_scenario_heroes_are_static_project_artwork() -> None:
+    payloads = [
+        _load_json(_VECTOR_ROOT / vector_name / "teams.expected.json")
+        for vector_name, _ in _SCENARIOS
+    ]
+
+    hero_urls = [url for payload in payloads for url in _background_image_urls(payload)]
+
+    assert len(hero_urls) == len(payloads)
+    assert all("/samples/scenarios/assets/" in url for url in hero_urls)
+    assert all("video" not in url.lower() for url in hero_urls)
+
+
+def test_image_fundamental_uses_only_the_canonical_image() -> None:
+    payload = _load_json(_FUNDAMENTAL_VECTOR_ROOT / "image" / "teams.expected.json")
+
+    assert _background_image_urls(payload) == ()
+    assert json.dumps(payload).count('"type": "Image"') == 1

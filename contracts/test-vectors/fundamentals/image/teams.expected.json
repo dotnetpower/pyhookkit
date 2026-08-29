@@ -12,27 +12,6 @@
         "speak": "Sample image: A publicly hosted sample image is attached.",
         "body": [
           {
-            "type": "Container",
-            "backgroundImage": {
-              "url": "https://assets.pyhookkit.example/samples/standard-video/assets/video_image.png",
-              "fillMode": "Cover",
-              "horizontalAlignment": "Center",
-              "verticalAlignment": "Center"
-            },
-            "bleed": true,
-            "minHeight": "180px",
-            "verticalContentAlignment": "Bottom",
-            "items": [
-              {
-                "type": "TextBlock",
-                "text": "PYHOOKKIT NOTIFICATION",
-                "wrap": true,
-                "weight": "Bolder",
-                "color": "Dark"
-              }
-            ]
-          },
-          {
             "type": "TextBlock",
             "text": "INFORMATION",
             "weight": "Bolder",

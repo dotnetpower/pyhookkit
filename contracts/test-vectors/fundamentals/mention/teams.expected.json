@@ -1,0 +1,87 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Action required: Review the synthetic alert.",
+        "speak": "Action required: Review the synthetic alert.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "ATTENTION",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Warning",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Action required",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 platform-alerts",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "Review the synthetic alert.",
+                "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "accent",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "<at>Example Owner</at>",
+                "wrap": true,
+                "weight": "Bolder",
+                "color": "Accent",
+                "horizontalAlignment": "Center",
+                "spacing": "None"
+              }
+            ]
+          }
+        ],
+        "msteams": {
+          "entities": [
+            {
+              "type": "mention",
+              "text": "<at>Example Owner</at>",
+              "mentioned": {
+                "id": "example-owner@pyhookkit.example",
+                "name": "Example Owner"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

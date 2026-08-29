@@ -16,6 +16,7 @@ from pyhookkit.adapters.outbound.slack.message_reference import (
     SlackMessageReference,
 )
 from pyhookkit.adapters.outbound.slack.message_renderer import (
+    SlackHeroImageUrlError,
     SlackMessageRenderer,
     SlackPayloadLimitError,
 )
@@ -35,6 +36,7 @@ from pyhookkit.domain.notification import (
     MetadataValue,
     Severity,
 )
+from pyhookkit.entrypoints.example_asset import example_asset_marker
 from pyhookkit.json_types import JsonObject, JsonValue
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
@@ -175,9 +177,21 @@ def test_slack_capability_matches_snapshot(
     capability: str,
     notification_factory: Callable[[], CanonicalNotification],
 ) -> None:
-    payload = SlackMessageRenderer().render(notification_factory())
+    hero_image_url = (
+        example_asset_marker("samples/cafe-menu/assets/hero.png")
+        if capability == "rich-card"
+        else None
+    )
+    payload = SlackMessageRenderer(hero_image_url=hero_image_url).render(
+        notification_factory()
+    )
 
     assert payload == _load_expected(capability)
+
+
+def test_renderer_rejects_insecure_hero_image() -> None:
+    with pytest.raises(SlackHeroImageUrlError, match="absolute HTTPS"):
+        SlackMessageRenderer(hero_image_url="http://assets.example.com/hero.png")
 
 
 def test_slack_mentions_match_snapshot() -> None:

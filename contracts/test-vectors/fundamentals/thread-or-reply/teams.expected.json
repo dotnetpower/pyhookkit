@@ -1,0 +1,88 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Synthetic follow-up completed. Teams Workflow capability: Teams Workflow webhooks cannot target a parent message. This fallback is delivered as a new channel message; use a bot or Microsoft Graph adapter when a true channel reply is required. Requested thread key: example-deployment-001.",
+        "speak": "Synthetic follow-up completed. Teams Workflow capability: Teams Workflow webhooks cannot target a parent message. This fallback is delivered as a new channel message; use a bot or Microsoft Graph adapter when a true channel reply is required. Requested thread key: example-deployment-001.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "SUCCESS",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Good",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Notification",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 platform-alerts",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "Synthetic follow-up completed.",
+                "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "accent",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "TEAMS WORKFLOW CAPABILITY",
+                "weight": "Bolder",
+                "size": "Small",
+                "color": "Warning",
+                "spacing": "None"
+              },
+              {
+                "type": "TextBlock",
+                "text": "Teams Workflow webhooks cannot target a parent message. This fallback is delivered as a new channel message; use a bot or Microsoft Graph adapter when a true channel reply is required.",
+                "wrap": true,
+                "spacing": "Small"
+              },
+              {
+                "type": "TextBlock",
+                "text": "Requested thread key \u00b7 example-deployment-001",
+                "wrap": true,
+                "isSubtle": true,
+                "size": "Small",
+                "spacing": "Small"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "type": "message",
+  "attachments": [
+    {
+      "contentType": "application/vnd.microsoft.card.adaptive",
+      "contentUrl": null,
+      "content": {
+        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+        "type": "AdaptiveCard",
+        "version": "1.4",
+        "fallbackText": "Investigation available: Open the synthetic investigation details.",
+        "speak": "Investigation available: Open the synthetic investigation details.",
+        "body": [
+          {
+            "type": "TextBlock",
+            "text": "INFORMATION",
+            "weight": "Bolder",
+            "size": "Small",
+            "color": "Accent",
+            "horizontalAlignment": "Center",
+            "spacing": "Medium"
+          },
+          {
+            "type": "TextBlock",
+            "text": "Investigation available",
+            "weight": "Bolder",
+            "size": "ExtraLarge",
+            "wrap": true,
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "TextBlock",
+            "text": "PyHookKit \u00b7 platform-alerts",
+            "isSubtle": true,
+            "size": "Small",
+            "horizontalAlignment": "Center",
+            "spacing": "Small"
+          },
+          {
+            "type": "Container",
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "Open the synthetic investigation details.",
+                "wrap": true,
+                "horizontalAlignment": "Center",
+                "isSubtle": true,
+                "size": "Medium",
+                "spacing": "None"
+              }
+            ]
+          },
+          {
+            "type": "Container",
+            "style": "accent",
+            "bleed": true,
+            "spacing": "Medium",
+            "items": [
+              {
+                "type": "TextBlock",
+                "text": "Continue to the investigation details",
+                "wrap": true,
+                "weight": "Bolder",
+                "horizontalAlignment": "Center",
+                "spacing": "None"
+              },
+              {
+                "type": "ActionSet",
+                "horizontalAlignment": "Center",
+                "spacing": "Small",
+                "actions": [
+                  {
+                    "type": "Action.OpenUrl",
+                    "title": "View details",
+                    "url": "https://example.com/notifications/example-001"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -14,23 +14,13 @@
           {
             "type": "Container",
             "backgroundImage": {
-              "url": "https://assets.pyhookkit.example/samples/author-highlight-video/assets/video_image.png",
+              "url": "https://assets.pyhookkit.example/samples/scenarios/assets/incident.png",
               "fillMode": "Cover",
               "horizontalAlignment": "Center",
               "verticalAlignment": "Center"
             },
             "bleed": true,
-            "minHeight": "180px",
-            "verticalContentAlignment": "Bottom",
-            "items": [
-              {
-                "type": "TextBlock",
-                "text": "PYHOOKKIT NOTIFICATION",
-                "wrap": true,
-                "weight": "Bolder",
-                "color": "Dark"
-              }
-            ]
+            "minHeight": "136px"
           },
           {
             "type": "TextBlock",
@@ -57,21 +47,6 @@
             "size": "Small",
             "horizontalAlignment": "Center",
             "spacing": "Small"
-          },
-          {
-            "type": "Container",
-            "spacing": "Medium",
-            "items": [
-              {
-                "type": "TextBlock",
-                "text": "ERROR: Incident alert: elevated latency. Incident INC-204 affects example-checkout since 2026-08-28T04:20:00Z. Status: unacknowledged. Responder: example-responders. Acknowledge incident: https://incidents.example.com/incidents/inc-204/acknowledge Open runbook: https://runbooks.example.com/services/example-checkout/latency",
-                "wrap": true,
-                "horizontalAlignment": "Center",
-                "isSubtle": true,
-                "size": "Medium",
-                "spacing": "None"
-              }
-            ]
           },
           {
             "type": "Container",
@@ -183,7 +158,7 @@
             "items": [
               {
                 "type": "TextBlock",
-                "text": "example-responders (Teams Workflow group notification unavailable)",
+                "text": "example-responders (additional Graph member-expansion configuration required)",
                 "wrap": true,
                 "weight": "Bolder",
                 "color": "Accent",

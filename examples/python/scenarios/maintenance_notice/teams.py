@@ -9,7 +9,10 @@ from pyhookkit.entrypoints.teams_workflow_example import run_teams_workflow_exam
 
 def main() -> None:
     renderer = TeamsMessageRenderer(
-        hero_image_url=example_asset_marker("samples/book-a-room/assets/room_hero.png")
+        hero_image_url=example_asset_marker("samples/scenarios/assets/maintenance.png"),
+        show_body_in_card=False,
+        show_hero_label=False,
+        hero_min_height=136,
     )
     run_teams_workflow_example(build_notification(), renderer)
 

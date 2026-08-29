@@ -45,7 +45,10 @@ def build_payload() -> dict[str, object]:
     }
 
 
-def build_logic_app_payload(team_id: str, channel_id: str) -> dict[str, object]:
+def build_logic_app_payload(
+    team_id: str,
+    channel_id: str,
+) -> dict[str, object]:
     return {
         "teamId": team_id,
         "channelId": channel_id,

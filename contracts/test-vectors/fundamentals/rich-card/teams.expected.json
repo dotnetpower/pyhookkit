@@ -24,11 +24,20 @@
             "verticalContentAlignment": "Bottom",
             "items": [
               {
-                "type": "TextBlock",
-                "text": "PYHOOKKIT NOTIFICATION",
-                "wrap": true,
-                "weight": "Bolder",
-                "color": "Dark"
+                "type": "Container",
+                "style": "accent",
+                "bleed": true,
+                "spacing": "None",
+                "items": [
+                  {
+                    "type": "TextBlock",
+                    "text": "PYHOOKKIT NOTIFICATION",
+                    "wrap": true,
+                    "weight": "Bolder",
+                    "horizontalAlignment": "Center",
+                    "spacing": "None"
+                  }
+                ]
               }
             ]
           },

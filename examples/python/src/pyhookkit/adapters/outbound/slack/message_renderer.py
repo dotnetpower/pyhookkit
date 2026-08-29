@@ -1,6 +1,7 @@
 """Canonical notification to Slack message rendering."""
 
 from html import escape
+from urllib.parse import urlsplit
 
 from pyhookkit.adapters.outbound.slack.identity import (
     SlackIdentityDirectory,
@@ -20,17 +21,38 @@ class SlackPayloadLimitError(ValueError):
     """Canonical content exceeds a Slack-specific rendered limit."""
 
 
+class SlackHeroImageUrlError(ValueError):
+    """The Slack presentation hero URL is invalid."""
+
+
 class SlackMessageRenderer:
     """Render rich canonical notifications for Slack."""
 
     def __init__(
         self,
         identity_directory: SlackIdentityDirectory | None = None,
+        *,
+        hero_image_url: str | None = None,
     ) -> None:
+        if hero_image_url is not None:
+            parsed_url = urlsplit(hero_image_url)
+            if parsed_url.scheme != "https" or not parsed_url.netloc:
+                raise SlackHeroImageUrlError(
+                    "Slack hero image URL must be an absolute HTTPS URL"
+                )
         self._identity_directory = identity_directory
+        self._hero_image_url = hero_image_url
 
     def render(self, notification: CanonicalNotification) -> JsonObject:
         blocks: list[JsonValue] = []
+        if self._hero_image_url is not None:
+            blocks.append(
+                {
+                    "type": "image",
+                    "image_url": self._hero_image_url,
+                    "alt_text": "PyHookKit notification presentation",
+                }
+            )
         if notification.title is not None:
             blocks.append(
                 {

@@ -15,9 +15,9 @@ different payload shapes; visual identity is not treated as parity.
 | Severity | Colored attachment rail | Centered semantic label and color |
 | Facts | Two-column `mrkdwn` fields | Styled `ColumnSet` fact panel |
 | User mention | Adapter-resolved `<@USER_ID>` | Adapter-resolved `<at>` text plus mention entity |
-| Group mention | Native `<!subteam^GROUP_ID>` | Visible group fallback with an explicit Workflow capability warning |
+| Group mention | Native `<!subteam^GROUP_ID>` | Additional Graph member-expansion configuration required |
 | Link action | Block Kit URL button | `Action.OpenUrl` |
-| Reply and lifecycle | `thread_ts`, `chat.update`, and `chat.delete` where supported | No one-to-one Teams Workflow equivalent in the paired examples |
+| Reply and lifecycle | `thread_ts`, `chat.update`, and `chat.delete` where supported | Explicit Workflow fallback/unsupported cards; bot or Graph required for mutation |
 | Delivery | Incoming Webhook or Slack Web API | Teams Workflow callback URL or routed Azure Logic App |
 
 ### Example coverage
@@ -26,30 +26,36 @@ different payload shapes; visual identity is not treated as parity.
 |---|---|---|
 | [F00 Raw HTTP request](examples/python/fundamentals/00_http_request) | Standard-library webhook POST | Standard-library Workflow POST |
 | [F01 Hello World](examples/python/fundamentals/01_hello_world) | Minimal text payload | Minimal Adaptive Card |
-| [F02 Basic notification](examples/python/fundamentals/02_basic_notification) | Title, body, severity, and timestamp | Not yet added |
+| [F02 Basic notification](examples/python/fundamentals/02_basic_notification) | Title, body, severity, and timestamp | Adaptive Card title, body, severity, and timestamp |
 | [F03 Rich card](examples/python/fundamentals/03_rich_card) | Block Kit facts and context | Adaptive Card fact panel and context |
-| [F04 Mention](examples/python/fundamentals/04_mention) | User and user-group aliases | Not yet added |
-| [F05 Link and action](examples/python/fundamentals/05_link_and_action) | Block Kit URL button | Not yet added |
+| [F04 Mention](examples/python/fundamentals/04_mention) | Native user and user-group mentions | Native user mention; group expansion requires Graph configuration |
+| [F05 Link and action](examples/python/fundamentals/05_link_and_action) | Block Kit URL button | `Action.OpenUrl` |
 | [F06 Image](examples/python/fundamentals/06_image) | External image block with alt text | Adaptive Card image with alt text |
-| [F07 Routing](examples/python/fundamentals/07_routing) | Logical route resolved to a webhook | Not yet added |
-| [F08 Thread or reply](examples/python/fundamentals/08_thread_or_reply) | Known parent `thread_ts` | Not yet added |
-| [F09 Update and delete](examples/python/fundamentals/09_update_and_delete) | Web API mutation payloads | Not yet added |
-| [F10 Error and retry](examples/python/fundamentals/10_error_and_retry) | Redacted result and bounded retry | Not yet added |
+| [F07 Routing](examples/python/fundamentals/07_routing) | Logical route resolved to a webhook | Logical route resolved to a Workflow |
+| [F08 Thread or reply](examples/python/fundamentals/08_thread_or_reply) | Known parent `thread_ts` | Explicit new-message fallback; bot or Graph required for replies |
+| [F09 Update and delete](examples/python/fundamentals/09_update_and_delete) | Web API mutation payloads | Explicit unsupported notice; bot or Graph required |
+| [F10 Error and retry](examples/python/fundamentals/10_error_and_retry) | Redacted result and bounded retry | Redacted result and bounded retry |
 | [Deployment result](examples/python/scenarios/deployment_result) | Paired Block Kit scenario | Paired Adaptive Card scenario |
-| [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | Native user-group mention and two links | Explicit group fallback and two `Action.OpenUrl` actions |
+| [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | Native user-group mention and two links | Group configuration notice and two `Action.OpenUrl` actions |
 | [Approval request](examples/python/scenarios/approval_request) | Native user mention and review link | Native user mention entity and review action |
-| [Maintenance notice](examples/python/scenarios/maintenance_notice) | Native user-group mention and status link | Explicit group fallback and status action |
+| [Maintenance notice](examples/python/scenarios/maintenance_notice) | Native user-group mention and status link | Group configuration notice and status action |
 
-## Scenario screenshots
+## Client screenshots
 
-No client screenshots are currently committed. The PNG files under
-`examples/python/teams_adaptive_cards/assets/` are card content, not client
-captures. Add only actual Slack or Teams client captures under
-[`docs/assets/card-previews/`](docs/assets/card-previews/README.md); do not use
-synthetic HTML or renderer previews to fill this gallery.
+The PNG files under `examples/python/teams_adaptive_cards/assets/` are card
+content, not client captures. Add only actual Slack or Teams client captures
+under [`docs/assets/card-previews/`](docs/assets/card-previews/README.md); do not
+use synthetic HTML or renderer previews to fill this gallery.
 
-| Scenario | Slack | Microsoft Teams |
+| Example | Slack | Microsoft Teams |
 |---|---|---|
+| [F01 Hello World](examples/python/fundamentals/01_hello_world) | <img src="./docs/assets/card-previews/hello-world-slack.png" alt="Hello World notification in Slack"> | <img src="./docs/assets/card-previews/hello-world-teams.png" alt="Hello World notification in Microsoft Teams"> |
+| [F02 Basic notification](examples/python/fundamentals/02_basic_notification) | <img src="./docs/assets/card-previews/basic-notification-slack.png" alt="Basic notification in Slack"> | <img src="./docs/assets/card-previews/basic-notification-teams.png" alt="Basic notification in Microsoft Teams"> |
+| [F03 Rich card](examples/python/fundamentals/03_rich_card) | <img src="./docs/assets/card-previews/rich-card-slack.png" alt="Rich card notification in Slack"> | <img src="./docs/assets/card-previews/rich-card-teams.png" alt="Rich card notification in Microsoft Teams"> |
+| [F04 Mention](examples/python/fundamentals/04_mention) | <img src="./docs/assets/card-previews/mention-slack.png" alt="Mention notification in Slack"> | <img src="./docs/assets/card-previews/mention-teams.png" alt="Mention notification in Microsoft Teams"><ul><li><sub>Group notification requires additional Microsoft Graph member-expansion configuration.</sub></li><li><sub>Teams displays the configured user name because substituting a logical alias can misidentify the mentioned person.</sub></li></ul> |
+| [F05 Link and action](examples/python/fundamentals/05_link_and_action) | <img src="./docs/assets/card-previews/link-and-action-slack.png" alt="Link and action notification in Slack"> | <img src="./docs/assets/card-previews/link-and-action-teams.png" alt="Link and action notification in Microsoft Teams"> |
+| [F06 Image](examples/python/fundamentals/06_image) | <img src="./docs/assets/card-previews/image-slack.png" alt="Image notification in Slack"> | <img src="./docs/assets/card-previews/image-teams.png" alt="Image notification in Microsoft Teams"> |
+| [F07 Routing](examples/python/fundamentals/07_routing) | <img src="./docs/assets/card-previews/route-slack.png" alt="Routed notification in Slack"> | <img src="./docs/assets/card-previews/route-teams.png" alt="Routed notification in Microsoft Teams"> |
 | [Deployment result](examples/python/scenarios/deployment_result) | _Screenshot pending: `deployment-result-slack.png`_ | _Screenshot pending: `deployment-result-teams.png`_ |
 | [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | _Screenshot pending: `incident-alert-acknowledgment-slack.png`_ | _Screenshot pending: `incident-alert-acknowledgment-teams.png`_ |
 | [Approval request](examples/python/scenarios/approval_request) | _Screenshot pending: `approval-request-slack.png`_ | _Screenshot pending: `approval-request-teams.png`_ |
@@ -79,10 +85,10 @@ steps and [Slack examples](docs/slack-examples.md) for the F01-F10 catalog.
 The Python distribution and import namespace are both `pyhookkit`. The project
 has not been published to PyPI yet.
 
-Paired scenario renderers are complete for Slack and Teams. Fundamental-level
-Teams parity is still being added incrementally, as shown in the coverage table.
-All committed values are synthetic; runtime credentials and real destination
-configuration belong outside this repository.
+Paired fundamental and scenario examples are complete for Slack and Teams.
+Provider differences are explicit when Teams Workflow lacks an equivalent
+operation. All committed values are synthetic; runtime credentials and real
+destination configuration belong outside this repository.
 
 Third-party example assets and their licenses are listed in
 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

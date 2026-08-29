@@ -16,6 +16,7 @@ from pyhookkit.adapters.outbound.teams.logic_app_request import (
     build_teams_logic_app_request,
 )
 from pyhookkit.adapters.outbound.teams.logic_app_url import TeamsLogicAppUrl
+from pyhookkit.adapters.outbound.teams.retry_policy import TeamsRetryPolicy
 from pyhookkit.domain.delivery import DeliveryErrorKind, DeliveryResult, DeliveryState
 from pyhookkit.json_types import JsonObject
 
@@ -115,6 +116,7 @@ def test_logic_app_destination_classifies_response(
     result = TeamsLogicAppDestination(
         TeamsLogicAppUrl(_URL),
         post=lambda *_args, **_kwargs: httpx.Response(status),
+        retry_policy=TeamsRetryPolicy(max_attempts=1),
     ).send({"teamId": "team-example"})
 
     assert result.state is state
@@ -129,7 +131,11 @@ def test_logic_app_destination_redacts_transport_failure() -> None:
     def fail(*_args: object, **_kwargs: object) -> httpx.Response:
         raise httpx.ConnectError("synthetic transport failure")
 
-    result = TeamsLogicAppDestination(TeamsLogicAppUrl(_URL), post=fail).send({})
+    result = TeamsLogicAppDestination(
+        TeamsLogicAppUrl(_URL),
+        post=fail,
+        retry_policy=TeamsRetryPolicy(max_attempts=1),
+    ).send({})
 
     assert result.error is not None
     assert result.error.kind is DeliveryErrorKind.TRANSPORT

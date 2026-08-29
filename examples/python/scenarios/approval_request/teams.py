@@ -25,8 +25,11 @@ def main() -> None:
         TeamsMessageRenderer(
             identities,
             hero_image_url=example_asset_marker(
-                "samples/simple-time-off-request/assets/hero.png"
+                "samples/scenarios/assets/approval.png"
             ),
+            show_body_in_card=False,
+            show_hero_label=False,
+            hero_min_height=136,
         ),
     )
 

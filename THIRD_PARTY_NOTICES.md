@@ -20,8 +20,8 @@ upstream paths.
 
 ## Microsoft Teams Adaptive Card sample images
 
-The files under
-`examples/python/teams_adaptive_cards/assets/samples/` are redistributed
+The Microsoft files listed in
+`examples/python/teams_adaptive_cards/assets/ATTRIBUTION.md` are redistributed
 unchanged with their upstream paths preserved from the
 [OfficeDev/Microsoft-Teams-Adaptive-Card-Samples](https://github.com/OfficeDev/Microsoft-Teams-Adaptive-Card-Samples)
 repository under the MIT License:

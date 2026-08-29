@@ -5,6 +5,11 @@
       "color": "#2EB67D",
       "blocks": [
         {
+          "type": "image",
+          "image_url": "https://assets.pyhookkit.example/samples/cafe-menu/assets/hero.png",
+          "alt_text": "PyHookKit notification presentation"
+        },
+        {
           "type": "header",
           "text": {
             "type": "plain_text",

@@ -17,6 +17,7 @@ from pyhookkit.adapters.outbound.slack.webhook_destination import (
 from pyhookkit.adapters.outbound.slack.webhook_url import SlackWebhookUrl
 from pyhookkit.domain.delivery import DeliveryState
 from pyhookkit.domain.notification import CanonicalNotification
+from pyhookkit.entrypoints.example_asset import resolve_example_asset_urls
 from pyhookkit.ports.message_renderer import MessageRenderer
 
 
@@ -49,6 +50,7 @@ def run_slack_webhook_example(
     webhook_url = SlackWebhookUrl(
         resolver.resolve(notification.route, active_environment)
     )
+    payload = resolve_example_asset_urls(payload, environment=active_environment)
     result = SlackWebhookDestination(webhook_url).send(payload)
     print(json.dumps(delivery_result_to_json(result), indent=2))
     if result.state is DeliveryState.FAILED:

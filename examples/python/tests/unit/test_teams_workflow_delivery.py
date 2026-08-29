@@ -7,6 +7,7 @@ import httpx
 import pytest
 
 import pyhookkit.entrypoints.teams_workflow_example as entrypoint
+from pyhookkit.adapters.outbound.teams.retry_policy import TeamsRetryPolicy
 from pyhookkit.adapters.outbound.teams.text_renderer import TeamsTextRenderer
 from pyhookkit.adapters.outbound.teams.workflow_destination import (
     TeamsWorkflowDestination,
@@ -53,6 +54,7 @@ def test_destination_classifies_response(
     result = TeamsWorkflowDestination(
         TeamsWorkflowUrl(_URL),
         post=lambda *_args, **_kwargs: httpx.Response(status),
+        retry_policy=TeamsRetryPolicy(max_attempts=1),
     ).send({"type": "message"})
 
     assert result.state is state
@@ -94,6 +96,19 @@ def test_entrypoint_renders_and_sends(
     assert json.loads(capsys.readouterr().out)["state"] == "succeeded"
 
 
+def test_entrypoint_checks_route_without_rendering(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    entrypoint.run_teams_workflow_example(
+        _notification(),
+        TeamsTextRenderer(),
+        arguments=["--check-route"],
+        environment={"TEAMS_WORKFLOW_URL": _URL},
+    )
+
+    assert capsys.readouterr().out == "Teams route configured\n"
+
+
 def test_entrypoint_routes_logic_app_delivery(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -118,6 +133,6 @@ def test_entrypoint_routes_logic_app_delivery(
         arguments=["--send-logic-app"],
         environment=environment,
     )
-
+    assert captured["event_id"] == "example-teams-entrypoint-001"
     assert captured["event_id"] == "example-teams-entrypoint-001"
     assert captured["environment"] is environment

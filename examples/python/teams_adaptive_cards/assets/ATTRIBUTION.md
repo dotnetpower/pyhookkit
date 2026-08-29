@@ -8,6 +8,16 @@ SPDX license identifier: `CC-BY-4.0` (CC BY 4.0).
 
 Copyright Microsoft Corporation.
 
+## PyHookKit original scenario artwork
+
+The following synthetic banners were created for PyHookKit and contain no
+third-party imagery:
+
+- `samples/scenarios/assets/deployment.png`
+- `samples/scenarios/assets/incident.png`
+- `samples/scenarios/assets/approval.png`
+- `samples/scenarios/assets/maintenance.png`
+
 | Local file | Upstream source | Changes |
 |---|---|---|
 | `adaptive-card-cat-hero.png` | `AdaptiveCards/content/cats/Cat_Sat_1_400x406.png` | File renamed; image content unchanged |

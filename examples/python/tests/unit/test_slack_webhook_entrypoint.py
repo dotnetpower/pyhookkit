@@ -30,12 +30,13 @@ class StubDestination:
         DeliveryState.SUCCEEDED,
         attempts=1,
     )
+    expected_payload: ClassVar[JsonObject] = {"text": "Synthetic example"}
 
     def __init__(self, webhook_url: SlackWebhookUrl) -> None:
         assert webhook_url.value == _WEBHOOK_URL
 
     def send(self, payload: JsonObject) -> DeliveryResult:
-        assert payload == {"text": "Synthetic example"}
+        assert payload == self.expected_payload
         return self.result
 
 
@@ -93,6 +94,7 @@ def test_entrypoint_sends_and_serializes_result(
         DeliveryState.SUCCEEDED,
         attempts=1,
     )
+    StubDestination.expected_payload = {"text": "Synthetic example"}
     monkeypatch.setattr(entrypoint, "SlackWebhookDestination", StubDestination)
 
     entrypoint.run_slack_webhook_example(
@@ -108,6 +110,36 @@ def test_entrypoint_sends_and_serializes_result(
     }
 
 
+def test_entrypoint_resolves_public_asset_before_sending(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class AssetRenderer:
+        def render(self, notification: CanonicalNotification) -> JsonObject:
+            assert notification.body == "Synthetic example"
+            return {
+                "image_url": "https://assets.pyhookkit.example/sample.png",
+            }
+
+    StubDestination.result = DeliveryResult(
+        DeliveryState.SUCCEEDED,
+        attempts=1,
+    )
+    StubDestination.expected_payload = {
+        "image_url": "https://cdn.example.com/assets/sample.png",
+    }
+    monkeypatch.setattr(entrypoint, "SlackWebhookDestination", StubDestination)
+
+    entrypoint.run_slack_webhook_example(
+        _notification(),
+        AssetRenderer(),
+        arguments=["--send"],
+        environment={
+            "SLACK_WEBHOOK_URL": _WEBHOOK_URL,
+            "EXAMPLE_ASSET_BASE_URL": "https://cdn.example.com/assets",
+        },
+    )
+
+
 def test_entrypoint_exits_nonzero_on_delivery_failure(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
@@ -121,6 +153,7 @@ def test_entrypoint_exits_nonzero_on_delivery_failure(
             status_code=503,
         ),
     )
+    StubDestination.expected_payload = {"text": "Synthetic example"}
     monkeypatch.setattr(entrypoint, "SlackWebhookDestination", StubDestination)
 
     with pytest.raises(SystemExit):

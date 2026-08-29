@@ -8,6 +8,9 @@ from collections.abc import Mapping, Sequence
 from pyhookkit.adapters.outbound.delivery_result_json import (
     delivery_result_to_json,
 )
+from pyhookkit.adapters.outbound.teams.route_resolver import (
+    TeamsEnvironmentRouteResolver,
+)
 from pyhookkit.adapters.outbound.teams.workflow_destination import (
     TeamsWorkflowDestination,
 )
@@ -31,15 +34,22 @@ def run_teams_workflow_example(
     """Render or deliberately send one Teams Workflow example."""
     parser = argparse.ArgumentParser()
     action = parser.add_mutually_exclusive_group()
+    action.add_argument("--check-route", action="store_true")
     action.add_argument("--send", action="store_true")
     action.add_argument("--send-logic-app", action="store_true")
     parsed = parser.parse_args(arguments)
+    active_environment = os.environ if environment is None else environment
+    resolver = TeamsEnvironmentRouteResolver({notification.route: "TEAMS_WORKFLOW_URL"})
+    if parsed.check_route:
+        TeamsWorkflowUrl(resolver.resolve(notification.route, active_environment))
+        print("Teams route configured")
+        return
+
     payload = renderer.render(notification)
     if not parsed.send and not parsed.send_logic_app:
         print(json.dumps(payload, indent=2))
         return
 
-    active_environment = os.environ if environment is None else environment
     if parsed.send_logic_app:
         send_teams_logic_app_example(
             payload,
@@ -48,9 +58,7 @@ def run_teams_workflow_example(
         )
         return
 
-    raw_url = active_environment.get("TEAMS_WORKFLOW_URL", "").strip()
-    if not raw_url:
-        raise ValueError("TEAMS_WORKFLOW_URL is required with --send")
+    raw_url = resolver.resolve(notification.route, active_environment)
     payload = resolve_example_asset_urls(payload, environment=active_environment)
     result = TeamsWorkflowDestination(TeamsWorkflowUrl(raw_url)).send(payload)
     print(json.dumps(delivery_result_to_json(result), indent=2))

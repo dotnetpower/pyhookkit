@@ -28,6 +28,11 @@ any 2xx response as success. They intentionally discard the provider response
 body and message identifiers rather than leaking provider payloads into the
 result contract.
 
+Both adapters retry rate limits, transient `5xx` responses, and transport
+failures up to three attempts. `Retry-After` takes precedence on `429`;
+otherwise bounded exponential backoff with jitter is used. Validation,
+authentication, permission, and other permanent failures are not retried.
+
 ```shell
 uv run python scenarios/deployment_result/teams.py --send-logic-app
 ```
@@ -73,8 +78,18 @@ current procedure and deferred automation checklist.
 
 `TeamsMessageRenderer` produces Adaptive Card 1.4 payloads with severity
 styling, headings, facts, images, source context, links, and user mention
-entities. Teams Workflow group mentions are explicitly degraded to visible
-group labels because the webhook flow cannot guarantee group notification.
+entities. Teams Workflow cannot mention a distribution list directly. Group
+notification is an advanced configuration: resolve members through Microsoft
+Graph, then render each member as an individual mention. This requires
+application credentials, administrator consent for `GroupMember.Read.All`, and
+explicit handling for membership and the 28 KB card-size limit. Until that
+adapter is configured, the group alias remains visible with a
+configuration-required notice.
+Thread targeting and message mutation are also unavailable through Workflow
+webhooks. F08 renders a visible new-message fallback with its requested thread
+key, while F09 renders an explicit unsupported notice. True replies, updates,
+and deletion require a bot or Microsoft Graph adapter with persisted Teams
+message identifiers and suitable permissions.
 
 The visual hierarchy uses:
 

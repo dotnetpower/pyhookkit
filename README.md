@@ -20,6 +20,28 @@ different payload shapes; visual identity is not treated as parity.
 | Reply and lifecycle | `thread_ts`, `chat.update`, and `chat.delete` where supported | Explicit Workflow fallback/unsupported cards; bot or Graph required for mutation |
 | Delivery | Incoming Webhook or Slack Web API | Teams Workflow callback URL or routed Azure Logic App |
 
+### Recommended Teams delivery
+
+The Teams examples are implemented against a Power Automate Workflow created
+from blank. The flow receives the Adaptive Card envelope through **When a Teams
+webhook request is received** and posts its card content to the configured
+channel with **Post card in a chat or channel**.
+
+This is the recommended default for channel notifications. Live testing
+confirmed rich cards and native user mentions without the owner attribution and
+**Get template** footer added by gallery-template Workflows. A gallery template
+remains useful for a quick proof of concept, while Azure Logic Apps are better
+suited to Azure-managed deployments or per-request Team and Channel routing.
+Features such as true replies, updates, deletion, or controlled sender identity
+require a Teams bot or Microsoft Graph adapter.
+
+Follow the [Power Automate Teams Workflow setup
+guide](infra/teams-workflows/README.md#attribution-free-flow-created-from-blank)
+for the verified trigger, action, Adaptive Card expression, credential handling,
+and smoke-test steps. See [Teams delivery
+options](docs/teams-delivery-options.md) for the tested alternatives and their
+trade-offs.
+
 ### Example coverage
 
 | Example | Slack | Microsoft Teams |

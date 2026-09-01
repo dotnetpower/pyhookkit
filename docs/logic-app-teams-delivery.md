@@ -45,6 +45,8 @@ provider-neutral state and attempt count.
 
 Connection authorization is an explicit bootstrap step. Bicep references an
 already authorized connection; it does not embed or reproduce OAuth consent.
+The connection may live in another resource group, but it must remain in the
+same subscription and region and must not be deleted with the Logic App.
 
 ## Deploy
 
@@ -197,6 +199,27 @@ Verify:
 The verified environment successfully delivered deployment, incident,
 maintenance, and approval scenarios through Logic App. It also verified that a
 pipeline with no selection still uses the Power Automate Workflow default.
+
+## Verified reference deployment
+
+The live verification deployed `logic-notify-teams` to `rg-notify` in Korea
+Central and reused a connected Teams managed API connection.
+
+The verification established:
+
+- Bicep redeployment is idempotent;
+- the deployed workflow definition matches the committed JSON;
+- invalid input returns `400`;
+- valid input returns `201` with Teams message identifiers;
+- all four scenario sends return provider-neutral success;
+- GitLab succeeds with both explicit `logic-app` and default `workflow`;
+- GitHub approval and promotion succeed with `logic-app`;
+- the AKS incident probe succeeds with `logic-app`;
+- Argo CD deployment-result notification succeeds with `logic-app`;
+- the observed Logic App verification runs completed with no failed runs.
+
+Real callback URLs, Team IDs, channel IDs, connection IDs, run IDs, and message
+identifiers are intentionally excluded from committed evidence.
 
 ## Rotate or remove
 

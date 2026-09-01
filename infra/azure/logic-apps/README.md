@@ -24,7 +24,9 @@ az deployment group create \
 
 OAuth consent remains a separate bootstrap responsibility. The connection may
 be shared across workflows in the same subscription and region; its resource ID
-is an environment parameter, not committed configuration.
+is an environment parameter, not committed configuration. Deleting
+`rg-notify` does not remove a connection referenced from another resource
+group.
 
 ## Request contract
 

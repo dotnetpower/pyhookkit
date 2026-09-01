@@ -78,7 +78,7 @@ notify-canonical-webhook:
   script:
     - test -n "$TEAMS_WORKFLOW_URL"
     - test -f "$TRIGGER_PAYLOAD"
-    - python -m pyhookkit.entrypoints.scenario_cli --input "$TRIGGER_PAYLOAD" --provider teams --send
+    - python -m pyhookkit.entrypoints.scenario_cli --input "$TRIGGER_PAYLOAD" --provider teams --teams-compact --teams-hide-group-mention-notice --send
   rules:
     - if: $PIPELINE_ACTION == "validate" && $TRIGGER_PAYLOAD
 
@@ -105,8 +105,10 @@ notify-maintenance:
         --affected-service reviews \
         --expected-impact "Brief request retries during the staging exercise" \
         --owner-alias example-operations \
-        --status-page-url "$SOURCE_URL" \
+        --status-page-url "$CI_PIPELINE_URL" \
         --source gitlab-ci \
+        --teams-compact \
+        --teams-hide-group-mention-notice \
         --send
   rules:
     - if: $PIPELINE_ACTION == "maintenance-notice"

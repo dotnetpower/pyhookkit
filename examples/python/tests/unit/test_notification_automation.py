@@ -167,6 +167,32 @@ def test_cli_renders_teams_input_without_synthetic_hero_by_default(
     assert "Example Approver" in serialized
 
 
+def test_cli_can_render_compact_teams_card_without_group_setup_banner(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    entrypoint.run_notification_automation(
+        arguments=[
+            "maintenance-notice",
+            "teams",
+            "--input",
+            str(_input_path("maintenance-notice")),
+            "--teams-compact",
+            "--teams-hide-group-mention-notice",
+        ]
+    )
+
+    payload = json.loads(capsys.readouterr().out)
+    card = payload["attachments"][0]["content"]
+    visible_card = json.dumps(card["body"])
+
+    assert "INFO: Scheduled maintenance notice." not in visible_card
+    assert (
+        "additional Graph member-expansion configuration required" not in visible_card
+    )
+    assert "Owner: example-operations" in card["fallbackText"]
+    assert "Open status page" in json.dumps(card["actions"])
+
+
 def test_cli_uses_explicit_public_hero_image_when_provided(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

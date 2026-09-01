@@ -18,7 +18,10 @@ from pyhookkit.adapters.outbound.teams.identity import (
     TeamsIdentity,
     TeamsIdentityDirectory,
 )
-from pyhookkit.adapters.outbound.teams.message_renderer import TeamsMessageRenderer
+from pyhookkit.adapters.outbound.teams.message_renderer import (
+    TeamsGroupMentionPolicy,
+    TeamsMessageRenderer,
+)
 from pyhookkit.application.scenarios.approval_request import (
     ApprovalRequestEvent,
 )
@@ -116,6 +119,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--route")
     parser.add_argument("--source")
     parser.add_argument("--hero-image-url")
+    parser.add_argument("--teams-compact", action="store_true")
+    parser.add_argument(
+        "--teams-hide-group-mention-notice",
+        action="store_true",
+    )
 
     deployment = parser.add_argument_group("deployment result")
     deployment.add_argument("--service")
@@ -227,7 +235,7 @@ def _notification_and_renderer(
         )
         return (
             build_deployment_result_notification(event),
-            _deployment_renderer(provider, parsed.hero_image_url),
+            _deployment_renderer(provider, parsed),
         )
 
     if scenario == "incident-alert-acknowledgment":
@@ -272,7 +280,6 @@ def _notification_and_renderer(
                 provider,
                 parsed,
                 event.responder_alias,
-                parsed.hero_image_url,
             ),
         )
 
@@ -309,7 +316,6 @@ def _notification_and_renderer(
                 provider,
                 parsed,
                 event.approver_alias,
-                parsed.hero_image_url,
             ),
         )
 
@@ -345,18 +351,17 @@ def _notification_and_renderer(
             provider,
             parsed,
             event.owner_alias,
-            parsed.hero_image_url,
         ),
     )
 
 
 def _deployment_renderer(
     provider: str,
-    hero_image_url: str | None,
+    parsed: argparse.Namespace,
 ) -> MessageRenderer:
     if provider == "slack":
-        return _slack_renderer(None, hero_image_url)
-    return _teams_renderer(None, hero_image_url)
+        return _slack_renderer(None, parsed.hero_image_url)
+    return _teams_renderer(None, parsed)
 
 
 def _incident_renderer(
@@ -364,7 +369,6 @@ def _incident_renderer(
     provider: str,
     parsed: argparse.Namespace,
     responder_alias: str,
-    hero_image_url: str | None,
 ) -> MessageRenderer:
     if provider == "slack":
         slack_group_id = _required_argument(
@@ -381,9 +385,9 @@ def _incident_renderer(
                     )
                 }
             ),
-            hero_image_url,
+            parsed.hero_image_url,
         )
-    return _teams_renderer(None, hero_image_url)
+    return _teams_renderer(None, parsed)
 
 
 def _approval_renderer(
@@ -391,7 +395,6 @@ def _approval_renderer(
     provider: str,
     parsed: argparse.Namespace,
     approver_alias: str,
-    hero_image_url: str | None,
 ) -> MessageRenderer:
     if provider == "slack":
         slack_user_id = _required_argument(
@@ -408,7 +411,7 @@ def _approval_renderer(
                     )
                 }
             ),
-            hero_image_url,
+            parsed.hero_image_url,
         )
     teams_user_id = _required_argument(
         parser,
@@ -429,7 +432,7 @@ def _approval_renderer(
                 )
             }
         ),
-        hero_image_url,
+        parsed,
     )
 
 
@@ -438,7 +441,6 @@ def _maintenance_renderer(
     provider: str,
     parsed: argparse.Namespace,
     owner_alias: str,
-    hero_image_url: str | None,
 ) -> MessageRenderer:
     if provider == "slack":
         slack_group_id = _required_argument(
@@ -455,9 +457,9 @@ def _maintenance_renderer(
                     )
                 }
             ),
-            hero_image_url,
+            parsed.hero_image_url,
         )
-    return _teams_renderer(None, hero_image_url)
+    return _teams_renderer(None, parsed)
 
 
 def _input_renderer(
@@ -492,7 +494,7 @@ def _input_renderer(
     _validate_teams_identities(notification.mentions, team_identifiers)
     teams_directory = _teams_identity_directory(team_identifiers, team_display_names)
     del scenario
-    return _teams_renderer(teams_directory, parsed.hero_image_url)
+    return _teams_renderer(teams_directory, parsed)
 
 
 def _slack_identity_directory(
@@ -539,11 +541,17 @@ def _teams_identity_directory(
 
 def _teams_renderer(
     identity_directory: TeamsIdentityDirectory | None,
-    hero_image_url: str | None,
+    parsed: argparse.Namespace,
 ) -> TeamsMessageRenderer:
     return TeamsMessageRenderer(
         identity_directory,
-        hero_image_url=hero_image_url,
+        hero_image_url=parsed.hero_image_url,
+        group_mention_policy=(
+            TeamsGroupMentionPolicy.OMIT
+            if parsed.teams_hide_group_mention_notice
+            else TeamsGroupMentionPolicy.CONFIGURATION_NOTICE
+        ),
+        show_body_in_card=not parsed.teams_compact,
     )
 
 

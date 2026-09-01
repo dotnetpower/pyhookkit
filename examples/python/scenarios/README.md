@@ -92,6 +92,12 @@ cannot mention a group directly. Automation rendering has no default hero
 image, so a live CI send cannot accidentally reference the committed synthetic
 asset host.
 
+Operational jobs can add `--teams-compact` when facts already carry the body
+meaning, and `--teams-hide-group-mention-notice` when the responsible group is
+represented outside Teams. The GitLab jobs use both options so cards avoid
+duplicating the fallback body and do not present a setup warning as if it were
+an actionable mention.
+
 The integrated AKS example uses this CLI from GitLab. GitHub approval and Argo
 CD synchronization submit canonical JSON through GitLab's trigger webhook,
 while the scheduled maintenance job invokes the typed scenario arguments.

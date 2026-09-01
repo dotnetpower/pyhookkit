@@ -64,8 +64,10 @@ Never pass credentials as pipeline inputs or ordinary trigger variables.
 
 Create a GitLab pipeline schedule with `action=maintenance-notice` to exercise
 the maintenance scenario. The job derives a one-hour synthetic staging window,
-links back to the configured `source-url`, and sends through the same
-provider-neutral scenario CLI.
+links to the exact GitLab pipeline, and sends a compact Teams card through the
+same provider-neutral scenario CLI. The canonical group owner remains in the
+fallback text while the live card suppresses the Graph configuration banner;
+GitLab remains the operational ownership system of record.
 
 The configuration is deliberately a demonstration control plane, not a
 production event bus. If event volume or delivery guarantees grow beyond these

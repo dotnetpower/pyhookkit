@@ -53,6 +53,10 @@ The custom triggers fire once per reconciled revision. The template submits
 canonical JSON through the `CANONICAL_NOTIFICATION` pipeline variable. GitLab
 validates it and sends it through the configured provider adapter.
 
+`context.teamsDelivery` selects `workflow` (default) or `logic-app` for
+deployment-result notifications. Configure the corresponding protected GitLab
+variables before choosing Logic App.
+
 The committed Application uses automated prune and self-heal for a disposable
 staging namespace. Use a separate Argo CD Project and a manual promotion policy
 before adapting this example to a shared or production cluster.

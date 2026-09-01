@@ -12,6 +12,7 @@ beside the assets they configure under `infra/`.
 | Configure local provider values | [Provider configuration](configuration.md) |
 | Understand semantic equivalence | [Notification parity](notification-parity.md) |
 | Create the Teams delivery flow | [Power Automate Teams Workflow](power-automate-teams-workflow.md) |
+| Deploy routed Teams delivery | [Azure Logic App Teams delivery](logic-app-teams-delivery.md) |
 | Run the full AKS scenario | [Integrated Bookinfo scenario](integrated-bookinfo-scenario.md) |
 | Understand infrastructure boundaries | [Infrastructure](infrastructure.md) |
 | Compare Teams delivery adapters | [Teams delivery options](teams-delivery-options.md) |

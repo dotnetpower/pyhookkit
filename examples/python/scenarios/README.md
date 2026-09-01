@@ -99,6 +99,9 @@ represented outside Teams. The GitLab jobs use both options so cards avoid
 duplicating the fallback body and do not present a setup warning as if it were
 an actionable mention.
 
+Teams automation accepts `--teams-delivery workflow` (default) or
+`--teams-delivery logic-app`. Slack rejects the Logic App option.
+
 The integrated AKS example uses this CLI from GitLab. GitHub and the AKS probe
 submit canonical JSON through `CANONICAL_NOTIFICATION` on the GitLab trigger
 API. Argo CD uses the authenticated GitLab pipeline API, while scheduled

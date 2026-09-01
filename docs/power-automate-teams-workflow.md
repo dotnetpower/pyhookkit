@@ -7,6 +7,8 @@ verification.
 
 For the GitHub, GitLab, Argo CD, and AKS sequence, see the
 [integrated Bookinfo scenario](integrated-bookinfo-scenario.md).
+For routed per-request destinations, use the
+[Azure Logic App Teams delivery guide](logic-app-teams-delivery.md).
 
 ## Why create the flow from blank
 

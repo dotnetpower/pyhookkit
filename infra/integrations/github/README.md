@@ -6,6 +6,9 @@ workflow sends a provider-neutral approval request to GitLab, waits at the
 `bookinfo-staging` environment, and asks GitLab to promote the approved Reviews
 variant.
 
+The dispatch input **Teams delivery adapter** selects `workflow` (default) or
+`logic-app` for the approval notification and downstream GitLab request.
+
 ## Repository configuration
 
 1. Create the `bookinfo-staging` GitHub environment.

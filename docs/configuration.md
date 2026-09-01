@@ -127,8 +127,9 @@ so those values do not belong in this initial environment contract.
 
 For Azure Logic App delivery, configure the signed HTTP trigger URL separately
 from the explicit Team and channel IDs. Follow the
-[Logic App runbook](../infra/azure/logic-apps/README.md); a Logic App callback
-cannot replace `TEAMS_WORKFLOW_URL` because its request schema is different.
+[Logic App Teams delivery guide](logic-app-teams-delivery.md); a Logic App
+callback cannot replace `TEAMS_WORKFLOW_URL` because its request schema is
+different.
 
 The provider-neutral asset base is used by image-led paired scenarios and
 standalone Adaptive Card examples for both Workflow and Logic App delivery.

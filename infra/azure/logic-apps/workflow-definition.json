@@ -1,0 +1,163 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "actions": {
+    "Validate_request": {
+      "actions": {
+        "Post_card_to_channel": {
+          "inputs": {
+            "body": {
+              "messageBody": "@string(triggerBody()?['card'])",
+              "recipient": {
+                "channelId": "@triggerBody()?['channelId']",
+                "groupId": "@triggerBody()?['teamId']"
+              }
+            },
+            "host": {
+              "connection": {
+                "name": "@parameters('$connections')['teams']['connectionId']"
+              }
+            },
+            "method": "post",
+            "path": "/v1.0/teams/conversation/adaptivecard/poster/Flow bot/location/@{encodeURIComponent('Channel')}",
+            "retryPolicy": {
+              "count": 2,
+              "interval": "PT5S",
+              "maximumInterval": "PT10S",
+              "minimumInterval": "PT5S",
+              "type": "exponential"
+            }
+          },
+          "limit": {
+            "timeout": "PT30S"
+          },
+          "runAfter": {},
+          "runtimeConfiguration": {
+            "secureData": {
+              "properties": [
+                "inputs",
+                "outputs"
+              ]
+            }
+          },
+          "type": "ApiConnection"
+        },
+        "Response_connector_error": {
+          "inputs": {
+            "body": {
+              "error": "TEAMS_CONNECTOR_ERROR",
+              "eventId": "@triggerBody()?['eventId']",
+              "message": "The Adaptive Card could not be posted. Check the IDs, channel type, card payload, and API connection."
+            },
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "statusCode": 502
+          },
+          "kind": "Http",
+          "runAfter": {
+            "Post_card_to_channel": [
+              "Failed",
+              "TimedOut"
+            ]
+          },
+          "type": "Response"
+        },
+        "Response_created": {
+          "inputs": {
+            "body": {
+              "channelId": "@triggerBody()?['channelId']",
+              "conversationId": "@body('Post_card_to_channel')?['conversationId']",
+              "eventId": "@triggerBody()?['eventId']",
+              "messageId": "@body('Post_card_to_channel')?['id']",
+              "messageLink": "@body('Post_card_to_channel')?['messageLink']",
+              "teamId": "@triggerBody()?['teamId']"
+            },
+            "headers": {
+              "Content-Type": "application/json"
+            },
+            "statusCode": 201
+          },
+          "kind": "Http",
+          "runAfter": {
+            "Post_card_to_channel": [
+              "Succeeded"
+            ]
+          },
+          "type": "Response"
+        }
+      },
+      "else": {
+        "actions": {
+          "Response_bad_request": {
+            "inputs": {
+              "body": {
+                "error": "INVALID_REQUEST",
+                "message": "teamId and channelId are required. card must be a non-empty AdaptiveCard object with type, version, and body."
+              },
+              "headers": {
+                "Content-Type": "application/json"
+              },
+              "statusCode": 400
+            },
+            "kind": "Http",
+            "runAfter": {},
+            "type": "Response"
+          }
+        }
+      },
+      "expression": "@and(not(empty(trim(coalesce(triggerBody()?['teamId'], '')))), not(empty(trim(coalesce(triggerBody()?['channelId'], '')))), equals(triggerBody()?['card']?['type'], 'AdaptiveCard'), not(empty(triggerBody()?['card']?['version'])), not(empty(triggerBody()?['card']?['body'])))",
+      "runAfter": {},
+      "type": "If"
+    }
+  },
+  "contentVersion": "1.0.0.0",
+  "outputs": {},
+  "parameters": {
+    "$connections": {
+      "defaultValue": {},
+      "type": "Object"
+    }
+  },
+  "triggers": {
+    "When_a_HTTP_request_is_received": {
+      "inputs": {
+        "method": "POST",
+        "schema": {
+          "additionalProperties": false,
+          "properties": {
+            "card": {
+              "type": "object"
+            },
+            "channelId": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "eventId": {
+              "type": "string"
+            },
+            "teamId": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "teamId",
+            "channelId",
+            "card"
+          ],
+          "type": "object"
+        }
+      },
+      "kind": "Http",
+      "runtimeConfiguration": {
+        "secureData": {
+          "properties": [
+            "inputs",
+            "outputs"
+          ]
+        }
+      },
+      "type": "Request"
+    }
+  }
+}

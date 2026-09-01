@@ -3,6 +3,29 @@
 The supported Logic App boundary uses a Consumption Logic App with an HTTP
 request trigger and an authorized Microsoft Teams managed-connector action.
 
+## Assets
+
+- `main.bicep` deploys the enabled Consumption Logic App and references an
+  authorized Teams API connection.
+- `workflow-definition.json` owns validation, connector delivery, secure data,
+  and explicit HTTP responses.
+
+Deploy from the repository root:
+
+```shell
+az deployment group create \
+  --name pyhookkit-logic-app \
+  --resource-group rg-notify \
+  --template-file infra/azure/logic-apps/main.bicep \
+  --parameters \
+    logicAppName=logic-notify-teams \
+    teamsConnectionResourceId="$TEAMS_CONNECTION_ID"
+```
+
+OAuth consent remains a separate bootstrap responsibility. The connection may
+be shared across workflows in the same subscription and region; its resource ID
+is an environment parameter, not committed configuration.
+
 ## Request contract
 
 The trigger accepts:
@@ -57,3 +80,7 @@ The rendered card is identical to the Power Automate path. Only the outbound
 request adapter differs: it removes the Teams Workflow envelope and adds Logic
 App routing fields. This invariant is exercised for every library-backed Teams
 example; F00 separately compares its two standard-library request builders.
+
+See the user-facing [Logic App Teams delivery
+guide](../../../docs/logic-app-teams-delivery.md) for callback retrieval,
+adapter selection, smoke testing, and removal.

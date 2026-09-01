@@ -46,6 +46,8 @@ spec:
               value: https://gitlab.example.com/example-platform/bookinfo-gitops/-/issues/new
             - name: RUNBOOK_URL
               value: https://github.com/dotnetpower/pyhookkit/blob/main/infra/gitops/bookinfo/README.md
+            - name: TEAMS_DELIVERY
+              value: workflow
           command:
             - /bin/sh
             - -ceu
@@ -93,6 +95,7 @@ spec:
                 --silent \
                 --request POST \
                 --form-string "variables[CANONICAL_NOTIFICATION]=$(cat /tmp/incident.json)" \
+                --form-string "inputs[teams-delivery]=${TEAMS_DELIVERY}" \
                 --output /dev/null \
                 "$GITLAB_TRIGGER_URL"; then
                 echo "GitLab notification dispatch failed" >&2

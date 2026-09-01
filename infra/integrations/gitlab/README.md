@@ -30,6 +30,9 @@ Configure these masked and protected values in GitLab:
 | Variable | Purpose |
 |---|---|
 | `TEAMS_WORKFLOW_URL` | Power Automate Workflow callback URL |
+| `TEAMS_LOGIC_APP_URL` | Azure Logic App HTTP trigger callback URL |
+| `TEAMS_LOGIC_APP_TEAM_ID` | Explicit Teams destination |
+| `TEAMS_LOGIC_APP_CHANNEL_ID` | Explicit Teams channel destination |
 
 Configure provider identity variables only when a canonical notification
 contains a native user mention. Group mentions remain visible as an explicit
@@ -72,6 +75,10 @@ links to the exact GitLab pipeline, and sends a compact Teams card through the
 same provider-neutral scenario CLI. The canonical group owner remains in the
 fallback text while the live card suppresses the Graph configuration banner;
 GitLab remains the operational ownership system of record.
+
+The `teams-delivery` pipeline input accepts `workflow` (default) or
+`logic-app`. The Logic App option requires all three `TEAMS_LOGIC_APP_*`
+variables.
 
 The configuration is deliberately a demonstration control plane, not a
 production event bus. If event volume or delivery guarantees grow beyond these

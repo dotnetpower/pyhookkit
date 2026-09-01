@@ -62,6 +62,7 @@ _SCENARIOS = (
     "maintenance-notice",
 )
 _PROVIDERS = ("slack", "teams")
+_TEAMS_DELIVERY_OPTIONS = ("workflow", "logic-app")
 
 
 def run_notification_automation(
@@ -80,7 +81,11 @@ def run_notification_automation(
         provider,
     )
     active_environment = os.environ if environment is None else environment
-    runner_arguments: list[str] = ["--send"] if parsed.send else []
+    runner_arguments = _delivery_arguments(
+        send=parsed.send,
+        provider=provider,
+        teams_delivery=parsed.teams_delivery,
+    )
     if provider == "slack":
         run_slack_webhook_example(
             notification,
@@ -114,6 +119,11 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--provider", choices=_PROVIDERS, dest="provider_option")
     parser.add_argument("--input", type=Path)
     parser.add_argument("--send", action="store_true")
+    parser.add_argument(
+        "--teams-delivery",
+        choices=_TEAMS_DELIVERY_OPTIONS,
+        default="workflow",
+    )
     parser.add_argument("--event-id")
     parser.add_argument("--correlation-id")
     parser.add_argument("--route")
@@ -189,7 +199,22 @@ def _resolve_mode(
         parser.error("--provider must match the positional provider when both are set")
     if parsed.input is None and parsed.scenario is None:
         parser.error("scenario is required unless --input is provided")
+    if provider != "teams" and parsed.teams_delivery != "workflow":
+        parser.error("--teams-delivery logic-app requires the teams provider")
     return parsed.scenario, provider
+
+
+def _delivery_arguments(
+    *,
+    send: bool,
+    provider: str,
+    teams_delivery: str,
+) -> list[str]:
+    if not send:
+        return []
+    if provider == "teams" and teams_delivery == "logic-app":
+        return ["--send-logic-app"]
+    return ["--send"]
 
 
 def _notification_and_renderer(

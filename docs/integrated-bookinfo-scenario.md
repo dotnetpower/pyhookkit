@@ -19,8 +19,11 @@ flowchart LR
     argocd -->|sync| aks[AKS Bookinfo]
     argocd -->|deployment result| gitlab
     aks -->|incident probe| gitlab
-    gitlab -->|canonical notification| power[Power Automate]
+    gitlab -->|canonical notification| delivery{Teams delivery}
+    delivery -->|workflow| power[Power Automate]
+    delivery -->|routed| logic[Azure Logic App]
     power --> teams[Microsoft Teams]
+    logic --> teams
 ```
 
 Each control plane has one responsibility:
@@ -31,13 +34,14 @@ Each control plane has one responsibility:
 | GitLab | GitOps validation, promotion, and provider delivery |
 | Argo CD | Reconcile `gitops-staging` into AKS |
 | AKS | Run the Istio-free Bookinfo workload and incident probe |
-| Power Automate | Accept the Adaptive Card envelope and post it to Teams |
+| Power Automate | Default fixed-channel Teams delivery |
+| Azure Logic App | Optional per-request Team and channel routing |
 | Teams | Present the notification and navigation action |
 
 Provider credentials do not cross these boundaries. GitHub and the AKS probe
 use separate GitLab trigger tokens. Argo CD uses a short-lived GitLab project
-access token in the `PRIVATE-TOKEN` header. Only GitLab stores
-`TEAMS_WORKFLOW_URL`.
+access token in the `PRIVATE-TOKEN` header. Only GitLab stores the Teams
+Workflow and Logic App callback credentials.
 
 ## Live environment
 
@@ -129,14 +133,15 @@ does not present the unsupported group-expansion notice as an action.
 
 ## Teams delivery dependency
 
-All four scenarios use one Power Automate Workflow as the final delivery
-adapter. Its creation, Teams action configuration, callback handling, smoke
-test, run history, and screenshots are intentionally maintained outside this
-cross-platform scenario document.
+All four scenarios select one final Teams delivery adapter. Power Automate
+Workflow is the default for the fixed test channel. Azure Logic App is optional
+when callers need per-request Team and channel routing.
 
 Complete the [Power Automate Teams Workflow
 guide](power-automate-teams-workflow.md) before running any scenario that sends
-to Teams. The infrastructure-oriented [Teams Workflows
+through the default path. Complete the
+[Logic App Teams delivery guide](logic-app-teams-delivery.md) before selecting
+`logic-app`. The infrastructure-oriented [Teams Workflows
 runbook](../infra/teams-workflows/README.md) covers repeated deployment,
 ownership, and footer verification.
 

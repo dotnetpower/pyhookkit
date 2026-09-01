@@ -259,6 +259,49 @@ def test_cli_sends_only_with_send_flag(
     assert recorded_arguments == [[], ["--send"]]
 
 
+def test_cli_selects_logic_app_delivery_for_teams(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recorded_arguments: list[Sequence[str] | None] = []
+
+    def run_teams(
+        _notification: CanonicalNotification,
+        _renderer: MessageRenderer,
+        *,
+        arguments: Sequence[str] | None = None,
+        environment: Mapping[str, str] | None = None,
+    ) -> None:
+        del environment
+        recorded_arguments.append(arguments)
+
+    monkeypatch.setattr(entrypoint, "run_teams_workflow_example", run_teams)
+
+    entrypoint.run_notification_automation(
+        arguments=[
+            *_deployment_args("teams", send=True),
+            "--teams-delivery",
+            "logic-app",
+        ]
+    )
+
+    assert recorded_arguments == [["--send-logic-app"]]
+
+
+def test_cli_rejects_logic_app_delivery_for_slack(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with pytest.raises(SystemExit):
+        entrypoint.run_notification_automation(
+            arguments=[
+                *_deployment_args("slack"),
+                "--teams-delivery",
+                "logic-app",
+            ]
+        )
+
+    assert "requires the teams provider" in capsys.readouterr().err
+
+
 def test_module_accepts_gitlab_style_input_order(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

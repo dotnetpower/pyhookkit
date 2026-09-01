@@ -38,7 +38,9 @@ uv run python scenarios/deployment_result/teams.py --send-logic-app
 ```
 
 See the [Logic App runbook](../infra/azure/logic-apps/README.md) for the trigger
-schema and required environment values.
+schema and infrastructure assets. See the
+[Logic App Teams delivery guide](logic-app-teams-delivery.md) for deployment,
+selection, live testing, and removal.
 
 Contract tests execute every library-backed Teams example through both adapters
 and assert that the resolved inner Adaptive Card is unchanged. The raw F00

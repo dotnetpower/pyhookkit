@@ -22,7 +22,7 @@ The integrated example uses Bookinfo as a small, multi-service workload without
 installing Istio. GitHub owns deployment approval, GitLab owns CI and
 notification dispatch, and Argo CD owns AKS reconciliation. This keeps provider
 credentials out of GitHub, Argo CD templates, and the Bookinfo namespace:
-`TEAMS_WORKFLOW_URL` exists only as a protected GitLab variable.
+the Teams callback credentials exist only as protected GitLab variables.
 
 Canonical JSON crosses the platform boundaries. GitHub, Argo CD, and the
 in-cluster probe do not build Slack or Teams payloads. A GitLab job validates
@@ -47,3 +47,6 @@ are actually needed.
 
 The complete execution sequence and redacted live captures are in the
 [integrated Bookinfo scenario](integrated-bookinfo-scenario.md).
+Power Automate remains the default delivery adapter; the
+[Logic App Teams delivery guide](logic-app-teams-delivery.md) documents the
+optional routed adapter.

@@ -38,7 +38,9 @@ require a Teams bot or Microsoft Graph adapter.
 Follow the [Power Automate Teams Workflow setup
 guide](docs/power-automate-teams-workflow.md) for the verified trigger, action,
 Adaptive Card expression, credential handling, screenshots, and smoke-test
-steps. See [Teams delivery
+steps. Use the [Azure Logic App Teams delivery
+guide](docs/logic-app-teams-delivery.md) when per-request Team and channel
+routing is required. See [Teams delivery
 options](docs/teams-delivery-options.md) for the tested alternatives and their
 trade-offs.
 

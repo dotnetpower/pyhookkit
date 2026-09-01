@@ -19,6 +19,12 @@ spec:
       description: HTTPS audit link for the initiating workflow
       default: https://github.example.com/example/pyhookkit/actions
       regex: ^https://
+    teams-delivery:
+      description: Teams outbound adapter
+      default: workflow
+      options:
+        - workflow
+        - logic-app
 ---
 stages:
   - validate
@@ -32,6 +38,7 @@ variables:
   PIPELINE_ACTION: $[[ inputs.action ]]
   REVIEWS_VERSION: $[[ inputs.reviews-version ]]
   SOURCE_URL: $[[ inputs.source-url ]]
+  TEAMS_DELIVERY: $[[ inputs.teams-delivery ]]
 
 validate-gitops:
   stage: validate
@@ -70,26 +77,40 @@ promote-bookinfo:
   rules:
     - if: $PIPELINE_ACTION == "promote"
 
-notify-canonical-webhook:
-  stage: notify
+.teams-notification:
   image: python:3.12-slim
   before_script:
     - python -m pip install ./examples/python
+    - |
+      case "$TEAMS_DELIVERY" in
+        workflow)
+          test -n "$TEAMS_WORKFLOW_URL"
+          ;;
+        logic-app)
+          test -n "$TEAMS_LOGIC_APP_URL"
+          test -n "$TEAMS_LOGIC_APP_TEAM_ID"
+          test -n "$TEAMS_LOGIC_APP_CHANNEL_ID"
+          ;;
+        *)
+          echo "unsupported Teams delivery adapter: $TEAMS_DELIVERY" >&2
+          exit 1
+          ;;
+      esac
+
+notify-canonical-webhook:
+  extends: .teams-notification
+  stage: notify
   script:
-    - test -n "$TEAMS_WORKFLOW_URL"
     - test -n "$CANONICAL_NOTIFICATION"
     - printf '%s' "$CANONICAL_NOTIFICATION" > canonical-notification.json
-    - python -m pyhookkit.entrypoints.scenario_cli --input canonical-notification.json --provider teams --teams-compact --teams-hide-group-mention-notice --send
+    - python -m pyhookkit.entrypoints.scenario_cli --input canonical-notification.json --provider teams --teams-delivery "$TEAMS_DELIVERY" --teams-compact --teams-hide-group-mention-notice --send
   rules:
     - if: $PIPELINE_ACTION == "validate" && $CANONICAL_NOTIFICATION
 
 notify-maintenance:
+  extends: .teams-notification
   stage: notify
-  image: python:3.12-slim
-  before_script:
-    - python -m pip install ./examples/python
   script:
-    - test -n "$TEAMS_WORKFLOW_URL"
     - announced_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     - window_start="$(date -u -d '+1 hour' '+%Y-%m-%dT%H:%M:%SZ')"
     - window_end="$(date -u -d '+2 hours' '+%Y-%m-%dT%H:%M:%SZ')"
@@ -108,6 +129,7 @@ notify-maintenance:
         --owner-alias example-operations \
         --status-page-url "$CI_PIPELINE_URL" \
         --source gitlab-ci \
+        --teams-delivery "$TEAMS_DELIVERY" \
         --teams-compact \
         --teams-hide-group-mention-notice \
         --send

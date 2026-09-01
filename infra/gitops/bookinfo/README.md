@@ -77,6 +77,9 @@ demonstration. The incident action opens GitLab's new-issue page; creating or
 updating that issue is the acknowledgment system of record. Delete and recreate
 the Job for another deliberate run.
 
+`TEAMS_DELIVERY` in the Job accepts `workflow` (default) or `logic-app` and is
+submitted as a typed GitLab pipeline input.
+
 ## One-time migration note
 
 Earlier drafts used a `Deployment/reviews-v3` resource name. The current tree

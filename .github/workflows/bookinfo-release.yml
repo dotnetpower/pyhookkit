@@ -11,6 +11,14 @@ on:
           - v1
           - v2
           - v3
+      teams_delivery:
+        description: Teams delivery adapter
+        required: true
+        default: workflow
+        type: choice
+        options:
+          - workflow
+          - logic-app
 
 permissions:
   contents: read
@@ -73,6 +81,7 @@ jobs:
             --show-error \
             --request POST \
             --form "variables[CANONICAL_NOTIFICATION]=<approval-notification.json" \
+            --form-string "inputs[teams-delivery]=${{ inputs.teams_delivery }}" \
             --output gitlab-response.json \
             "$GITLAB_TRIGGER_URL"
           jq -e '.id | numbers' gitlab-response.json >/dev/null
@@ -88,6 +97,7 @@ jobs:
           GITLAB_TRIGGER_URL: ${{ secrets.GITLAB_TRIGGER_URL }}
           REVIEWS_VERSION: ${{ inputs.reviews_version }}
           SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TEAMS_DELIVERY: ${{ inputs.teams_delivery }}
         run: |
           test -n "$GITLAB_TRIGGER_URL"
           curl \
@@ -98,6 +108,7 @@ jobs:
             --form-string "inputs[action]=promote" \
             --form-string "inputs[reviews-version]=$REVIEWS_VERSION" \
             --form-string "inputs[source-url]=$SOURCE_URL" \
+            --form-string "inputs[teams-delivery]=$TEAMS_DELIVERY" \
             --output gitlab-response.json \
             "$GITLAB_TRIGGER_URL"
           jq -e '.id | numbers' gitlab-response.json >/dev/null

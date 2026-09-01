@@ -3,8 +3,8 @@
 Azure assets support the optional runtime and routed Teams delivery paths:
 
 - [`bicep/`](bicep/README.md) provisions the minimal AKS baseline;
-- [`logic-apps/`](logic-apps/README.md) documents routed Teams delivery through
-  an authorized managed connector;
+- [`logic-apps/`](logic-apps/README.md) deploys routed Teams delivery through an
+  authorized managed connector;
 - [`parameters/`](parameters/README.md) defines the committed parameter
   boundary.
 

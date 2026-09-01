@@ -16,7 +16,7 @@ credentials. Treat webhook URLs, `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`,
 | Credential | Approved owner |
 |---|---|
 | Slack webhook and API tokens | Local `.env` or deployment secret store |
-| Power Automate callback URL | GitLab protected masked variable |
+| Power Automate and Logic App callback URLs | GitLab protected masked variables |
 | GitLab producer trigger token | Calling control plane's secret store |
 | Argo CD GitLab project token | `argocd-notifications-secret` |
 | Kubernetes administrator credentials | Operator kubeconfig outside Git |

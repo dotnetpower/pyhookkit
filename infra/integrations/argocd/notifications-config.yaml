@@ -12,8 +12,6 @@ data:
       - name: Content-Type
         value: application/json
     retryMax: 3
-    retryWaitMin: 2s
-    retryWaitMax: 10s
   template.bookinfo-sync-failed: |
     webhook:
       gitlab-pipeline:

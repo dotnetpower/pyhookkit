@@ -60,4 +60,40 @@ contracts.
 `TEAMS_WORKFLOW_URL` should reference the from-blank flow documented in the
 Teams Workflows runbook when template attribution is not acceptable.
 
+## Automation CLI
+
+CI systems can construct the same scenarios with validated runtime values:
+
+```console
+uv run python -m pyhookkit.entrypoints.scenario_cli \
+  deployment-result teams \
+  --event-id deploy-example-1042 \
+  --correlation-id deploy-example-1042 \
+  --service bookinfo \
+  --deployment-environment staging \
+  --revision 9f3a2c1 \
+  --duration "2m 18s" \
+  --completed-at 2026-08-28T03:15:00Z \
+  --deployment-url https://deployments.example.com/runs/1042
+```
+
+Add `--send` only for deliberate delivery. The CLI also accepts an existing
+canonical contract file:
+
+```console
+uv run python -m pyhookkit.entrypoints.scenario_cli \
+  --input ../../contracts/test-vectors/scenarios/deployment-result/notification.json \
+  --provider teams
+```
+
+User mentions require explicit provider identity arguments. Teams group
+mentions remain visible as a configuration notice because Workflow webhooks
+cannot mention a group directly. Automation rendering has no default hero
+image, so a live CI send cannot accidentally reference the committed synthetic
+asset host.
+
+The integrated AKS example uses this CLI from GitLab. GitHub approval and Argo
+CD synchronization submit canonical JSON through GitLab's trigger webhook,
+while the scheduled maintenance job invokes the typed scenario arguments.
+
 All names, IDs, routes, timestamps, and URLs are synthetic.

@@ -44,3 +44,11 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
 IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Istio Bookinfo container images
+
+The GitOps examples reference the
+[Istio Bookinfo](https://github.com/istio/istio/tree/master/samples/bookinfo)
+sample container images. The images are not redistributed by this repository.
+Istio is licensed under the
+[Apache License 2.0](https://github.com/istio/istio/blob/master/LICENSE).

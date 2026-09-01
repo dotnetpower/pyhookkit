@@ -1,0 +1,104 @@
+name: Bookinfo release
+
+on:
+  workflow_dispatch:
+    inputs:
+      reviews_version:
+        description: Reviews deployment variant
+        required: true
+        type: choice
+        options:
+          - v1
+          - v2
+          - v3
+
+permissions:
+  contents: read
+
+jobs:
+  request-approval:
+    name: Request staging approval
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build canonical approval notification
+        env:
+          ACTION_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EVENT_ID: github-${{ github.run_id }}-approval
+          REQUESTER: ${{ github.actor }}
+          REVIEWS_VERSION: ${{ inputs.reviews_version }}
+        run: |
+          deadline="$(date -u -d '+1 hour' '+%Y-%m-%dT%H:%M:%SZ')"
+          timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          jq -n \
+            --arg event_id "$EVENT_ID" \
+            --arg requester "$REQUESTER" \
+            --arg version "$REVIEWS_VERSION" \
+            --arg deadline "$deadline" \
+            --arg timestamp "$timestamp" \
+            --arg action_url "$ACTION_URL" \
+            '{
+              schemaVersion: "1.0",
+              eventId: $event_id,
+              route: "change-approvals",
+              title: "Bookinfo staging approval requested",
+              body: ("WARNING: Approval requested. " + $requester
+                + " requested Bookinfo reviews " + $version
+                + " for staging before " + $deadline
+                + ". Approver: GitHub environment reviewers. Review deployment: "
+                + $action_url),
+              severity: "warning",
+              facts: [
+                {key: "Application", value: "bookinfo"},
+                {key: "Reviews version", value: $version},
+                {key: "Requester", value: $requester},
+                {key: "Approver", value: "GitHub environment reviewers"},
+                {key: "Deadline", value: $deadline}
+              ],
+              links: [{label: "Review deployment", url: $action_url}],
+              sourceTimestamp: $timestamp,
+              metadata: {
+                source: "github-actions",
+                correlationId: ("github-run-" + env.GITHUB_RUN_ID)
+              }
+            }' > approval-notification.json
+
+      - name: Trigger GitLab notification pipeline
+        env:
+          GITLAB_WEBHOOK_URL: ${{ secrets.GITLAB_WEBHOOK_URL }}
+        run: |
+          test -n "$GITLAB_WEBHOOK_URL"
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --request POST \
+            --header "Content-Type: application/json" \
+            --data-binary @approval-notification.json \
+            --output gitlab-response.json \
+            "$GITLAB_WEBHOOK_URL"
+          jq -e '.id | numbers' gitlab-response.json >/dev/null
+
+  promote:
+    name: Promote through GitLab
+    needs: request-approval
+    runs-on: ubuntu-latest
+    environment: bookinfo-staging
+    steps:
+      - name: Trigger GitLab promotion pipeline
+        env:
+          GITLAB_TRIGGER_URL: ${{ secrets.GITLAB_TRIGGER_URL }}
+          REVIEWS_VERSION: ${{ inputs.reviews_version }}
+          SOURCE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          test -n "$GITLAB_TRIGGER_URL"
+          curl \
+            --fail \
+            --silent \
+            --show-error \
+            --request POST \
+            --form-string "inputs[action]=promote" \
+            --form-string "inputs[reviews-version]=$REVIEWS_VERSION" \
+            --form-string "inputs[source-url]=$SOURCE_URL" \
+            --output gitlab-response.json \
+            "$GITLAB_TRIGGER_URL"
+          jq -e '.id | numbers' gitlab-response.json >/dev/null

@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reviews
+  labels:
+    version: v2
+spec:
+  template:
+    metadata:
+      labels:
+        version: v2
+    spec:
+      containers:
+        - name: reviews
+          image: docker.io/istio/examples-bookinfo-reviews-v2:1.20.2

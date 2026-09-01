@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookinfo-incident-probe
+  namespace: bookinfo-staging
+  labels:
+    app.kubernetes.io/name: bookinfo-incident-probe
+    app.kubernetes.io/part-of: bookinfo
+automountServiceAccountToken: false
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: bookinfo-incident-probe
+  namespace: bookinfo-staging
+  labels:
+    app.kubernetes.io/name: bookinfo-incident-probe
+    app.kubernetes.io/part-of: bookinfo
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 120
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bookinfo-incident-probe
+        app.kubernetes.io/part-of: bookinfo
+    spec:
+      automountServiceAccountToken: false
+      restartPolicy: Never
+      serviceAccountName: bookinfo-incident-probe
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: probe
+          image: curlimages/curl:8.10.1
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: GITLAB_WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-notification-trigger
+                  key: url
+            - name: INCIDENT_URL
+              value: https://gitlab.example.com/example-platform/bookinfo-gitops/-/issues/new
+            - name: RUNBOOK_URL
+              value: https://github.com/dotnetpower/pyhookkit/blob/main/infra/gitops/bookinfo/README.md
+          command:
+            - /bin/sh
+            - -ceu
+            - |
+              probe_url="http://productpage:9080/synthetic-incident"
+              if curl --fail --silent "$probe_url" >/dev/null; then
+                echo "synthetic incident path unexpectedly succeeded" >&2
+                exit 1
+              fi
+
+              timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+              compact_timestamp="$(date -u '+%Y%m%dT%H%M%SZ')"
+              cat > /tmp/incident.json <<EOF
+              {
+                "schemaVersion": "1.0",
+                "eventId": "bookinfo-incident-${compact_timestamp}",
+                "route": "incident-response",
+                "title": "Bookinfo incident: product page probe failed",
+                "body": "ERROR: Synthetic incident probe failed for Bookinfo productpage in staging at ${timestamp}. Status: unacknowledged. Responder: example-responders. Acknowledge incident: ${INCIDENT_URL} Open runbook: ${RUNBOOK_URL}",
+                "severity": "error",
+                "facts": [
+                  {"key": "Incident", "value": "BOOKINFO-PROBE"},
+                  {"key": "Service", "value": "productpage"},
+                  {"key": "Started", "value": "${timestamp}"},
+                  {"key": "Status", "value": "Unacknowledged"}
+                ],
+                "links": [
+                  {"label": "Acknowledge incident", "url": "${INCIDENT_URL}"},
+                  {"label": "Open runbook", "url": "${RUNBOOK_URL}"}
+                ],
+                "mentions": [
+                  {"kind": "group", "alias": "example-responders"}
+                ],
+                "threadKey": "bookinfo-incident-${compact_timestamp}",
+                "sourceTimestamp": "${timestamp}",
+                "metadata": {
+                  "source": "bookinfo-probe",
+                  "correlationId": "bookinfo-incident-${compact_timestamp}"
+                }
+              }
+              EOF
+
+              if ! curl \
+                --fail \
+                --silent \
+                --request POST \
+                --header "Content-Type: application/json" \
+                --data-binary @/tmp/incident.json \
+                --output /dev/null \
+                "$GITLAB_WEBHOOK_URL"; then
+                echo "GitLab notification dispatch failed" >&2
+                exit 1
+              fi
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

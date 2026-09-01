@@ -1,0 +1,30 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: bookinfo-staging
+
+resources:
+  - ../../base
+  - smoke-test-job.yaml
+
+commonAnnotations:
+  pyhookkit.dev/environment: staging
+
+replicas:
+  - name: productpage-v1
+    count: 2
+  - name: reviews
+    count: 2
+
+patches:
+  - target:
+      kind: Namespace
+      name: bookinfo
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: bookinfo-staging
+      - op: add
+        path: /metadata/labels/environment
+        value: staging
+  - path: reviews-v3-patch.yaml

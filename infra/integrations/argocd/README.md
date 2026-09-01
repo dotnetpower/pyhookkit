@@ -1,4 +1,58 @@
 # Argo CD integration
 
-Argo CD Notifications is an optional inbound integration. Removing it must not
-affect fundamental examples or the provider-neutral core.
+Argo CD owns Bookinfo deployment reconciliation. It watches the GitLab GitOps
+repository, deploys the staging overlay to AKS, and submits canonical deployment
+results to a GitLab trigger pipeline. GitLab renders and delivers the result;
+Argo CD does not contain a provider-specific Teams payload.
+
+## Bootstrap
+
+1. Install the pinned Argo CD chart with the minimal single-node values:
+
+   ```shell
+   helm repo add argo https://argoproj.github.io/argo-helm
+   helm repo update argo
+   helm upgrade --install argocd argo/argo-cd \
+     --version 10.4.2 \
+     --namespace argocd \
+     --create-namespace \
+     --values infra/integrations/argocd/values.yaml \
+     --wait \
+     --timeout 10m
+   ```
+
+   The example does not use SSO or ApplicationSets, so Dex is disabled and the
+   ApplicationSet controller has zero replicas. This leaves enough Pod capacity
+   for Bookinfo hooks on the one-node AKS baseline.
+2. Give Argo CD read-only access to the GitLab GitOps repository with a deploy
+   key.
+3. Create the protected `gitops-staging` branch and replace the synthetic
+   `repoURL` in `application.yaml`.
+4. Replace `context.argocdUrl` in `notifications-config.yaml` with the public
+   HTTPS Argo CD URL used by operators.
+5. Create a GitLab pipeline trigger token and construct its webhook URL:
+
+   ```text
+   https://gitlab.example.com/api/v4/projects/123456/ref/main/trigger/pipeline?token=<token>
+   ```
+
+6. Create the notification secret without writing the URL to disk:
+
+   ```shell
+   kubectl -n argocd create secret generic argocd-notifications-secret \
+     --from-literal=gitlab-webhook-url="$GITLAB_WEBHOOK_URL"
+   ```
+
+7. Apply `notifications-config.yaml` and `application.yaml`.
+
+Do not apply `notifications-secret.example.yaml`; it documents only the required
+key. The trigger URL is a credential and must stay out of Git, terminal output,
+and Argo CD Application resources.
+
+The custom triggers fire once per reconciled revision. GitLab receives the JSON
+body as its `TRIGGER_PAYLOAD` file variable, validates it as a canonical
+notification, and sends it through the configured provider adapter.
+
+The committed Application uses automated prune and self-heal for a disposable
+staging namespace. Use a separate Argo CD Project and a manual promotion policy
+before adapting this example to a shared or production cluster.

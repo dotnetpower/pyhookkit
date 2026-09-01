@@ -1,0 +1,55 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "clusterName": {
+      "value": "phk-aks-stg-82001"
+    },
+    "dnsPrefix": {
+      "value": "phkbookstg82001"
+    },
+    "nodeCount": {
+      "value": 1
+    },
+    "nodeVmSize": {
+      "value": "Standard_D2ds_v5"
+    },
+    "virtualNetworkName": {
+      "value": "phk-aks-stg-82001-vnet"
+    },
+    "aksSubnetName": {
+      "value": "aks-subnet"
+    },
+    "vnetAddressPrefix": {
+      "value": "10.42.0.0/22"
+    },
+    "aksSubnetPrefix": {
+      "value": "10.42.0.0/23"
+    },
+    "serviceCidr": {
+      "value": "10.2.0.0/24"
+    },
+    "dnsServiceIp": {
+      "value": "10.2.0.10"
+    },
+    "podCidr": {
+      "value": "10.244.0.0/16"
+    },
+    "adminGroupObjectIds": {
+      "value": []
+    },
+    "enableAzureRbac": {
+      "value": true
+    },
+    "disableLocalAccounts": {
+      "value": false
+    },
+    "tags": {
+      "value": {
+        "environment": "staging",
+        "owner": "platform-team",
+        "costCenter": "synthetic-001"
+      }
+    }
+  }
+}

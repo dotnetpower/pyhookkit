@@ -1,0 +1,9 @@
+applicationSet:
+  replicas: 0
+
+dex:
+  enabled: false
+
+server:
+  service:
+    type: ClusterIP

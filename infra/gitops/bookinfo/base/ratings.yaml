@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookinfo-ratings
+  labels:
+    app.kubernetes.io/name: ratings
+    app.kubernetes.io/part-of: bookinfo
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ratings
+  labels:
+    app.kubernetes.io/name: ratings
+    app.kubernetes.io/part-of: bookinfo
+    app: ratings
+spec:
+  selector:
+    app: ratings
+  ports:
+    - name: http
+      port: 9080
+      targetPort: 9080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ratings-v1
+  labels:
+    app.kubernetes.io/name: ratings
+    app.kubernetes.io/part-of: bookinfo
+    app: ratings
+    version: v1
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: ratings
+      version: v1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ratings
+        app.kubernetes.io/part-of: bookinfo
+        app: ratings
+        version: v1
+    spec:
+      automountServiceAccountToken: false
+      serviceAccountName: bookinfo-ratings
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: ratings
+          image: docker.io/istio/examples-bookinfo-ratings-v1:1.20.2
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9080
+              name: http
+          startupProbe:
+            tcpSocket:
+              port: 9080
+            failureThreshold: 30
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 9080
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9080
+            periodSeconds: 30
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL

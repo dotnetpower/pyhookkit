@@ -42,6 +42,18 @@ and smoke-test steps. See [Teams delivery
 options](docs/teams-delivery-options.md) for the tested alternatives and their
 trade-offs.
 
+### Integrated delivery scenario
+
+The infrastructure example runs Istio-free Bookinfo on AKS and connects all
+three delivery control planes without duplicating their responsibilities:
+GitHub provides the staging approval, GitLab validates and promotes the GitOps
+revision, and Argo CD reconciles it to AKS. Approval, deployment, incident, and
+maintenance events retain the provider-neutral contract until a GitLab job
+renders and sends them through Power Automate.
+
+See the [infrastructure guide](docs/infrastructure.md#aks-bookinfo-notification-environment)
+for the architecture and bootstrap order.
+
 ### Example coverage
 
 | Example | Slack | Microsoft Teams |

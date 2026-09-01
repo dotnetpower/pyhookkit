@@ -64,7 +64,7 @@ promote-bookinfo:
       fi
     - git config user.name "PyHookKit GitOps"
     - git config user.email "gitops@pyhookkit.example"
-    - git commit -m "deploy: promote Bookinfo reviews $REVIEWS_VERSION" -m "Approved from $SOURCE_URL"
+    - 'git commit -m "deploy: promote Bookinfo reviews $REVIEWS_VERSION" -m "Approved from $SOURCE_URL"'
     - git remote set-url origin "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
     - git push origin "HEAD:$GITOPS_BRANCH"
   resource_group: bookinfo-staging

@@ -81,6 +81,42 @@ The template loads
 enables secure trigger and connector input/output handling, and does not return
 the signed callback URL as a deployment output.
 
+## Inspect the deployed configuration
+
+The Bicep template and committed workflow definition are the source of truth.
+Use the Portal to inspect and verify the deployment, not to maintain a separate
+click-configured copy.
+
+1. Open the deployed Logic App in Azure Portal.
+2. Select **Development Tools → Logic app designer**.
+3. Select **Expand all** to inspect both validation branches.
+
+The active workflow accepts HTTP requests, validates routing and card fields,
+posts valid cards to Teams, and returns an explicit status on every path:
+
+![Expanded Logic App workflow with validation, Teams delivery, and response branches](assets/logic-app-teams-delivery/logic-app-workflow-expanded.png)
+
+Select **When a HTTP request is received → Settings**. Both **Secure inputs**
+and **Secure outputs** must be on so callback and notification data do not
+appear in run diagnostics:
+
+![Logic App HTTP trigger with secure inputs and outputs enabled](assets/logic-app-teams-delivery/logic-app-trigger-security.png)
+
+Select **Post card to channel → Parameters** and verify:
+
+| Field | Value |
+|---|---|
+| **Post as** | `Flow bot` |
+| **Post in** | `Channel` |
+| **Team** | `triggerBody()?['teamId']` |
+| **Channel** | `triggerBody()?['channelId']` |
+| **Adaptive Card** | `string(triggerBody()?['card'])` |
+
+![Logic App Teams action with dynamic route and Adaptive Card inputs](assets/logic-app-teams-delivery/logic-app-teams-action.png)
+
+Do not open or capture the trigger **Parameters** tab for documentation. It
+displays the signed callback URL.
+
 ## Retrieve and store the callback
 
 Retrieve the callback directly into the approved secret-store command. Do not
@@ -195,6 +231,17 @@ Verify:
 2. the Logic App run is `Succeeded`;
 3. the Teams card preserves the same semantic fields as Workflow delivery;
 4. callback URLs, connector inputs, and provider outputs do not appear in logs.
+
+Open the designer's **Run history** tab. The reference verification produced
+successful runs for direct scenarios and the GitHub, GitLab, Argo CD, and AKS
+automation paths:
+
+![Logic App run history with successful notification runs](assets/logic-app-teams-delivery/logic-app-run-history.png)
+
+Open a successful run and verify that the HTTP trigger, validation, Teams post,
+and `Response created` steps all succeeded:
+
+![Successful Logic App run showing the complete routed delivery path](assets/logic-app-teams-delivery/logic-app-run-success.png)
 
 The verified environment successfully delivered deployment, incident,
 maintenance, and approval scenarios through Logic App. It also verified that a

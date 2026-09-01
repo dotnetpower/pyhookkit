@@ -37,7 +37,7 @@ spec:
           image: curlimages/curl:8.10.1
           imagePullPolicy: IfNotPresent
           env:
-            - name: GITLAB_WEBHOOK_URL
+            - name: GITLAB_TRIGGER_URL
               valueFrom:
                 secretKeyRef:
                   name: gitlab-notification-trigger
@@ -92,10 +92,9 @@ spec:
                 --fail \
                 --silent \
                 --request POST \
-                --header "Content-Type: application/json" \
-                --data-binary @/tmp/incident.json \
+                --form-string "variables[CANONICAL_NOTIFICATION]=$(cat /tmp/incident.json)" \
                 --output /dev/null \
-                "$GITLAB_WEBHOOK_URL"; then
+                "$GITLAB_TRIGGER_URL"; then
                 echo "GitLab notification dispatch failed" >&2
                 exit 1
               fi

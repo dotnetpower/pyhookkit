@@ -64,18 +64,17 @@ jobs:
 
       - name: Trigger GitLab notification pipeline
         env:
-          GITLAB_WEBHOOK_URL: ${{ secrets.GITLAB_WEBHOOK_URL }}
+          GITLAB_TRIGGER_URL: ${{ secrets.GITLAB_TRIGGER_URL }}
         run: |
-          test -n "$GITLAB_WEBHOOK_URL"
+          test -n "$GITLAB_TRIGGER_URL"
           curl \
             --fail \
             --silent \
             --show-error \
             --request POST \
-            --header "Content-Type: application/json" \
-            --data-binary @approval-notification.json \
+            --form "variables[CANONICAL_NOTIFICATION]=<approval-notification.json" \
             --output gitlab-response.json \
-            "$GITLAB_WEBHOOK_URL"
+            "$GITLAB_TRIGGER_URL"
           jq -e '.id | numbers' gitlab-response.json >/dev/null
 
   promote:

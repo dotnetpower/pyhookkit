@@ -45,16 +45,18 @@ target the same pipeline.
 
 ## Trigger contracts
 
-Canonical notification webhooks use:
+Canonical notification producers use:
 
 ```text
-POST /api/v4/projects/<project-id>/ref/main/trigger/pipeline?token=<token>
-Content-Type: application/json
+POST /api/v4/projects/<project-id>/trigger/pipeline?token=<token>&ref=main
+variables[CANONICAL_NOTIFICATION]=<canonical JSON>
 ```
 
-GitLab exposes that JSON body to the job as the file-type `TRIGGER_PAYLOAD`
-variable. Promotion requests use the trigger API form with the typed `action`
-and `reviews-version` pipeline inputs:
+Set the project's minimum role allowed to use pipeline variables to
+**Maintainer**. Each trigger token is owned by a Maintainer, so canonical input
+is accepted while lower-role callers cannot override pipeline variables.
+Promotion requests use the same trigger API with the typed `action` and
+`reviews-version` pipeline inputs:
 
 ```text
 POST /api/v4/projects/<project-id>/trigger/pipeline?token=<token>&ref=main

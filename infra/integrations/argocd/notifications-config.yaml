@@ -7,7 +7,7 @@ data:
   context: |
     argocdUrl: https://argocd.example.com
   service.webhook.gitlab-pipeline: |
-    url: $gitlab-webhook-url
+    url: $gitlab-trigger-url
     headers:
       - name: Content-Type
         value: application/json
@@ -20,24 +20,9 @@ data:
         method: POST
         body: |
           {
-            "schemaVersion": "1.0",
-            "eventId": "argocd-{{.app.metadata.name}}-{{.app.status.sync.revision}}-failed",
-            "route": "release-notifications",
-            "title": "Bookinfo deployment failed",
-            "body": "ERROR: Argo CD could not deploy Bookinfo revision {{.app.status.sync.revision}} to staging. Inspect application: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
-            "severity": "error",
-            "facts": [
-              {"key": "Application", "value": "{{.app.metadata.name}}"},
-              {"key": "Environment", "value": "staging"},
-              {"key": "Revision", "value": "{{.app.status.sync.revision}}"},
-              {"key": "Phase", "value": "{{.app.status.operationState.phase}}"}
-            ],
-            "links": [
-              {"label": "Inspect deployment", "url": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"}
-            ],
-            "metadata": {
-              "source": "argocd",
-              "correlationId": "{{.app.status.sync.revision}}"
+            "ref": "main",
+            "variables": {
+              "CANONICAL_NOTIFICATION": "{\"schemaVersion\":\"1.0\",\"eventId\":\"argocd-{{.app.metadata.name}}-{{.app.status.sync.revision}}-failed\",\"route\":\"release-notifications\",\"title\":\"Bookinfo deployment failed\",\"body\":\"ERROR: Argo CD could not deploy Bookinfo revision {{.app.status.sync.revision}} to staging. Inspect application: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}\",\"severity\":\"error\",\"facts\":[{\"key\":\"Application\",\"value\":\"{{.app.metadata.name}}\"},{\"key\":\"Environment\",\"value\":\"staging\"},{\"key\":\"Revision\",\"value\":\"{{.app.status.sync.revision}}\"},{\"key\":\"Phase\",\"value\":\"{{.app.status.operationState.phase}}\"}],\"links\":[{\"label\":\"Inspect deployment\",\"url\":\"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}\"}],\"metadata\":{\"source\":\"argocd\",\"correlationId\":\"{{.app.status.sync.revision}}\"}}"
             }
           }
   template.bookinfo-sync-succeeded: |
@@ -46,24 +31,9 @@ data:
         method: POST
         body: |
           {
-            "schemaVersion": "1.0",
-            "eventId": "argocd-{{.app.metadata.name}}-{{.app.status.sync.revision}}-succeeded",
-            "route": "release-notifications",
-            "title": "Bookinfo deployment succeeded",
-            "body": "SUCCESS: Argo CD deployed Bookinfo revision {{.app.status.sync.revision}} to staging. View deployment: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
-            "severity": "success",
-            "facts": [
-              {"key": "Application", "value": "{{.app.metadata.name}}"},
-              {"key": "Environment", "value": "staging"},
-              {"key": "Revision", "value": "{{.app.status.sync.revision}}"},
-              {"key": "Duration", "value": "Recorded by Argo CD"}
-            ],
-            "links": [
-              {"label": "View deployment", "url": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"}
-            ],
-            "metadata": {
-              "source": "argocd",
-              "correlationId": "{{.app.status.sync.revision}}"
+            "ref": "main",
+            "variables": {
+              "CANONICAL_NOTIFICATION": "{\"schemaVersion\":\"1.0\",\"eventId\":\"argocd-{{.app.metadata.name}}-{{.app.status.sync.revision}}-succeeded\",\"route\":\"release-notifications\",\"title\":\"Bookinfo deployment succeeded\",\"body\":\"SUCCESS: Argo CD deployed Bookinfo revision {{.app.status.sync.revision}} to staging. View deployment: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}\",\"severity\":\"success\",\"facts\":[{\"key\":\"Application\",\"value\":\"{{.app.metadata.name}}\"},{\"key\":\"Environment\",\"value\":\"staging\"},{\"key\":\"Revision\",\"value\":\"{{.app.status.sync.revision}}\"},{\"key\":\"Duration\",\"value\":\"Recorded by Argo CD\"}],\"links\":[{\"label\":\"View deployment\",\"url\":\"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}\"}],\"metadata\":{\"source\":\"argocd\",\"correlationId\":\"{{.app.status.sync.revision}}\"}}"
             }
           }
   trigger.on-bookinfo-sync-failed: |

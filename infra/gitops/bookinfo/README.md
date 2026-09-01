@@ -65,7 +65,7 @@ into a Kubernetes Secret:
 
 ```bash
 kubectl -n bookinfo-staging create secret generic gitlab-notification-trigger \
-  --from-literal=url="$GITLAB_WEBHOOK_URL"
+  --from-literal=url="$GITLAB_TRIGGER_URL"
 kubectl apply -f infra/gitops/bookinfo/operations/incident-probe-job.yaml
 kubectl -n bookinfo-staging wait \
   --for=condition=complete job/bookinfo-incident-probe \

@@ -77,10 +77,11 @@ notify-canonical-webhook:
     - python -m pip install ./examples/python
   script:
     - test -n "$TEAMS_WORKFLOW_URL"
-    - test -f "$TRIGGER_PAYLOAD"
-    - python -m pyhookkit.entrypoints.scenario_cli --input "$TRIGGER_PAYLOAD" --provider teams --teams-compact --teams-hide-group-mention-notice --send
+    - test -n "$CANONICAL_NOTIFICATION"
+    - printf '%s' "$CANONICAL_NOTIFICATION" > canonical-notification.json
+    - python -m pyhookkit.entrypoints.scenario_cli --input canonical-notification.json --provider teams --teams-compact --teams-hide-group-mention-notice --send
   rules:
-    - if: $PIPELINE_ACTION == "validate" && $TRIGGER_PAYLOAD
+    - if: $PIPELINE_ACTION == "validate" && $CANONICAL_NOTIFICATION
 
 notify-maintenance:
   stage: notify

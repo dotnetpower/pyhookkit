@@ -30,23 +30,24 @@ Argo CD does not contain a provider-specific Teams payload.
    `repoURL` in `application.yaml`.
 4. Replace `context.argocdUrl` in `notifications-config.yaml` with the public
    HTTPS Argo CD URL used by operators.
-5. Create a GitLab pipeline trigger token. Replace the synthetic project ID and
-   GitLab host in `notifications-config.yaml`.
+5. Create a GitLab project access token with the `api` scope and Maintainer
+   access. Give it the shortest practical expiration. Replace the synthetic
+   project ID and GitLab host in `notifications-config.yaml`.
 
 6. Create the notification secret without writing the URL to disk:
 
    ```shell
    kubectl -n argocd create secret generic argocd-notifications-secret \
-     --from-literal=gitlab-trigger-token="$GITLAB_TRIGGER_TOKEN"
+     --from-literal=gitlab-api-token="$GITLAB_API_TOKEN"
    ```
 
 7. Apply `notifications-config.yaml` and `application.yaml`.
 
 Do not apply `notifications-secret.example.yaml`; it documents only the required
-key. The trigger token is a credential and must stay out of Git, terminal
-output, service URLs, and Argo CD Application resources. The notification
-template inserts the secret into the POST body so the controller does not print
-it as part of the webhook URL.
+key. The API token is a credential and must stay out of Git, terminal output,
+service URLs, and Argo CD Application resources. The webhook service submits it
+in the `PRIVATE-TOKEN` header so controller logs contain only the non-sensitive
+pipeline endpoint.
 
 The custom triggers fire once per reconciled revision. The template submits
 canonical JSON through the `CANONICAL_NOTIFICATION` pipeline variable. GitLab

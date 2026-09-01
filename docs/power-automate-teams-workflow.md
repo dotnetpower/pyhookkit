@@ -57,18 +57,20 @@ Set the action fields as follows:
 | **Post in** | `Channel` |
 | **Team** | The dedicated synthetic test Team |
 | **Channel** | The dedicated notification test channel |
-| **Adaptive Card** | `triggerBody()?['attachments'][0]['content']` |
+| **Adaptive Card** | `triggerBody()` |
 
 ![Power Automate Teams post-card action settings](assets/power-automate-teams-workflow/power-automate-teams-action.png)
 
-The expression extracts the inner Adaptive Card from the Teams `message`
-envelope:
+The current Teams Workflow trigger exposes the webhook body in the form
+accepted by **Post card in a chat or channel**. Pass it directly:
 
 ```text
-triggerBody()?['attachments'][0]['content']
+triggerBody()
 ```
 
-Do not paste the full incoming envelope into the **Adaptive Card** field.
+This is the setting used by the verified live flow shown above. Do not use the
+Azure Logic App expression from the separate Logic App adapter; that endpoint
+accepts a different request contract.
 
 ## Save and store the callback
 

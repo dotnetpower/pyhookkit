@@ -14,9 +14,6 @@ Bookinfo staging scenario.
 | `gitlab-argocd-notification-pipeline.png` | Argo-triggered notification pipeline |
 | `gitlab-incident-pipeline.png` | Incident notification pipeline |
 | `gitlab-maintenance-pipeline.png` | Scheduled maintenance notification |
-| `power-automate-flow-designer.png` | Webhook trigger and Teams action |
-| `power-automate-teams-action.png` | Redacted Teams action configuration |
-| `power-automate-flow-history.png` | Enabled flow and successful runs |
 | `teams-approval-request.png` | Approval card received in Teams |
 
 Captures are cropped to remove account, tenant, subscription, connection,

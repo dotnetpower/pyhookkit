@@ -4,9 +4,10 @@ This runbook demonstrates approval, deployment, incident, and maintenance
 notifications across GitHub, GitLab, Argo CD, AKS, Power Automate, and Microsoft
 Teams.
 
-> **Capture status:** GitHub, GitLab, Argo CD, AKS, Bookinfo, Power Automate run
-> history, and the Teams approval card are included. The remaining Teams cards
-> are pending a working Teams web capture.
+> **Capture status:** GitHub, GitLab, Argo CD, AKS, Bookinfo, and the Teams
+> approval card are included. Power Automate setup and runtime evidence is kept
+> in the separate [Power Automate Teams Workflow guide](power-automate-teams-workflow.md).
+> The remaining Teams cards are pending a working Teams web capture.
 
 ## Architecture
 
@@ -127,92 +128,18 @@ does not present the unsupported group-expansion notice as an action.
 
 _Teams maintenance card capture pending._
 
-## Power Automate delivery
+## Teams delivery dependency
 
-### Create the flow from blank
+All four scenarios use one Power Automate Workflow as the final delivery
+adapter. Its creation, Teams action configuration, callback handling, smoke
+test, run history, and screenshots are intentionally maintained outside this
+cross-platform scenario document.
 
-Do not use the **Send webhook alerts to a channel** gallery template for this
-scenario. Template-origin flows add owner attribution and a **Get template**
-footer that cannot be removed from the Adaptive Card payload.
-
-1. Open [Power Automate](https://make.powerautomate.com) and select the target
-   environment.
-2. Select **Create**, then **Create from blank**.
-3. Name the flow using an environment-neutral name such as
-   `PyHookKit Teams Flow`.
-4. Add the Microsoft Teams trigger **When a Teams webhook request is
-   received**.
-5. Set **Who can trigger the flow?** to **Anyone** for the signed callback URL
-   model used by this example.
-6. Add the Microsoft Teams action **Post card in a chat or channel** directly
-   after the trigger.
-
-The completed flow has one trigger and one action:
-
-![Power Automate flow with Teams webhook trigger and post-card action](assets/integrated-scenario/power-automate-flow-designer.png)
-
-### Configure the Teams action
-
-Set the action fields as follows:
-
-| Field | Value |
-|---|---|
-| **Post as** | `Flow bot` |
-| **Post in** | `Channel` |
-| **Team** | The dedicated synthetic test Team |
-| **Channel** | The dedicated notification test channel |
-| **Adaptive Card** | `triggerBody()?['attachments'][0]['content']` |
-
-![Power Automate Teams post-card action settings](assets/integrated-scenario/power-automate-teams-action.png)
-
-The expression extracts the inner Adaptive Card from PyHookKit's Teams
-`message` envelope. Do not paste the full incoming envelope into the Adaptive
-Card field.
-
-### Save and distribute the callback safely
-
-1. Select **Save**.
-2. Reopen the trigger and copy its generated **HTTP URL**.
-3. Treat the complete URL as a credential because its query string contains the
-   callback signature.
-4. Add it to GitLab under **Settings → CI/CD → Variables** with:
-   - key: `TEAMS_WORKFLOW_URL`;
-   - visibility: **Masked**;
-   - protection: **Protected**;
-   - expansion: disabled.
-5. Do not store the URL in GitHub, Argo CD, Kubernetes manifests, screenshots,
-   terminal transcripts, or repository files.
-6. Add a co-owner before using the flow as a shared or long-lived integration.
-
-See the provider-specific [Power Automate Teams Workflow
-runbook](../infra/teams-workflows/README.md#attribution-free-flow-created-from-blank)
-for footer verification and repeated deployment guidance.
-
-### Smoke test
-
-From `examples/python`, render first:
-
-```shell
-uv run python scenarios/deployment_result/teams.py
-```
-
-After checking that the payload contains no real secret or identity, load the
-ignored local environment and send deliberately:
-
-```shell
-set -a
-. ../../.env
-set +a
-uv run python scenarios/deployment_result/teams.py --send
-```
-
-The CLI must return `state: succeeded`. Confirm the card in Teams and then
-confirm the corresponding Power Automate run is **Succeeded**.
-
-The live flow is enabled and its run history shows the webhook requests used by
-the scenarios completing successfully.
-
-![Power Automate flow details and successful run history](assets/integrated-scenario/power-automate-flow-history.png)
+Complete the [Power Automate Teams Workflow
+guide](power-automate-teams-workflow.md) before running any scenario that sends
+to Teams. The infrastructure-oriented [Teams Workflows
+runbook](../infra/teams-workflows/README.md) covers repeated deployment,
+ownership, and footer verification.
 
 ## Verification
 

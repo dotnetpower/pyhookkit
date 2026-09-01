@@ -3,6 +3,11 @@
 This directory owns reusable Workflow templates and the owner, connection, and
 callback URL bootstrap runbook.
 
+The user-facing [Power Automate Teams Workflow
+guide](../../docs/power-automate-teams-workflow.md) contains the from-blank
+creation steps, screenshots, callback storage, and smoke test. This runbook
+focuses on provider lifecycle, repeat deployment, and attribution verification.
+
 ## Quick template bootstrap
 
 The quickest bootstrap uses a one-time manually created Teams Workflow:
@@ -38,25 +43,8 @@ It is flow metadata, not an Adaptive Card element.
 
 ## Attribution-free flow created from blank
 
-The following configuration was verified against the test channel without
-modifying the template Workflow:
-
-1. Open [Power Automate](https://make.powerautomate.com).
-2. Select **Create from blank**.
-3. Add **When a Teams webhook request is received**.
-4. Set **Who can trigger the flow?** to **Anyone** for the current callback URL
-   credential model.
-5. Add **Post card in a chat or channel**.
-6. Set **Post as** to **Flow bot** and **Post in** to **Channel**.
-7. Select the target Team and Channel.
-8. In **Adaptive Card**, insert this expression:
-
-   ```text
-   triggerBody()?['attachments'][0]['content']
-   ```
-
-9. Save the flow, copy its generated HTTP URL, and replace
-   `TEAMS_WORKFLOW_URL` in the ignored `.env`.
+Create and test this flow by following the
+[Power Automate Teams Workflow guide](../../docs/power-automate-teams-workflow.md).
 
 Live verification showed that this from-blank flow renders titles, severity
 colors, facts, buttons, and native user mentions without the owner attribution
@@ -68,19 +56,6 @@ visible **Original template** link as an attribution risk and run a channel
 smoke test before promoting its callback URL. **Save As** is not considered a
 reliable workaround because copy behavior can preserve or recreate template
 metadata; creating from blank is the reproducible path verified here.
-
-Load and test the callback from the repository root:
-
-```shell
-set -a
-. ./.env
-set +a
-python3 examples/python/fundamentals/00_http_request/teams.py --send
-```
-
-The URL is a credential. Do not commit, print, or attach it to an issue. Add a
-co-owner for a shared or long-lived Workflow so delivery does not depend on one
-person's account.
 
 ## Headless deployment roadmap
 

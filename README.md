@@ -36,9 +36,9 @@ Features such as true replies, updates, deletion, or controlled sender identity
 require a Teams bot or Microsoft Graph adapter.
 
 Follow the [Power Automate Teams Workflow setup
-guide](infra/teams-workflows/README.md#attribution-free-flow-created-from-blank)
-for the verified trigger, action, Adaptive Card expression, credential handling,
-and smoke-test steps. See [Teams delivery
+guide](docs/power-automate-teams-workflow.md) for the verified trigger, action,
+Adaptive Card expression, credential handling, screenshots, and smoke-test
+steps. See [Teams delivery
 options](docs/teams-delivery-options.md) for the tested alternatives and their
 trade-offs.
 

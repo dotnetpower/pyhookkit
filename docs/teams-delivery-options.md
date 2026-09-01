@@ -71,8 +71,10 @@ step-by-step flow designer. Direct creation through Dataverse workflow JSON is
 an advanced, version-sensitive alternative and is not the recommended
 bootstrap path.
 
-See the [Teams Workflows runbook](../infra/teams-workflows/README.md) for the
-current procedure and deferred automation checklist.
+See the [Power Automate Teams Workflow guide](power-automate-teams-workflow.md)
+for manual creation and smoke testing, and the
+[Teams Workflows runbook](../infra/teams-workflows/README.md) for deployment
+automation and ownership.
 
 ## Rendering and attribution
 

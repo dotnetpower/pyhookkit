@@ -38,7 +38,7 @@ Bootstrap in this order:
 4. install and configure [Argo CD](../infra/integrations/argocd/README.md);
 5. add the protected [GitHub approval workflow](../infra/integrations/github/README.md);
 6. configure the from-blank
-   [Power Automate Workflow](../infra/teams-workflows/README.md#attribution-free-flow-created-from-blank).
+   [Power Automate Teams Workflow](power-automate-teams-workflow.md).
 
 The first iteration intentionally uses an internal health probe rather than a
 full Prometheus stack. Argo CD, Istio, managed monitoring, Key Vault CSI, and a

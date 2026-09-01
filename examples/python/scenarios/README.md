@@ -6,10 +6,10 @@ renderers. Each sibling `slack.py` and `teams.py` imports the same
 
 | Scenario | Required meaning and action |
 |---|---|
-| `deployment_result` | result, service, environment, revision, duration, time, deployment link |
-| `incident_alert_acknowledgment` | severity, incident, service, start, status, responder, acknowledgment and runbook links |
-| `approval_request` | subject, requester, deadline, approver, review link |
-| `maintenance_notice` | window, affected services, impact, owner, status-page link |
+| [`deployment_result`](deployment_result/README.md) | result, service, environment, revision, duration, time, deployment link |
+| [`incident_alert_acknowledgment`](incident_alert_acknowledgment/README.md) | severity, incident, service, start, status, responder, acknowledgment and runbook links |
+| [`approval_request`](approval_request/README.md) | subject, requester, deadline, approver, review link |
+| [`maintenance_notice`](maintenance_notice/README.md) | window, affected services, impact, owner, status-page link |
 
 Run a renderer from `examples/python`:
 
@@ -58,7 +58,8 @@ because Power Automate Workflow and Logic App triggers accept different request
 contracts.
 
 `TEAMS_WORKFLOW_URL` should reference the from-blank flow documented in the
-Teams Workflows runbook when template attribution is not acceptable.
+[Power Automate Teams Workflow
+guide](../../../docs/power-automate-teams-workflow.md).
 
 ## Automation CLI
 
@@ -98,8 +99,9 @@ represented outside Teams. The GitLab jobs use both options so cards avoid
 duplicating the fallback body and do not present a setup warning as if it were
 an actionable mention.
 
-The integrated AKS example uses this CLI from GitLab. GitHub approval and Argo
-CD synchronization submit canonical JSON through GitLab's trigger webhook,
-while the scheduled maintenance job invokes the typed scenario arguments.
+The integrated AKS example uses this CLI from GitLab. GitHub and the AKS probe
+submit canonical JSON through `CANONICAL_NOTIFICATION` on the GitLab trigger
+API. Argo CD uses the authenticated GitLab pipeline API, while scheduled
+maintenance invokes the typed scenario arguments.
 
 All names, IDs, routes, timestamps, and URLs are synthetic.

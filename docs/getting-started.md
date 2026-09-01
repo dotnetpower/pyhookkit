@@ -45,3 +45,11 @@ uv run python fundamentals/01_hello_world/teams.py
 Slack F01-F07 and F10 also accept `--send` after `.env` is loaded. See
 [Slack examples](slack-examples.md) before sending mention, thread, or mutation
 examples.
+
+Before sending Teams examples, create the from-blank
+[Power Automate Teams Workflow](power-automate-teams-workflow.md). Teams
+examples render without live credentials and send only when `--send` or
+`--send-logic-app` is supplied.
+
+For the full GitHub, GitLab, Argo CD, and AKS demonstration, follow the
+[integrated Bookinfo scenario](integrated-bookinfo-scenario.md).

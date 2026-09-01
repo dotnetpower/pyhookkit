@@ -5,10 +5,10 @@ Each directory contains one provider-neutral `notification.json` plus frozen
 
 | Vector | Semantics preserved by both snapshots |
 |---|---|
-| `deployment-result` | result, severity, service, environment, revision, duration, timestamp, details link |
-| `incident-alert-acknowledgment` | alert, severity, incident, service, start, acknowledgment state, responder alias, acknowledgment and runbook links |
-| `approval-request` | request, severity, subject, requester, deadline, approver alias, review link |
-| `maintenance-notice` | notice, severity, window, affected services, expected impact, owner alias, status-page link |
+| [`deployment-result`](deployment-result/) | result, severity, service, environment, revision, duration, timestamp, details link |
+| [`incident-alert-acknowledgment`](incident-alert-acknowledgment/) | alert, severity, incident, service, start, acknowledgment state, responder alias, acknowledgment and runbook links |
+| [`approval-request`](approval-request/) | request, severity, subject, requester, deadline, approver alias, review link |
+| [`maintenance-notice`](maintenance-notice/) | notice, severity, window, affected services, expected impact, owner alias, status-page link |
 
 Slack snapshots use structured Block Kit facts, native mapped mentions, and
 link buttons. Teams snapshots freeze an image-led editorial header, semantic

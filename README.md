@@ -96,20 +96,27 @@ use synthetic HTML or renderer previews to fill this gallery.
 | [F07 Routing](examples/python/fundamentals/07_routing) | <img src="./docs/assets/card-previews/route-slack.png" alt="Routed notification in Slack"> | <img src="./docs/assets/card-previews/route-teams.png" alt="Routed notification in Microsoft Teams"> |
 | [Deployment result](examples/python/scenarios/deployment_result) | _Screenshot pending: `deployment-result-slack.png`_ | _Screenshot pending: `deployment-result-teams.png`_ |
 | [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | _Screenshot pending: `incident-alert-acknowledgment-slack.png`_ | _Screenshot pending: `incident-alert-acknowledgment-teams.png`_ |
-| [Approval request](examples/python/scenarios/approval_request) | _Screenshot pending: `approval-request-slack.png`_ | _Screenshot pending: `approval-request-teams.png`_ |
+| [Approval request](examples/python/scenarios/approval_request) | _Screenshot pending: `approval-request-slack.png`_ | <img src="./docs/assets/card-previews/approval-request-teams.png" alt="Bookinfo deployment approval request in Microsoft Teams"> |
 | [Maintenance notice](examples/python/scenarios/maintenance_notice) | _Screenshot pending: `maintenance-notice-slack.png`_ | _Screenshot pending: `maintenance-notice-teams.png`_ |
 
 ## Repository layout
 
-- `contracts/`: language-neutral schemas and paired test vectors
-- `docs/`: public usage, architecture, security, and migration guidance
-- `examples/python/`: Python 3.12 reference implementation and examples
-- `infra/`: provider configuration, runtime infrastructure, integrations, and
-  policy checks
+- [`contracts/`](contracts/README.md): language-neutral schemas and paired test
+  vectors
+- [`docs/`](docs/README.md): public usage, architecture, security, and
+  migration guidance
+- [`examples/`](examples/README.md): reference implementations and examples
+- [`infra/`](infra/README.md): provider configuration, runtime infrastructure,
+  integrations, and policy checks
 
 Examples are organized by capability or scenario. Where parity is complete,
 Slack and Teams entrypoints are siblings and consume the same canonical
 notification.
+
+Every user-facing documentation, infrastructure, test, and executable-example
+directory has a README entrypoint. Source-package directories, frozen fixture
+leaf directories, generated caches, and nested image-only asset directories are
+documented by their nearest parent README instead of duplicating local files.
 
 ## Local configuration
 

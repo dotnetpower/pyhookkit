@@ -5,6 +5,18 @@ without coupling them to a language implementation.
 
 Real environment overlays, generated credentials, and state remain private.
 
+## Layout
+
+- [`azure/`](azure/README.md): AKS Bicep, Logic Apps, and parameters;
+- [`gitops/`](gitops/README.md): declarative workload desired state;
+- [`integrations/`](integrations/README.md): GitHub, GitLab, and Argo CD;
+- [`runtime/`](runtime/README.md): reserved local, container, and Azure
+  composition boundaries;
+- [`slack/`](slack/README.md): Slack app manifest;
+- [`teams-workflows/`](teams-workflows/README.md): Power Platform lifecycle and
+  attribution verification;
+- [`policy/`](policy/README.md): infrastructure security expectations.
+
 ## Integrated Bookinfo scenario
 
 The minimal end-to-end environment assigns one responsibility to each control

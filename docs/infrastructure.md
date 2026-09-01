@@ -44,3 +44,6 @@ The first iteration intentionally uses an internal health probe rather than a
 full Prometheus stack. Argo CD, Istio, managed monitoring, Key Vault CSI, and a
 private event service can be introduced independently when their capabilities
 are actually needed.
+
+The complete execution sequence and redacted live captures are in the
+[integrated Bookinfo scenario](integrated-bookinfo-scenario.md).

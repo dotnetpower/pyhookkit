@@ -22,13 +22,13 @@ The entrypoint converts the Workflow envelope to the Logic App request contract.
 
 | ID | Pattern | Best-practice focus |
 |---|---|---|
-| T00 | Visual hierarchy | Critical content first, concise header and callout |
-| T01 | Metrics dashboard | Two-column responsive metrics without fixed widths |
-| T02 | Hero image | Microsoft editorial sample, alt text, caption and fallback |
-| T03 | Progressive disclosure | Limited actions and in-card detail toggle |
-| T04 | User mention | Teams mention entity with runtime-only identity |
-| T05 | Progress timeline | Scannable status sequence and current-step emphasis |
-| T06 | Image gallery | Three attributed repository-hosted sample images |
+| T00 | [Visual hierarchy](00_visual_hierarchy/README.md) | Critical content first, concise header and callout |
+| T01 | [Metrics dashboard](01_metrics_dashboard/README.md) | Two-column responsive metrics without fixed widths |
+| T02 | [Hero image](02_hero_image/README.md) | Microsoft editorial sample, alt text, caption and fallback |
+| T03 | [Progressive disclosure](03_progressive_disclosure/README.md) | Limited actions and in-card detail toggle |
+| T04 | [User mention](04_user_mention/README.md) | Teams mention entity with runtime-only identity |
+| T05 | [Progress timeline](05_progress_timeline/README.md) | Scannable status sequence and current-step emphasis |
+| T06 | [Image gallery](06_image_gallery/README.md) | Three attributed repository-hosted sample images |
 
 The gallery targets Adaptive Card 1.4 for conservative Workflow compatibility.
 It avoids fixed pixel widths and keeps ColumnSets to two columns. Newer

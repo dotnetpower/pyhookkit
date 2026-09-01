@@ -44,6 +44,12 @@ This directory accepts actual Slack and Microsoft Teams client captures only.
 |---|---|
 | ![Routed notification in Slack](./route-slack.png) | ![Routed notification in Microsoft Teams](./route-teams.png) |
 
+## Scenario: Approval request
+
+| Slack | Microsoft Teams |
+|---|---|
+| _Capture pending_ | ![Bookinfo deployment approval request in Microsoft Teams](./approval-request-teams.png) |
+
 Use these filenames:
 
 - `hello-world-slack.png`

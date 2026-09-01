@@ -79,8 +79,8 @@ OfficeDev/Microsoft-Teams-Adaptive-Card-Samples repository under the MIT License
 Card design does not control the Teams **Get template** footer. Gallery-template
 flows retain an **Original template** relationship and receive the footer
 outside the Adaptive Card payload. Use the verified from-blank flow in the
-[Teams Workflows runbook](../infra/teams-workflows/README.md) when attribution
-must be absent.
+[Power Automate Teams Workflow guide](power-automate-teams-workflow.md) when
+attribution must be absent.
 
 ## Verification
 

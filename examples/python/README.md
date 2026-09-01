@@ -23,6 +23,17 @@ Teams-specific presentation patterns live under `teams_adaptive_cards`. The
 gallery demonstrates hierarchy, metrics, images, progressive disclosure,
 mentions, and progress timelines without expanding the provider-neutral domain.
 
+## Catalog
+
+- [`fundamentals/`](fundamentals/README.md): F00-F10 paired capabilities;
+- [`scenarios/`](scenarios/README.md): deployment, incident, approval, and
+  maintenance notifications;
+- [`slack_operations/`](slack_operations/README.md): Slack Web API and inbound
+  protocols;
+- [`teams_adaptive_cards/`](teams_adaptive_cards/README.md): Teams-only
+  presentation patterns;
+- [`tests/`](tests/README.md): unit, contract, and integration boundaries.
+
 All library-backed Teams examples render by default. Use `--send` for a Power
 Automate Workflow callback, or `--send-logic-app` for the routed Azure Logic App
 contract:
@@ -55,4 +66,13 @@ The stable public value objects are importable from the package root:
 
 ```python
 from pyhookkit import CanonicalNotification, Severity
+```
+
+## Verify
+
+```shell
+uv run ruff format --check .
+uv run ruff check .
+uv run pyright
+uv run pytest -q
 ```

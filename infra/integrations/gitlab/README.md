@@ -30,6 +30,7 @@ Configure these masked and protected values in GitLab:
 | Variable | Purpose |
 |---|---|
 | `TEAMS_WORKFLOW_URL` | Power Automate Workflow callback URL |
+
 Configure provider identity variables only when a canonical notification
 contains a native user mention. Group mentions remain visible as an explicit
 Teams capability notice and do not require Graph permissions.
@@ -39,9 +40,10 @@ the project. The promotion job uses its short-lived `CI_JOB_TOKEN` to update the
 protected `gitops-staging` branch, so no long-lived repository write token is
 required.
 
-Create separate pipeline trigger tokens for GitHub, Argo CD, and the AKS probe.
-Separate tokens make each producer independently revocable even though they
-target the same pipeline.
+Create separate pipeline trigger tokens for GitHub and the AKS probe. Argo CD
+uses a short-lived GitLab project access token in the `PRIVATE-TOKEN` header.
+Separate credentials make each producer independently revocable even though
+they target the same pipeline.
 
 ## Trigger contracts
 

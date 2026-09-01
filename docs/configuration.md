@@ -115,9 +115,8 @@ You need:
 
 1. A Microsoft 365 account that can create Workflows in Teams.
 2. A synthetic test team and channel.
-3. A Workflow created from **Send webhook alerts to a channel**, or a flow
-   using the Teams webhook request trigger and an action that posts to the test
-   channel.
+3. A Power Automate flow created from blank with the Teams webhook request
+   trigger and an action that posts to the test channel.
 4. An authorized Teams connection and a confirmed Workflow owner; add a
    co-owner for any shared or long-lived environment.
 5. The HTTP POST callback URL generated after the Workflow is saved.
@@ -138,12 +137,10 @@ standalone Adaptive Card examples for both Workflow and Logic App delivery.
 and used only by the standalone mention example. Do not set these example
 values in shared production notification configuration.
 
-Create the Workflow using the
-[Microsoft Teams Incoming Webhooks and Workflows documentation](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook).
-The current manual bootstrap and deferred deployment automation plan are in the
+Create and smoke-test the from-blank flow with the
+[Power Automate Teams Workflow guide](power-automate-teams-workflow.md).
+The deferred deployment automation and ownership plan are in the
 [Teams Workflows runbook](../infra/teams-workflows/README.md).
-Use the from-blank flow in that runbook when the gallery template's
-owner/**Get template** attribution is not acceptable.
 
 For repeated environments, deploy the verified flow as a Power Platform
 Solution with Power Platform CLI and retrieve each environment's callback URL

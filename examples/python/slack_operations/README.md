@@ -9,17 +9,17 @@ and credentials loaded from the repository `.env`.
 
 | ID | Capability | Required bot scopes |
 |---|---|---|
-| O00 | Authentication check | none beyond a valid token |
-| O01 | Channels and members | `channels:read`, `groups:read` |
-| O02 | Users and user groups | `users:read`, `usergroups:read` |
-| O03 | Message lifecycle | `chat:write` |
-| O04 | Channel and broadcast mentions | `chat:write` |
-| O05 | Interactive approval | `chat:write`; signing secret |
-| O06 | File upload | `files:write` |
-| O07 | Reactions | `chat:write`, `reactions:write` |
-| O08 | Scheduled and ephemeral messages | `chat:write` |
-| O09 | Events API HTTP | `app_mentions:read`; signing secret |
-| O10 | Socket Mode | `app_mentions:read`; app token `connections:write` |
+| O00 | [Authentication check](00_auth_test/README.md) | none beyond a valid token |
+| O01 | [Channels and members](01_channels/README.md) | `channels:read`, `groups:read` |
+| O02 | [Users and user groups](02_identities/README.md) | `users:read`, `usergroups:read` |
+| O03 | [Message lifecycle](03_message_lifecycle/README.md) | `chat:write` |
+| O04 | [Channel and broadcast mentions](04_mentions/README.md) | render-only |
+| O05 | [Interactive approval](05_interactive_approval/README.md) | `chat:write`; signing secret |
+| O06 | [File upload](06_file_upload/README.md) | `files:write` |
+| O07 | [Reactions](07_reactions/README.md) | `chat:write`, `reactions:write` |
+| O08 | [Scheduled and ephemeral messages](08_scheduled_ephemeral/README.md) | `chat:write` |
+| O09 | [Events API HTTP](09_events_http/README.md) | `app_mentions:read`; signing secret |
+| O10 | [Socket Mode](10_socket_mode/README.md) | `app_mentions:read`; app token `connections:write` |
 
 Private conversations are visible only when the token has access. Discovery
 uses cursor pagination and intentionally does not request email addresses.

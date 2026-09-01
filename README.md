@@ -54,6 +54,10 @@ renders and sends them through Power Automate.
 See the [infrastructure guide](docs/infrastructure.md#aks-bookinfo-notification-environment)
 for the architecture and bootstrap order.
 
+The [integrated Bookinfo scenario](docs/integrated-bookinfo-scenario.md)
+includes the live approval, GitOps promotion, Argo CD reconciliation, incident,
+maintenance, and Teams delivery evidence.
+
 ### Example coverage
 
 | Example | Slack | Microsoft Teams |

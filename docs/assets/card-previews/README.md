@@ -50,6 +50,24 @@ This directory accepts actual Slack and Microsoft Teams client captures only.
 |---|---|
 | _Capture pending_ | ![Bookinfo deployment approval request in Microsoft Teams](./approval-request-teams.png) |
 
+## Scenario: Deployment result
+
+| Slack | Microsoft Teams |
+|---|---|
+| _Capture pending_ | ![Bookinfo deployment result in Microsoft Teams](./deployment-result-teams.png) |
+
+## Scenario: Incident alert and acknowledgment
+
+| Slack | Microsoft Teams |
+|---|---|
+| _Capture pending_ | ![Bookinfo incident alert in Microsoft Teams](./incident-alert-acknowledgment-teams.png) |
+
+## Scenario: Maintenance notice
+
+| Slack | Microsoft Teams |
+|---|---|
+| _Capture pending_ | ![Scheduled maintenance notice in Microsoft Teams](./maintenance-notice-teams.png) |
+
 Use these filenames:
 
 - `hello-world-slack.png`

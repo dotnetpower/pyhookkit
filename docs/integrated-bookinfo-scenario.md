@@ -4,10 +4,9 @@ This runbook demonstrates approval, deployment, incident, and maintenance
 notifications across GitHub, GitLab, Argo CD, AKS, Power Automate, and Microsoft
 Teams.
 
-> **Capture status:** GitHub, GitLab, Argo CD, AKS, Bookinfo, and the Teams
-> approval card are included. Power Automate setup and runtime evidence is kept
+> **Capture status:** GitHub, GitLab, Argo CD, AKS, Bookinfo, and all four Teams
+> scenario cards are included. Power Automate setup and runtime evidence is kept
 > in the separate [Power Automate Teams Workflow guide](power-automate-teams-workflow.md).
-> The remaining Teams cards are pending a working Teams web capture.
 
 ## Architecture
 
@@ -80,7 +79,7 @@ The compact approval card preserves the selected application and Reviews
 version, requester, GitHub environment reviewer boundary, deadline, and review
 action without repeating the canonical fallback body.
 
-![Teams deployment approval request](assets/integrated-scenario/teams-approval-request.png)
+![Teams deployment approval request](assets/card-previews/approval-request-teams.png)
 
 ## Scenario 2: GitOps promotion and deployment result
 
@@ -96,7 +95,7 @@ canonical-notification pipeline.
 
 ![GitLab pipeline started by Argo CD](assets/integrated-scenario/gitlab-argocd-notification-pipeline.png)
 
-_Teams deployment-result card capture pending._
+![Teams Bookinfo deployment result](assets/card-previews/deployment-result-teams.png)
 
 ## Scenario 3: incident alert and acknowledgment
 
@@ -112,7 +111,7 @@ provider adapter.
 The acknowledgment action opens the GitLab new-issue page. GitLab Issues, not
 Teams, is the acknowledgment system of record.
 
-_Teams incident card capture pending._
+![Teams Bookinfo incident alert and acknowledgment actions](assets/card-previews/incident-alert-acknowledgment-teams.png)
 
 ## Scenario 4: maintenance notice
 
@@ -126,7 +125,7 @@ The live Teams renderer uses compact presentation: required meaning remains in
 the canonical fallback, while the visible card avoids repeating the body and
 does not present the unsupported group-expansion notice as an action.
 
-_Teams maintenance card capture pending._
+![Teams scheduled maintenance notice](assets/card-previews/maintenance-notice-teams.png)
 
 ## Teams delivery dependency
 

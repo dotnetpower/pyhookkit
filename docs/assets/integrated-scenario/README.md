@@ -14,7 +14,6 @@ Bookinfo staging scenario.
 | `gitlab-argocd-notification-pipeline.png` | Argo-triggered notification pipeline |
 | `gitlab-incident-pipeline.png` | Incident notification pipeline |
 | `gitlab-maintenance-pipeline.png` | Scheduled maintenance notification |
-| `teams-approval-request.png` | Approval card received in Teams |
 
 Captures are cropped to remove account, tenant, subscription, connection,
 callback URL, Team, Channel, and other environment-specific identity details.

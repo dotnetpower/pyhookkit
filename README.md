@@ -94,10 +94,10 @@ use synthetic HTML or renderer previews to fill this gallery.
 | [F05 Link and action](examples/python/fundamentals/05_link_and_action) | <img src="./docs/assets/card-previews/link-and-action-slack.png" alt="Link and action notification in Slack"> | <img src="./docs/assets/card-previews/link-and-action-teams.png" alt="Link and action notification in Microsoft Teams"> |
 | [F06 Image](examples/python/fundamentals/06_image) | <img src="./docs/assets/card-previews/image-slack.png" alt="Image notification in Slack"> | <img src="./docs/assets/card-previews/image-teams.png" alt="Image notification in Microsoft Teams"> |
 | [F07 Routing](examples/python/fundamentals/07_routing) | <img src="./docs/assets/card-previews/route-slack.png" alt="Routed notification in Slack"> | <img src="./docs/assets/card-previews/route-teams.png" alt="Routed notification in Microsoft Teams"> |
-| [Deployment result](examples/python/scenarios/deployment_result) | _Screenshot pending: `deployment-result-slack.png`_ | _Screenshot pending: `deployment-result-teams.png`_ |
-| [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | _Screenshot pending: `incident-alert-acknowledgment-slack.png`_ | _Screenshot pending: `incident-alert-acknowledgment-teams.png`_ |
+| [Deployment result](examples/python/scenarios/deployment_result) | _Screenshot pending: `deployment-result-slack.png`_ | <img src="./docs/assets/card-previews/deployment-result-teams.png" alt="Bookinfo deployment result in Microsoft Teams"> |
+| [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | _Screenshot pending: `incident-alert-acknowledgment-slack.png`_ | <img src="./docs/assets/card-previews/incident-alert-acknowledgment-teams.png" alt="Bookinfo incident alert in Microsoft Teams"> |
 | [Approval request](examples/python/scenarios/approval_request) | _Screenshot pending: `approval-request-slack.png`_ | <img src="./docs/assets/card-previews/approval-request-teams.png" alt="Bookinfo deployment approval request in Microsoft Teams"> |
-| [Maintenance notice](examples/python/scenarios/maintenance_notice) | _Screenshot pending: `maintenance-notice-slack.png`_ | _Screenshot pending: `maintenance-notice-teams.png`_ |
+| [Maintenance notice](examples/python/scenarios/maintenance_notice) | _Screenshot pending: `maintenance-notice-slack.png`_ | <img src="./docs/assets/card-previews/maintenance-notice-teams.png" alt="Scheduled maintenance notice in Microsoft Teams"> |
 
 ## Repository layout
 

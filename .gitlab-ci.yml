@@ -35,10 +35,9 @@ variables:
 
 validate-gitops:
   stage: validate
-  image:
-    name: registry.k8s.io/kubectl:v1.34.0
-    entrypoint:
-      - ""
+  image: alpine:3.22
+  before_script:
+    - apk add --no-cache kubectl
   script:
     - kubectl kustomize infra/gitops/bookinfo/base >/dev/null
     - kubectl kustomize infra/gitops/bookinfo/overlays/staging >/dev/null

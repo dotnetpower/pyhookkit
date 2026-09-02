@@ -310,6 +310,12 @@ reflect the change, then reauthorize the existing Teams connection and rerun a
 synthetic card. A `202 Accepted` trigger response is not evidence that the
 Teams action succeeded.
 
+If the action returns `Unauthorized` with `Teams has been disabled on the
+tenant`, the tenant needs an active Microsoft 365 subscription that includes
+Teams and the connection user needs an enabled Teams service plan. Enabling
+enterprise applications cannot substitute for the subscription or user
+license.
+
 ### Power Automate rejects the request
 
 Check that the caller sends `channelLink` alongside the Teams `message`

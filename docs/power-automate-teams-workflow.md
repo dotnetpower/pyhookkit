@@ -25,6 +25,8 @@ and avoided that footer in the verified environment.
 
 - permission to create a Power Automate cloud flow;
 - a Microsoft Teams connection authorized for the destination Team;
+- a dedicated licensed Microsoft 365 connection user for shared or production
+   environments;
 - a dedicated synthetic test Team and channel;
 - permission to create protected GitLab CI/CD variables;
 - Python 3.12 and `uv` for the smoke test.
@@ -88,7 +90,8 @@ accepts a different request contract.
    - expansion: disabled.
 6. Do not store the URL in GitHub, Argo CD, Kubernetes manifests, screenshots,
    command output, or repository files.
-7. Add a co-owner before using the flow as a shared or long-lived integration.
+7. Add at least two named operational co-owners before using the flow as a
+   shared or long-lived integration.
 
 ## Smoke test
 

@@ -8,6 +8,30 @@ guide](../../docs/power-automate-teams-workflow.md) contains the from-blank
 creation steps, screenshots, callback storage, and smoke test. This runbook
 focuses on provider lifecycle, repeat deployment, and attribution verification.
 
+## Production identity model
+
+Keep flow ownership, connector authentication, and runtime invocation as three
+separate security boundaries:
+
+| Boundary | Identity | Required access |
+|---|---|---|
+| Solution-aware flow owner | Dataverse application user for an Entra service principal | Own and activate the imported flow |
+| Teams connection | Dedicated licensed Microsoft 365 user | Member of the destination Team and any required private or shared channel |
+| Runtime caller | CI/CD or workload identity | Possession of the signed Workflow callback URL only |
+| Operations | At least two named administrators | Co-owner access for recovery and connection reauthorization |
+
+The Teams connector's default authentication is a non-shareable user OAuth
+connection. Assigning the flow to a service principal does not convert that
+connection to application authentication. Do not share the dedicated user's
+password. Restrict interactive access, apply Conditional Access appropriate to
+the connector authorization flow, and monitor license, sign-in, and connection
+health separately from flow ownership.
+
+Do not grant the dedicated user a tenant administrator role. Team membership is
+sufficient for a standard destination channel. Private and shared channels are
+visible only when the user is a member, and the Teams connector does not
+currently support posting messages or Adaptive Cards to private channels.
+
 ## Quick template bootstrap
 
 The quickest bootstrap uses a one-time manually created Teams Workflow:
@@ -57,30 +81,109 @@ smoke test before promoting its callback URL. **Save As** is not considered a
 reliable workaround because copy behavior can preserve or recreate template
 metadata; creating from blank is the reproducible path verified here.
 
-## Headless deployment roadmap
+## Automated deployment
 
 The Power Automate portal is not required for repeated deployments after a
 from-blank flow has been authored once. The supported ALM path is to store the
 flow inside a Power Platform Solution and deploy the Solution with Power
 Platform CLI.
 
-The future automation should:
+The checked-in tools automate the supported lifecycle after a from-blank flow
+has been authored and exported as a Solution:
 
 1. add the verified from-blank flow to an unmanaged Solution;
 2. replace its concrete Teams connection with a connection reference;
 3. represent the target Team and Channel with environment variables;
-4. authenticate Power Platform CLI with an approved workload identity;
+4. authenticate Power Platform CLI with an approved service principal;
 5. export and unpack the unmanaged Solution as the source artifact;
 6. pack and import the Solution into the target environment;
 7. bind the target connection reference and environment variables;
 8. activate the imported flow;
-9. retrieve the HTTP trigger callback URL through the Power Automate management
-   API `listCallbackUrl` operation;
-10. write the URL directly to the target secret store;
-11. run a synthetic rich-card smoke test and assert that the posted card has no
+9. assign and verify the Dataverse application user as flow owner;
+10. optionally inventory the channels visible through Microsoft Graph;
+11. retrieve the HTTP trigger callback URL and write it directly to the target
+    secret store;
+12. run a synthetic rich-card smoke test and assert that the posted card has no
     template attribution.
 
-The automation cannot assume that Microsoft connection consent is portable.
+Steps 1-3 and the first Teams OAuth authorization are one-time environment
+bootstrap operations. The flow must contain exactly one
+`/providers/Microsoft.PowerApps/apis/shared_teams` connection reference and the
+Team and Channel IDs must be represented by Solution environment variables.
+
+Authenticate `pac` before running the deployment. In CI, inject the client
+secret from the approved secret store; never place it in a repository file or
+shell history:
+
+```shell
+pac auth create \
+  --name pyhookkit-production \
+  --applicationId "$POWER_PLATFORM_APPLICATION_ID" \
+  --clientSecret "$POWER_PLATFORM_CLIENT_SECRET" \
+  --tenant "$POWER_PLATFORM_TENANT_ID"
+```
+
+The service principal must already exist as a Dataverse application user in
+the target environment. Use the narrowest role that can import the Solution,
+activate its flow, and assign the Process row. Do not retain the default System
+Administrator role after bootstrap.
+
+A service principal application user cannot hold a user license. If the flow
+uses premium features, assign a Power Automate Process license to the
+solution-aware flow or designate a sufficiently licensed human co-owner on the
+flow details page. A standard-connector-only flow remains subject to the
+tenant's non-licensed request pool; monitor that pool rather than assuming the
+dedicated Teams connection user's license transfers to the flow owner.
+
+Run the deployment from the repository root after injecting the Dataverse and
+Graph access tokens into the environment. The scripts never pass either token
+as a command argument. Set `SOLUTION_FOLDER` to the checked-in output of
+`pac solution clone` or `pac solution unpack`; this repository does not
+fabricate the environment-specific initial flow definition:
+
+```shell
+mkdir -p infra/teams-workflows/.local
+
+infra/teams-workflows/bin/deploy-solution.sh \
+  --solution-folder "$SOLUTION_FOLDER" \
+  --solution-zip infra/teams-workflows/.local/pyhookkit-teams.zip \
+  --package-type Managed \
+  --environment "https://example.crm.dynamics.com" \
+  --teams-connection-id "$TEAMS_CONNECTION_ID" \
+  --team-schema-name pyk_TeamId \
+  --team-id "$TEAMS_TEAM_ID" \
+  --channel-schema-name pyk_ChannelId \
+  --channel-id "$TEAMS_CHANNEL_ID" \
+  --flow-id "$TEAMS_FLOW_ID" \
+  --application-id "$POWER_PLATFORM_APPLICATION_ID" \
+  --channel-report infra/teams-workflows/.local/channels.json \
+  --include-incoming \
+  --smoke-test
+```
+
+`prepare-deployment-settings.py` rejects missing or duplicate Teams connection
+references, missing destination variables, invalid Team IDs, and signed URLs.
+`set-flow-owner.py` resolves exactly one enabled Dataverse application user,
+updates the flow `ownerid`, and reads it back. `list-team-channels.py` requests
+only `id`, `displayName`, and `membershipType`, follows Graph pagination, and
+writes the report with mode `0600`. `--smoke-test` sends the synthetic
+deployment-result scenario through `TEAMS_WORKFLOW_URL` and fails unless the
+redacted delivery result succeeds. Retrieve that URL through the supported
+administrative procedure for the target environment and inject it from the
+secret store; the deployment script never prints it or writes it to disk.
+
+For a delegated token, grant `Channel.ReadBasic.All`; the report then reflects
+only private and shared channels visible to the signed-in user. For an
+application token, prefer Team-scoped resource-specific consent
+`ChannelSettings.Read.Group` with the `/channels` endpoint. Use tenant-wide
+application `Channel.ReadBasic.All` only when the application must inventory
+more than the consented Team. The `--include-incoming` option calls
+`/allChannels`, requires application `Channel.ReadBasic.All`, and includes
+incoming shared channels. Add application `Team.ReadBasic.All` only when Team
+discovery is required; this tooling accepts a configured Team ID and does not
+need it.
+
+The automation does not assume that Microsoft connection consent is portable.
 Initial connection authorization, tenant policy approval, and Workflow
 ownership may remain environment bootstrap steps. The generated callback URL is
 environment-specific runtime state and must never be committed to a Solution
@@ -102,7 +205,7 @@ The recommended boundary is therefore:
 - **environment bootstrap:** authorize the Teams connection when tenant policy
   requires an interactive administrator or owner.
 
-Before implementing this roadmap, confirm the current
+Before upgrading the tooling, confirm the current
 [Power Platform CLI Solution commands](https://learn.microsoft.com/power-platform/developer/cli/reference/solution),
 [cloud-flow code APIs](https://learn.microsoft.com/power-automate/manage-flows-with-code),
 and Teams Workflow behavior because callback URL lifecycle and connector

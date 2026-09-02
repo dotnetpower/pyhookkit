@@ -117,9 +117,11 @@ You need:
 2. A synthetic test team and channel.
 3. A Power Automate flow created from blank with the Teams webhook request
    trigger and an action that posts to the test channel.
-4. An authorized Teams connection and a confirmed Workflow owner; add a
-   co-owner for any shared or long-lived environment.
-5. The HTTP POST callback URL generated after the Workflow is saved.
+4. An authorized Teams connection owned by a dedicated licensed Microsoft 365
+  user that is a member of the destination Team.
+5. A Dataverse application user for service-principal ownership in shared or
+  production environments, plus at least two named operational co-owners.
+6. The HTTP POST callback URL generated after the Workflow is saved.
 
 Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`. The
 Workflow owns its target team, channel, connection, and authentication policy,
@@ -140,7 +142,8 @@ values in shared production notification configuration.
 
 Create and smoke-test the from-blank flow with the
 [Power Automate Teams Workflow guide](power-automate-teams-workflow.md).
-The deferred deployment automation and ownership plan are in the
+The Solution deployment, service-principal ownership, and channel-access tools
+are in the
 [Teams Workflows runbook](../infra/teams-workflows/README.md).
 
 For repeated environments, deploy the verified flow as a Power Platform

@@ -32,6 +32,24 @@ sufficient for a standard destination channel. Private and shared channels are
 visible only when the user is a member, and the Teams connector does not
 currently support posting messages or Adaptive Cards to private channels.
 
+### Authorization boundaries
+
+Ownership and execution permissions are deliberately non-transitive:
+
+- assigning the Dataverse application user as flow owner does not authorize a
+  Teams connection for that principal;
+- binding a connection reference selects an existing connection but does not
+  copy, share, or convert the connection user's OAuth credentials;
+- adding a co-owner permits flow administration but does not let that person
+  edit credentials for a connection created by another user;
+- possession of the signed callback URL permits invocation but grants no
+  Power Platform, Teams, or Graph role;
+- granting Graph channel-read permission to an inventory principal does not
+  authorize Teams connector delivery.
+
+The detailed role setup, runtime sequence, and recovery behavior are in the
+[Power Automate Teams Workflow guide](../../docs/power-automate-teams-workflow.md#identity-and-permission-setup).
+
 ## Quick template bootstrap
 
 The quickest bootstrap uses a one-time manually created Teams Workflow:
@@ -128,6 +146,23 @@ The service principal must already exist as a Dataverse application user in
 the target environment. Use the narrowest role that can import the Solution,
 activate its flow, and assign the Process row. Do not retain the default System
 Administrator role after bootstrap.
+
+Before the first production deployment, verify each permission independently:
+
+| Check | Principal | Evidence |
+|---|---|---|
+| Power Platform authentication and Solution import | Deployment service principal | `pac auth list` succeeds and a synthetic managed import completes |
+| Enabled application user and flow ownership | Dataverse application user | `set-flow-owner.py verify` exits successfully for the imported flow |
+| Teams connection binding | Dedicated connection user | The connection reference resolves to a valid Microsoft Teams connection in the target environment |
+| Destination access | Dedicated connection user | The approved standard channel is visible to the user and receives a synthetic card |
+| Optional channel inventory | Graph delegated or application principal | `list-team-channels.py` writes the expected access-scoped `0600` report |
+| Runtime invocation | CI/CD or workload identity | It can read the callback secret and the allowlisted channel link, but has no connection-user credentials |
+| Operational recovery | Two named administrators | Both appear as co-owners and can inspect run history without assuming the connection user's account |
+
+Run the checks again after replacing a connection user, changing a Dataverse
+role, changing Team membership, importing into another environment, or rotating
+the callback URL. A successful owner check does not prove Teams delivery; the
+live card smoke test is a separate required check.
 
 A service principal application user cannot hold a user license. If the flow
 uses premium features, assign a Power Automate Process license to the

@@ -35,6 +35,87 @@ and avoided that footer in the verified environment.
 Do not place real Team names, channel names, identities, or callback URLs in
 committed files or screenshots.
 
+## Identity and permission setup
+
+Use separate identities for authoring, ownership, connector execution, and
+runtime invocation. Granting one identity access does not grant it to the
+others.
+
+| Identity | Required access | Not required |
+|---|---|---|
+| Bootstrap administrator | Create the Solution, application user, security role, connection reference, and environment variable | Routine flow execution |
+| Dataverse application user | Own the solution-aware flow; read, update, assign, and activate the required Process row; import and publish the Solution when the same principal deploys it | Microsoft 365 license, Teams membership, or the connection user's password |
+| Teams connection user | Appropriate Microsoft 365 and Power Automate entitlement; sign in to the target Power Platform environment; authorize the Microsoft Teams connection; membership in every destination Team | Tenant administrator role or flow ownership |
+| Operational co-owner | Access the target environment and co-owner access to inspect runs, edit, enable or disable, and recover the flow | Access to change another user's connection credentials |
+| Runtime caller | Read the signed callback URL from its secret store and send the routed request contract | Power Automate, Dataverse, Teams, or Microsoft Graph permissions |
+| Channel inventory caller | A delegated or application Microsoft Graph token with the scope described in the infrastructure runbook | Flow ownership or callback access |
+
+Create a custom Dataverse security role for the application user after initial
+bootstrap. It must cover only the Solution deployment operations and Process
+rows owned by this integration. A bootstrap administrator may temporarily use
+a broader role to prove the deployment, but must remove that role after the
+custom role succeeds. Do not leave the application user as System
+Administrator.
+
+Configure the Teams connection user as follows:
+
+1. Create or designate a dedicated, licensed Microsoft 365 user. Do not use a
+   departing employee's account or a tenant administrator.
+2. Add the user as a member of every Team that contains an approved
+   destination. Explicit membership is also needed to discover private or
+   shared channels, although the Teams connector action used here does not
+   support posting to private channels.
+3. Sign in as that user in the target Power Platform environment, open
+   **Connections**, create the Microsoft Teams connection, and complete the
+   tenant's consent, MFA, and Conditional Access requirements.
+4. Bind the Solution's Microsoft Teams connection reference to that connection.
+   A connection reference is a deployment-time indirection; it does not copy
+   or convert the user's OAuth connection into application authentication.
+5. Add at least two named operational co-owners. Confirm they can inspect run
+   history and manage the flow, but do not give them the connection user's
+   password. A co-owner cannot update credentials for a connection created by
+   another user.
+
+### Invocation and execution behavior
+
+The HTTP trigger setting and the Teams connector authorize different parts of
+the run:
+
+1. The runtime caller invokes **When an HTTP request is received** by presenting
+   the signed callback URL. With **Who can trigger the flow?** set to
+   **Anyone**, the current PyHookKit adapter sends no Microsoft Entra access
+   token.
+2. The flow checks `channelLink` against `pyk_AllowedChannelLinks` before
+   parsing it or calling Teams. Possession of the callback therefore permits
+   attempts only to explicitly configured destinations.
+3. The Teams action uses the embedded Microsoft Teams connection selected by
+   the connection reference. It runs with the connection user's Teams access,
+   not the callback caller's access and not the Dataverse flow owner's access.
+4. The Teams service enforces the connection user's current Team and channel
+   access. A dynamic Team or Channel value cannot expand that access.
+
+Selecting **Any user in my tenant** or **Specific users in my tenant** for the
+trigger is not a drop-in hardening change. Those modes require an OAuth-capable
+caller and token validation that the current signed-URL adapter does not
+implement. Keep **Anyone** only with secret storage, exact destination
+allowlisting, producer-specific secret access, and callback rotation after
+suspected disclosure.
+
+### Permission changes and recovery
+
+| Change | Expected effect | Recovery |
+|---|---|---|
+| Connection user loses Team membership | New posts to that Team or channel fail at the Teams action | Restore approved membership or bind a replacement connection, then smoke-test |
+| Connection is revoked, deleted, or requires sign-in | The trigger can still start a run, but the Teams action fails | Reauthorize the existing connection or bind a new one to the connection reference |
+| Connection user's license or account is removed | Delivery continuity is no longer supported and the connection can become unusable | Restore the account entitlement or migrate to a prepared replacement user and connection |
+| Application user is disabled or loses its Dataverse role | Owner assignment, deployment, activation, or later administration can fail | Re-enable the application user or restore the custom role, then rerun owner verification |
+| A co-owner is removed | Runtime connection and callback behavior are unchanged | Add another named co-owner before the remaining recovery path is lost |
+| Callback URL is disclosed | Anyone holding it can invoke the allowlisted flow | Regenerate or replace the callback, update only approved secret stores, and revoke the old value |
+
+Do not treat an accepted HTTP request as delivery evidence. After any identity,
+membership, connection, or callback change, verify the Power Automate run,
+the destination card, and the absence of template attribution.
+
 ## Create the flow
 
 1. Open [Power Automate](https://make.powerautomate.com).
@@ -224,3 +305,9 @@ it after activation and write it directly to the target secret store.
 See the [Teams Workflows infrastructure
 runbook](../infra/teams-workflows/README.md) for the ALM roadmap, ownership
 requirements, and footer verification checklist.
+
+Microsoft's ownership and connection semantics are documented in
+[Share a cloud flow](https://learn.microsoft.com/power-automate/create-team-flows),
+[Change the owner of a cloud flow](https://learn.microsoft.com/power-automate/change-cloud-flow-owner),
+[solution-aware cloud flows](https://learn.microsoft.com/power-automate/guidance/coding-guidelines/understand-benefits-solution-aware-flows),
+and [Send a message in Teams](https://learn.microsoft.com/power-automate/teams/send-a-message-in-teams).

@@ -73,6 +73,8 @@ def test_workflow_request_adds_link_and_preserves_message() -> None:
     request = build_teams_workflow_request(envelope, TeamsChannelLink(_LINK))
 
     assert request["channelLink"] == _LINK
+    assert request["teamId"] == "11111111-1111-4111-8111-111111111111"
+    assert request["channelId"] == "19:example-channel@thread.tacv2"
     assert request["attachments"] is envelope["attachments"]
     assert "channelLink" not in envelope
 

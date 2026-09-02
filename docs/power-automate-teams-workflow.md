@@ -2,8 +2,8 @@
 
 This guide creates the Power Automate delivery adapter used by PyHookKit Teams
 examples and the integrated Bookinfo scenario. One flow accepts a validated
-Teams channel link and Adaptive Card message, extracts the Team and Channel
-identifiers, and posts to an approved destination.
+Teams channel link, its derived Team and Channel identifiers, and an Adaptive
+Card message, then posts to the approved destination.
 
 For the GitHub, GitLab, Argo CD, and AKS sequence, see the
 [integrated Bookinfo scenario](integrated-bookinfo-scenario.md).
@@ -136,8 +136,9 @@ the destination card, and the absence of template attribution.
 
 The routed request contract is
 [`routed-request.schema.json`](../infra/teams-workflows/routed-request.schema.json).
-Its top-level `channelLink` carries routing and its `attachments` collection
-carries the message. The existing screenshot shows the earlier fixed-channel
+Its top-level `channelLink` carries the auditable route, `teamId` and
+`channelId` carry identifiers derived from that validated link, and its
+`attachments` collection carries the message. The existing screenshot shows the earlier fixed-channel
 shape and should not be used as the routed-flow definition:
 
 ![Power Automate flow with Teams webhook trigger and post-card action](assets/power-automate-teams-workflow/power-automate-flow-designer.png)
@@ -163,7 +164,9 @@ In the **False** branch, add **Terminate** with status `Failed`, code
 link. This check must precede the Teams action. Restrict the dedicated Teams
 connection user to notification Teams as an additional authorization boundary.
 
-In the **True** branch, add `Team_ID` and `Channel_ID` Compose actions.
+The sender already derives `teamId` and `channelId` from the validated link.
+Use these request fields directly in the Teams action. The following Compose
+expressions remain useful as an independent Flow-side consistency check.
 
 `Team_ID`:
 
@@ -193,8 +196,8 @@ Set the action fields as follows:
 |---|---|
 | **Post as** | `Flow bot` |
 | **Post in** | `Channel` |
-| **Team** | `outputs('Team_ID')` |
-| **Channel** | `outputs('Channel_ID')` |
+| **Team** | `triggerBody()?['teamId']` |
+| **Channel** | `triggerBody()?['channelId']` |
 | **Adaptive Card** | `first(triggerBody()?['attachments'])?['content']` |
 
 ![Power Automate Teams post-card action settings](assets/power-automate-teams-workflow/power-automate-teams-action.png)

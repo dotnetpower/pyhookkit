@@ -31,4 +31,9 @@ def build_teams_workflow_request(
         )
     if "channelLink" in envelope:
         raise TeamsWorkflowRequestError("Teams envelope already contains channelLink")
-    return {**envelope, "channelLink": channel_link.value}
+    return {
+        **envelope,
+        "channelLink": channel_link.value,
+        "teamId": str(channel_link.team_id),
+        "channelId": channel_link.channel_id,
+    }

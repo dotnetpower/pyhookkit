@@ -113,6 +113,8 @@ def test_send_posts_json_with_a_bounded_timeout(
     )
     if provider == "teams":
         expected_payload["channelLink"] = _TEAMS_CHANNEL_LINK
+        expected_payload["teamId"] = "11111111-1111-4111-8111-111111111111"
+        expected_payload["channelId"] = "19:example-channel@thread.tacv2"
     assert posted_payload == expected_payload
 
 
@@ -171,6 +173,8 @@ def test_raw_teams_workflow_payload_adds_channel_link(
     payload = build_workflow_payload(_TEAMS_CHANNEL_LINK)
 
     assert payload["channelLink"] == _TEAMS_CHANNEL_LINK
+    assert payload["teamId"] == "11111111-1111-4111-8111-111111111111"
+    assert payload["channelId"] == "19:example-channel@thread.tacv2"
     assert payload["type"] == "message"
 
 

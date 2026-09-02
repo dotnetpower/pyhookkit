@@ -66,4 +66,10 @@ def test_routed_workflow_schema_requires_channel_link() -> None:
     schema = _load_json(_SCHEMA_PATH)
 
     assert schema["additionalProperties"] is False
-    assert schema["required"] == ["type", "channelLink", "attachments"]
+    assert schema["required"] == [
+        "type",
+        "channelLink",
+        "teamId",
+        "channelId",
+        "attachments",
+    ]

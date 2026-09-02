@@ -61,8 +61,13 @@ def build_logic_app_payload(
 
 
 def build_workflow_payload(channel_link: str) -> dict[str, object]:
-    _require_channel_link(channel_link)
-    return {**build_payload(), "channelLink": channel_link}
+    team_id, channel_id = _channel_target(channel_link)
+    return {
+        **build_payload(),
+        "channelLink": channel_link,
+        "teamId": team_id,
+        "channelId": channel_id,
+    }
 
 
 def send(
@@ -122,7 +127,7 @@ def _require_https_url(url: str) -> None:
         raise ValueError("Teams destination must be an HTTPS URL")
 
 
-def _require_channel_link(channel_link: str) -> None:
+def _channel_target(channel_link: str) -> tuple[str, str]:
     parsed = urlsplit(channel_link)
     path_parts = parsed.path.split("/")
     if (
@@ -140,14 +145,16 @@ def _require_channel_link(channel_link: str) -> None:
     ):
         raise ValueError("invalid Microsoft Teams channel link")
     query = parse_qs(parsed.query, strict_parsing=True)
+    identifiers: dict[str, str] = {}
     for parameter in ("groupId", "tenantId"):
         values = query.get(parameter, [])
         if len(values) != 1:
             raise ValueError("invalid Microsoft Teams channel link")
         try:
-            UUID(values[0])
+            identifiers[parameter] = str(UUID(values[0]))
         except ValueError as error:
             raise ValueError("invalid Microsoft Teams channel link") from error
+    return identifiers["groupId"], unquote(path_parts[3])
 
 
 def _required(variable_name: str, option: str) -> str:

@@ -14,7 +14,7 @@ are different:
 
 | Surface | Power Automate Workflow | Azure Logic App `post-card` |
 |---|---|---|
-| Request body | `channelLink` plus Teams `message` envelope | `teamId`, `channelId`, optional `eventId`, and inner `card` |
+| Request body | `channelLink`, derived `teamId`/`channelId`, and Teams `message` envelope | `teamId`, `channelId`, optional `eventId`, and inner `card` |
 | Routing | Exact allowlisted channel link per request | Explicit Team and Channel IDs per request |
 | Endpoint success | Workflow 2xx status | `post-card` returns `201` with Teams message identifiers |
 | Authentication | Signed Workflow callback URL | Signed Logic App trigger URL plus authorized Teams API connection |

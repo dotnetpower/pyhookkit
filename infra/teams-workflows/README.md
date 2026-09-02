@@ -259,7 +259,8 @@ rendering:
   request schema.
 3. Confirm an exact `pyk_AllowedChannelLinks` check precedes URL parsing and the
   Teams connector action.
-4. Confirm the action uses the parsed Team and Channel outputs and passes only
+4. Confirm the action uses the request Team and Channel IDs derived from the
+  validated link and passes only
   `first(triggerBody()?['attachments'])?['content']` as the Adaptive Card.
 5. Retrieve a fresh callback URL after deployment instead of copying one from a
    different environment.

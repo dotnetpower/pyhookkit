@@ -292,6 +292,24 @@ enabled, its connection is valid, and the connection user can access the Team
 and channel. Open the corresponding run and inspect action status without
 copying request bodies or connection details into an issue.
 
+If the action reports `AADSTS500014` or `ResourceDisabledInTenant`, identify
+the resource in the action output before changing tenant configuration. Verify
+the corresponding Microsoft first-party enterprise application under
+**Microsoft Entra ID** > **Enterprise applications**:
+
+| Resource or application ID | Enterprise application |
+|---|---|
+| `https://publishers.crm.dynamics.com` or `00000007-0000-0000-c000-000000000000` | Dataverse |
+| `ab3be6b7-f5df-413d-ac2d-abf1e3fd9c0b` | Microsoft Teams Graph Service |
+| `https://api.spaces.skype.com` or `cc15fd57-2c6c-4117-a88c-83b1d56b4bbe` | Microsoft Teams Services |
+| `00000003-0000-0ff1-ce00-000000000000` | Office 365 SharePoint Online |
+
+Enable only the application named by the error after confirming that tenant
+policy and licensing permit it. Wait for Microsoft Entra token issuance to
+reflect the change, then reauthorize the existing Teams connection and rerun a
+synthetic card. A `202 Accepted` trigger response is not evidence that the
+Teams action succeeded.
+
 ### Power Automate rejects the request
 
 Check that the caller sends `channelLink` alongside the Teams `message`

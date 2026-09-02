@@ -19,6 +19,12 @@ _REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 _SCHEMA_PATH = (
     _REPOSITORY_ROOT / "infra" / "teams-workflows" / "routed-request.schema.json"
 )
+_POWER_AUTOMATE_SCHEMA_PATH = (
+    _REPOSITORY_ROOT
+    / "infra"
+    / "teams-workflows"
+    / "power-automate-trigger.schema.json"
+)
 _LINK = (
     "https://teams.microsoft.com/l/channel/"
     "19%3Aexample-channel%40thread.tacv2/General"
@@ -38,9 +44,9 @@ def _load_json(path: Path) -> SchemaObject:
     return cast(SchemaObject, mapping)
 
 
-def _validator() -> Validator:
+def _validator(path: Path = _SCHEMA_PATH) -> Validator:
     return Draft202012Validator(
-        _load_json(_SCHEMA_PATH),
+        _load_json(path),
         format_checker=FormatChecker(),
     )
 
@@ -60,6 +66,7 @@ def test_routed_workflow_request_matches_schema() -> None:
     request = build_teams_workflow_request(envelope, TeamsChannelLink(_LINK))
 
     _validator().validate(request)
+    _validator(_POWER_AUTOMATE_SCHEMA_PATH).validate(request)
 
 
 def test_routed_workflow_schema_requires_channel_link() -> None:
@@ -73,3 +80,13 @@ def test_routed_workflow_schema_requires_channel_link() -> None:
         "channelId",
         "attachments",
     ]
+
+
+def test_power_automate_schema_preserves_required_fields_without_patterns() -> None:
+    canonical_schema = _load_json(_SCHEMA_PATH)
+    trigger_schema = _load_json(_POWER_AUTOMATE_SCHEMA_PATH)
+
+    assert trigger_schema["required"] == canonical_schema["required"]
+    assert trigger_schema["properties"].keys() == canonical_schema["properties"].keys()
+    assert "pattern" not in json.dumps(trigger_schema)
+    assert "format" not in trigger_schema["properties"]["channelLink"]

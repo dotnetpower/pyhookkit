@@ -124,7 +124,8 @@ the destination card, and the absence of template attribution.
 4. Name the flow using an environment-neutral name such as
    `PyHookKit Routed Teams Flow`.
 5. Add the Request trigger **When an HTTP request is received** and paste the
-   contents of `routed-request.schema.json` into **Request Body JSON Schema**.
+   contents of `power-automate-trigger.schema.json` into **Request Body JSON
+   Schema**.
 6. Set **Who can trigger the flow?** to **Anyone** for the signed callback URL
    model used by these examples. **Specific users in my tenant** is stronger,
    but requires an OAuth-capable caller that is outside the current callback
@@ -134,7 +135,14 @@ the destination card, and the absence of template attribution.
 8. Set its current value to a JSON array containing the exact approved Teams
    channel links. Keep real links out of source control.
 
-The routed request contract is
+The Power Automate trigger schema is
+[`power-automate-trigger.schema.json`](../infra/teams-workflows/power-automate-trigger.schema.json).
+Power Automate rejects `pattern` when schema validation is combined with an
+`OpenApiConnection` action, and its URI format validator rejects percent-encoded
+Teams channel links. The trigger schema therefore omits those keywords. Keep
+exact destination validation in the allowlist condition before the Teams action.
+
+The stricter producer-side contract remains
 [`routed-request.schema.json`](../infra/teams-workflows/routed-request.schema.json).
 Its top-level `channelLink` carries the auditable route, `teamId` and
 `channelId` carry identifiers derived from that validated link, and its

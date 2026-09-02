@@ -25,7 +25,8 @@ python fundamentals/00_http_request/teams.py --send-logic-app
 ```
 
 Slack requires `SLACK_WEBHOOK_URL` for an Incoming Webhook. Teams requires
-`TEAMS_WORKFLOW_URL` for a Workflow HTTP POST callback. Logic App delivery uses
+`TEAMS_WORKFLOW_URL` for the shared Workflow HTTP POST callback and
+`TEAMS_WORKFLOW_CHANNEL_LINK` for its exact allowlisted destination. Logic App delivery uses
 `TEAMS_LOGIC_APP_URL`, `TEAMS_LOGIC_APP_TEAM_ID`, and
 `TEAMS_LOGIC_APP_CHANNEL_ID`. All destinations must be HTTPS URLs. The scripts
 report only the HTTP status and never print the destination URL or provider

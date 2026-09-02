@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.pyhookkit.example/teams-workflow-request.schema.json",
+  "title": "Routed Microsoft Teams Workflow request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "type",
+    "channelLink",
+    "attachments"
+  ],
+  "properties": {
+    "type": {
+      "const": "message"
+    },
+    "channelLink": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https://teams\\.microsoft\\.com/l/channel/",
+      "maxLength": 2048
+    },
+    "attachments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "contentType",
+          "content"
+        ],
+        "properties": {
+          "contentType": {
+            "const": "application/vnd.microsoft.card.adaptive"
+          },
+          "contentUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "content": {
+            "type": "object"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,13 +1,13 @@
 # Power Automate Teams Workflow
 
 This guide creates the Power Automate delivery adapter used by PyHookKit Teams
-examples and the integrated Bookinfo scenario. It owns the manual provider
-bootstrap, callback credential, Teams destination, smoke test, and operational
-verification.
+examples and the integrated Bookinfo scenario. One flow accepts a validated
+Teams channel link and Adaptive Card message, extracts the Team and Channel
+identifiers, and posts to an approved destination.
 
 For the GitHub, GitLab, Argo CD, and AKS sequence, see the
 [integrated Bookinfo scenario](integrated-bookinfo-scenario.md).
-For routed per-request destinations, use the
+For direct Team and Channel ID routing with an Azure-managed workflow, use the
 [Azure Logic App Teams delivery guide](logic-app-teams-delivery.md).
 
 ## Why create the flow from blank
@@ -27,7 +27,8 @@ and avoided that footer in the verified environment.
 - a Microsoft Teams connection authorized for the destination Team;
 - a dedicated licensed Microsoft 365 connection user for shared or production
    environments;
-- a dedicated synthetic test Team and channel;
+- one or more dedicated synthetic test Teams channels that the connection user
+   can access;
 - permission to create protected GitLab CI/CD variables;
 - Python 3.12 and `uv` for the smoke test.
 
@@ -40,18 +41,70 @@ committed files or screenshots.
 2. Select the environment that owns the Teams connection.
 3. Select **Create**, then **Create from blank**.
 4. Name the flow using an environment-neutral name such as
-   `PyHookKit Teams Flow`.
-5. Add the Microsoft Teams trigger **When a Teams webhook request is
-   received**.
+   `PyHookKit Routed Teams Flow`.
+5. Add the Request trigger **When an HTTP request is received** and paste the
+   contents of `routed-request.schema.json` into **Request Body JSON Schema**.
 6. Set **Who can trigger the flow?** to **Anyone** for the signed callback URL
-   model used by these examples.
-7. Add **Post card in a chat or channel** directly after the trigger.
+   model used by these examples. **Specific users in my tenant** is stronger,
+   but requires an OAuth-capable caller that is outside the current callback
+   client contract.
+7. Add the flow to a Solution and create a text environment variable with the
+   schema name `pyk_AllowedChannelLinks`.
+8. Set its current value to a JSON array containing the exact approved Teams
+   channel links. Keep real links out of source control.
 
-The completed flow has exactly one trigger and one action:
+The routed request contract is
+[`routed-request.schema.json`](../infra/teams-workflows/routed-request.schema.json).
+Its top-level `channelLink` carries routing and its `attachments` collection
+carries the message. The existing screenshot shows the earlier fixed-channel
+shape and should not be used as the routed-flow definition:
 
 ![Power Automate flow with Teams webhook trigger and post-card action](assets/power-automate-teams-workflow/power-automate-flow-designer.png)
 
+## Validate and parse the destination
+
+Add a **Compose** action named `Channel_link`:
+
+```text
+triggerBody()?['channelLink']
+```
+
+Before parsing the URL, add a **Condition** that checks the exact link against
+the Solution environment-variable allowlist. Insert the
+`pyk_AllowedChannelLinks` dynamic value in place of the placeholder:
+
+```text
+contains(json(<Allowed channel links>), outputs('Channel_link'))
+```
+
+In the **False** branch, add **Terminate** with status `Failed`, code
+`DestinationNotAllowed`, and a generic message that does not echo the supplied
+link. This check must precede the Teams action. Restrict the dedicated Teams
+connection user to notification Teams as an additional authorization boundary.
+
+In the **True** branch, add `Team_ID` and `Channel_ID` Compose actions.
+
+`Team_ID`:
+
+```text
+first(split(last(split(uriQuery(outputs('Channel_link')), 'groupId=')), '&'))
+```
+
+`Channel_ID`:
+
+```text
+decodeUriComponent(first(split(last(split(uriPath(outputs('Channel_link')), '/l/channel/')), '/')))
+```
+
+The deployment tooling validates every allowlisted link as an HTTPS
+`teams.microsoft.com/l/channel/...` URL with one GUID `groupId`, one GUID
+`tenantId`, and a supported channel ID before import.
+
 ## Configure the Teams action
+
+Add **Post card in a chat or channel** to the Condition's **True** branch. For
+the Team and Channel controls, select **Enter custom value** and use the Compose
+outputs:
 
 Set the action fields as follows:
 
@@ -59,22 +112,16 @@ Set the action fields as follows:
 |---|---|
 | **Post as** | `Flow bot` |
 | **Post in** | `Channel` |
-| **Team** | The dedicated synthetic test Team |
-| **Channel** | The dedicated notification test channel |
-| **Adaptive Card** | `triggerBody()` |
+| **Team** | `outputs('Team_ID')` |
+| **Channel** | `outputs('Channel_ID')` |
+| **Adaptive Card** | `first(triggerBody()?['attachments'])?['content']` |
 
 ![Power Automate Teams post-card action settings](assets/power-automate-teams-workflow/power-automate-teams-action.png)
 
-The current Teams Workflow trigger exposes the webhook body in the form
-accepted by **Post card in a chat or channel**. Pass it directly:
-
-```text
-triggerBody()
-```
-
-This is the setting used by the verified live flow shown above. Do not use the
-Azure Logic App expression from the separate Logic App adapter; that endpoint
-accepts a different request contract.
+Do not pass the complete trigger body into the Adaptive Card field. The routed
+body also contains `channelLink`; only the first attachment's `content` object
+is the Adaptive Card. Private-channel posting remains unsupported by the Teams
+connector.
 
 ## Save and store the callback
 
@@ -90,7 +137,10 @@ accepts a different request contract.
    - expansion: disabled.
 6. Do not store the URL in GitHub, Argo CD, Kubernetes manifests, screenshots,
    command output, or repository files.
-7. Add at least two named operational co-owners before using the flow as a
+7. Store the selected channel link as `TEAMS_WORKFLOW_CHANNEL_LINK` in the same
+   protected environment. It is configuration rather than a credential, but it
+   contains real tenant and destination identifiers.
+8. Add at least two named operational co-owners before using the flow as a
    shared or long-lived integration.
 
 ## Smoke test
@@ -120,11 +170,13 @@ The CLI must return:
 }
 ```
 
-Confirm all three outcomes:
+Confirm all four outcomes:
 
 1. the card appears in the expected Teams channel;
-2. the card has no owner attribution or **Get template** footer;
-3. the corresponding Power Automate run is **Succeeded**.
+2. a non-allowlisted synthetic link reaches `DestinationNotAllowed` without a
+   Teams connector call;
+3. the card has no owner attribution or **Get template** footer;
+4. the corresponding Power Automate run is **Succeeded**.
 
 ## Runtime evidence
 
@@ -143,16 +195,16 @@ Adaptive Card, or copying the callback URL does not remove template metadata.
 
 ### The request succeeds but no card appears
 
-Confirm that the Teams action is enabled, its connection is valid, and the
-selected Team and channel still exist. Open the corresponding run and inspect
-the trigger and action status without copying request bodies or connection
-details into an issue.
+Confirm that the link exactly matches an allowlist entry, the Teams action is
+enabled, its connection is valid, and the connection user can access the Team
+and channel. Open the corresponding run and inspect action status without
+copying request bodies or connection details into an issue.
 
 ### Power Automate rejects the request
 
-Check that the caller sends the Teams `message` envelope expected by the
-Workflow adapter. A Logic App request uses a different contract and cannot be
-sent by replacing only the endpoint URL.
+Check that the caller sends `channelLink` alongside the Teams `message`
+envelope expected by the Workflow adapter. A Logic App request uses direct IDs
+and cannot be sent by replacing only the endpoint URL.
 
 ### Images do not render
 

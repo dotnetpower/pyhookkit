@@ -34,8 +34,8 @@ Each control plane has one responsibility:
 | GitLab | GitOps validation, promotion, and provider delivery |
 | Argo CD | Reconcile `gitops-staging` into AKS |
 | AKS | Run the Istio-free Bookinfo workload and incident probe |
-| Power Automate | Default fixed-channel Teams delivery |
-| Azure Logic App | Optional per-request Team and channel routing |
+| Power Automate | Default allowlisted channel-link Teams delivery |
+| Azure Logic App | Optional direct Team and Channel ID routing |
 | Teams | Present the notification and navigation action |
 
 Provider credentials do not cross these boundaries. GitHub and the AKS probe
@@ -134,8 +134,9 @@ does not present the unsupported group-expansion notice as an action.
 ## Teams delivery dependency
 
 All four scenarios select one final Teams delivery adapter. Power Automate
-Workflow is the default for the fixed test channel. Azure Logic App is optional
-when callers need per-request Team and channel routing.
+Workflow is the default and reuses one callback across exact allowlisted Teams
+channel links. Azure Logic App is optional when callers already own direct Team
+and Channel IDs or require Azure-managed deployment.
 
 Complete the [Power Automate Teams Workflow
 guide](power-automate-teams-workflow.md) before running any scenario that sends

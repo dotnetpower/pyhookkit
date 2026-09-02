@@ -22,6 +22,14 @@ class Send(Protocol):
     def __call__(self, destination_url: str) -> int: ...
 
 
+_TEAMS_CHANNEL_LINK = (
+    "https://teams.microsoft.com/l/channel/"
+    "19%3Aexample-channel%40thread.tacv2/General"
+    "?groupId=11111111-1111-4111-8111-111111111111"
+    "&tenantId=22222222-2222-4222-8222-222222222222"
+)
+
+
 class StubResponse:
     def __init__(self, status: int) -> None:
         self.status = status
@@ -77,6 +85,8 @@ def test_send_posts_json_with_a_bounded_timeout(
     namespace = _load_script(provider, monkeypatch)
     send = cast(Send, namespace["send"])
     captured_requests: list[urllib.request.Request] = []
+    if provider == "teams":
+        monkeypatch.setenv("TEAMS_WORKFLOW_CHANNEL_LINK", _TEAMS_CHANNEL_LINK)
 
     def open_request(
         request: urllib.request.Request,
@@ -97,9 +107,13 @@ def test_send_posts_json_with_a_bounded_timeout(
     assert request.get_header("Content-type") == "application/json"
     request_data = request.data
     assert isinstance(request_data, bytes)
-    assert json.loads(request_data) == json.loads(
+    posted_payload = json.loads(request_data)
+    expected_payload = json.loads(
         (_VECTOR_DIRECTORY / f"{provider}.expected.json").read_text()
     )
+    if provider == "teams":
+        expected_payload["channelLink"] = _TEAMS_CHANNEL_LINK
+    assert posted_payload == expected_payload
 
 
 @pytest.mark.parametrize("provider", ["slack", "teams"])
@@ -143,3 +157,31 @@ def test_raw_teams_logic_app_payload_extracts_card(
     assert isinstance(attachment_value, dict)
     attachment = cast(dict[str, object], attachment_value)
     assert card == attachment["content"]
+
+
+def test_raw_teams_workflow_payload_adds_channel_link(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    namespace = _load_script("teams", monkeypatch)
+    build_workflow_payload = cast(
+        Callable[[str], dict[str, object]],
+        namespace["build_workflow_payload"],
+    )
+
+    payload = build_workflow_payload(_TEAMS_CHANNEL_LINK)
+
+    assert payload["channelLink"] == _TEAMS_CHANNEL_LINK
+    assert payload["type"] == "message"
+
+
+def test_raw_teams_workflow_payload_rejects_non_channel_link(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    namespace = _load_script("teams", monkeypatch)
+    build_workflow_payload = cast(
+        Callable[[str], dict[str, object]],
+        namespace["build_workflow_payload"],
+    )
+
+    with pytest.raises(ValueError, match="invalid Microsoft Teams channel link"):
+        build_workflow_payload("https://example.test/channel")

@@ -102,6 +102,13 @@ def test_example_preserves_card_between_delivery_adapters(
         "workflows/example/triggers/manual/paths/invoke?sig=synthetic",
     )
     monkeypatch.setenv(
+        "TEAMS_WORKFLOW_CHANNEL_LINK",
+        "https://teams.microsoft.com/l/channel/"
+        "19%3Aexample-channel%40thread.tacv2/General"
+        "?groupId=11111111-1111-4111-8111-111111111111"
+        "&tenantId=22222222-2222-4222-8222-222222222222",
+    )
+    monkeypatch.setenv(
         "TEAMS_LOGIC_APP_URL",
         "https://example.logic.azure.com/workflows/example/"
         "triggers/manual/paths/invoke?sig=synthetic",
@@ -153,6 +160,9 @@ def test_example_preserves_card_between_delivery_adapters(
     assert len(StubLogicAppDestination.requests) == 1
     workflow_payload = StubWorkflowDestination.payloads[0]
     logic_app_request = StubLogicAppDestination.requests[0]
+    channel_link = workflow_payload["channelLink"]
+    assert isinstance(channel_link, str)
+    assert channel_link.startswith("https://teams.microsoft.com/")
     assert logic_app_request["teamId"] == "team-example"
     assert logic_app_request["channelId"] == "channel-example"
     assert logic_app_request["card"] == _card(workflow_payload)

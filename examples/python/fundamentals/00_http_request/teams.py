@@ -3,14 +3,17 @@
 import argparse
 import json
 import os
+import re
 import urllib.error
 import urllib.request
 from collections.abc import Sequence
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, unquote, urlsplit
+from uuid import UUID
 
 from example_message import MESSAGE
 
 _WORKFLOW_URL_VARIABLE = "TEAMS_WORKFLOW_URL"
+_WORKFLOW_CHANNEL_LINK_VARIABLE = "TEAMS_WORKFLOW_CHANNEL_LINK"
 _LOGIC_APP_URL_VARIABLE = "TEAMS_LOGIC_APP_URL"
 _LOGIC_APP_TEAM_VARIABLE = "TEAMS_LOGIC_APP_TEAM_ID"
 _LOGIC_APP_CHANNEL_VARIABLE = "TEAMS_LOGIC_APP_CHANNEL_ID"
@@ -57,12 +60,21 @@ def build_logic_app_payload(
     }
 
 
+def build_workflow_payload(channel_link: str) -> dict[str, object]:
+    _require_channel_link(channel_link)
+    return {**build_payload(), "channelLink": channel_link}
+
+
 def send(
     url: str,
     payload: dict[str, object] | None = None,
 ) -> int:
     _require_https_url(url)
-    active_payload = build_payload() if payload is None else payload
+    active_payload = (
+        build_workflow_payload(_required(_WORKFLOW_CHANNEL_LINK_VARIABLE, "--send"))
+        if payload is None
+        else payload
+    )
     request = urllib.request.Request(
         url,
         data=json.dumps(active_payload).encode(),
@@ -97,7 +109,9 @@ def main(arguments: Sequence[str] | None = None) -> None:
         )
     else:
         url = _required(_WORKFLOW_URL_VARIABLE, "--send")
-        payload = build_payload()
+        payload = build_workflow_payload(
+            _required(_WORKFLOW_CHANNEL_LINK_VARIABLE, "--send")
+        )
     status_code = send(url, payload)
     print(json.dumps({"state": "succeeded", "statusCode": status_code}, indent=2))
 
@@ -106,6 +120,34 @@ def _require_https_url(url: str) -> None:
     parsed = urlsplit(url)
     if parsed.scheme != "https" or not parsed.netloc:
         raise ValueError("Teams destination must be an HTTPS URL")
+
+
+def _require_channel_link(channel_link: str) -> None:
+    parsed = urlsplit(channel_link)
+    path_parts = parsed.path.split("/")
+    if (
+        parsed.scheme != "https"
+        or parsed.netloc.lower() != "teams.microsoft.com"
+        or parsed.fragment
+        or len(path_parts) != 5
+        or path_parts[1:3] != ["l", "channel"]
+        or re.fullmatch(
+            r"19:[A-Za-z0-9_-]+@thread\.(?:tacv2|skype)",
+            unquote(path_parts[3]),
+        )
+        is None
+        or not unquote(path_parts[4]).strip()
+    ):
+        raise ValueError("invalid Microsoft Teams channel link")
+    query = parse_qs(parsed.query, strict_parsing=True)
+    for parameter in ("groupId", "tenantId"):
+        values = query.get(parameter, [])
+        if len(values) != 1:
+            raise ValueError("invalid Microsoft Teams channel link")
+        try:
+            UUID(values[0])
+        except ValueError as error:
+            raise ValueError("invalid Microsoft Teams channel link") from error
 
 
 def _required(variable_name: str, option: str) -> str:

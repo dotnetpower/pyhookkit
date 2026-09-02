@@ -57,7 +57,9 @@ configured Team and channel IDs. Replacing only the endpoint is not sufficient
 because Power Automate Workflow and Logic App triggers accept different request
 contracts.
 
-`TEAMS_WORKFLOW_URL` should reference the from-blank flow documented in the
+`TEAMS_WORKFLOW_URL` should reference the shared from-blank routed flow, and
+`TEAMS_WORKFLOW_CHANNEL_LINK` must exactly match one of its approved links.
+The flow is documented in the
 [Power Automate Teams Workflow
 guide](../../../docs/power-automate-teams-workflow.md).
 

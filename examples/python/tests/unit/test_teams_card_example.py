@@ -91,3 +91,12 @@ def test_card_entrypoint_routes_logic_app_delivery(
     assert captured["event_id"] == "gallery-example"
     assert captured["event_id"] == "gallery-example"
     assert captured["environment"] is environment
+
+
+def test_card_entrypoint_rejects_missing_channel_link() -> None:
+    with pytest.raises(TeamsCardExampleError, match="TEAMS_WORKFLOW_CHANNEL_LINK"):
+        run_teams_card_example(
+            _payload(),
+            arguments=["--send"],
+            environment={"TEAMS_WORKFLOW_URL": "https://workflow.example.test"},
+        )

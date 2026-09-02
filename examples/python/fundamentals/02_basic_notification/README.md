@@ -14,4 +14,5 @@ python fundamentals/02_basic_notification/teams.py
 ```
 
 Add `--send` to deliberately deliver through `SLACK_WEBHOOK_URL` or
-`TEAMS_WORKFLOW_URL`. Teams Workflow delivery requires no Graph permission.
+`TEAMS_WORKFLOW_URL` and `TEAMS_WORKFLOW_CHANNEL_LINK`. Teams Workflow delivery
+requires no Graph permission.

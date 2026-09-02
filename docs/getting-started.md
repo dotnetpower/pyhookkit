@@ -8,7 +8,8 @@ Create the ignored local configuration file:
 cp .env.example .env
 ```
 
-Fill in `SLACK_WEBHOOK_URL` and `TEAMS_WORKFLOW_URL` as described in
+Fill in `SLACK_WEBHOOK_URL`, `TEAMS_WORKFLOW_URL`, and
+`TEAMS_WORKFLOW_CHANNEL_LINK` as described in
 [Provider configuration](configuration.md). The initial render-only examples
 can run while these values are blank.
 

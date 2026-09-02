@@ -8,8 +8,9 @@ delivery:
 - The AKS probe submits canonical incident JSON.
 - A scheduled pipeline submits maintenance notices.
 
-Only GitLab stores `TEAMS_WORKFLOW_URL`. Upstream systems receive separate,
-revocable pipeline trigger tokens and never receive the Teams credential.
+Only GitLab stores `TEAMS_WORKFLOW_URL` and the selected
+`TEAMS_WORKFLOW_CHANNEL_LINK`. Upstream systems receive separate, revocable
+pipeline trigger tokens and never receive the Teams credential.
 
 ## Project model
 
@@ -30,6 +31,7 @@ Configure these masked and protected values in GitLab:
 | Variable | Purpose |
 |---|---|
 | `TEAMS_WORKFLOW_URL` | Power Automate Workflow callback URL |
+| `TEAMS_WORKFLOW_CHANNEL_LINK` | Exact allowlisted Teams channel destination |
 | `TEAMS_LOGIC_APP_URL` | Azure Logic App HTTP trigger callback URL |
 | `TEAMS_LOGIC_APP_TEAM_ID` | Explicit Teams destination |
 | `TEAMS_LOGIC_APP_CHANNEL_ID` | Explicit Teams channel destination |

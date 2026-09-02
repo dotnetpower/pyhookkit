@@ -102,6 +102,7 @@ Set:
 
 ```dotenv
 TEAMS_WORKFLOW_URL="<Teams Workflow HTTP POST callback URL>"
+TEAMS_WORKFLOW_CHANNEL_LINK="<exact approved Microsoft Teams channel link>"
 TEAMS_LOGIC_APP_URL="<Azure Logic App HTTP trigger callback URL>"
 TEAMS_LOGIC_APP_TEAM_ID="<Microsoft Teams team ID>"
 TEAMS_LOGIC_APP_CHANNEL_ID="<Microsoft Teams channel ID>"
@@ -115,17 +116,20 @@ You need:
 
 1. A Microsoft 365 account that can create Workflows in Teams.
 2. A synthetic test team and channel.
-3. A Power Automate flow created from blank with the Teams webhook request
-   trigger and an action that posts to the test channel.
+3. One Power Automate flow created from blank with the HTTP request trigger,
+  routed request schema, exact channel-link allowlist, link parsing, and
+  dynamic post action.
 4. An authorized Teams connection owned by a dedicated licensed Microsoft 365
   user that is a member of the destination Team.
 5. A Dataverse application user for service-principal ownership in shared or
   production environments, plus at least two named operational co-owners.
 6. The HTTP POST callback URL generated after the Workflow is saved.
 
-Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`. The
-Workflow owns its target team, channel, connection, and authentication policy,
-so those values do not belong in this initial environment contract.
+Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`, and copy an
+exact allowlisted Teams channel link into `TEAMS_WORKFLOW_CHANNEL_LINK`. The
+callback is shared by all approved destinations; the link selects the Team and
+Channel for each request. Do not accept arbitrary links merely because the
+connection user can access them.
 
 For Azure Logic App delivery, configure the signed HTTP trigger URL separately
 from the explicit Team and channel IDs. Follow the
@@ -166,6 +170,7 @@ Check that a value exists without printing the credential:
 ```shell
 test -n "$SLACK_WEBHOOK_URL" && echo "Slack destination configured"
 test -n "$TEAMS_WORKFLOW_URL" && echo "Teams destination configured"
+test -n "$TEAMS_WORKFLOW_CHANNEL_LINK" && echo "Teams channel route configured"
 test -n "$TEAMS_LOGIC_APP_URL" && echo "Teams Logic App configured"
 ```
 

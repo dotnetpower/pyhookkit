@@ -10,8 +10,12 @@ from typing import cast
 from pyhookkit.adapters.outbound.delivery_result_json import (
     delivery_result_to_json,
 )
+from pyhookkit.adapters.outbound.teams.channel_link import TeamsChannelLink
 from pyhookkit.adapters.outbound.teams.workflow_destination import (
     TeamsWorkflowDestination,
+)
+from pyhookkit.adapters.outbound.teams.workflow_request import (
+    build_teams_workflow_request,
 )
 from pyhookkit.adapters.outbound.teams.workflow_url import TeamsWorkflowUrl
 from pyhookkit.domain.delivery import DeliveryState
@@ -20,6 +24,8 @@ from pyhookkit.entrypoints.teams_logic_app_example import (
     send_teams_logic_app_example,
 )
 from pyhookkit.json_types import JsonObject, JsonValue
+
+_CHANNEL_LINK_VARIABLE = "TEAMS_WORKFLOW_CHANNEL_LINK"
 
 
 class TeamsCardExampleError(ValueError):
@@ -90,8 +96,15 @@ def run_teams_card_example(
     raw_url = active_environment.get("TEAMS_WORKFLOW_URL", "").strip()
     if not raw_url:
         raise TeamsCardExampleError("TEAMS_WORKFLOW_URL is required with --send")
+    raw_channel_link = active_environment.get(_CHANNEL_LINK_VARIABLE, "").strip()
+    if not raw_channel_link:
+        raise TeamsCardExampleError(f"{_CHANNEL_LINK_VARIABLE} is required with --send")
     payload = resolve_example_asset_urls(payload, environment=active_environment)
-    result = TeamsWorkflowDestination(TeamsWorkflowUrl(raw_url)).send(payload)
+    request = build_teams_workflow_request(
+        payload,
+        TeamsChannelLink(raw_channel_link),
+    )
+    result = TeamsWorkflowDestination(TeamsWorkflowUrl(raw_url)).send(request)
     print(json.dumps(delivery_result_to_json(result), indent=2))
     if result.state is DeliveryState.FAILED:
         raise SystemExit(1)

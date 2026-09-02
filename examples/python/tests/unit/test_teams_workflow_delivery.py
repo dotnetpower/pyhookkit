@@ -22,6 +22,12 @@ _URL = (
     "powerautomate/automations/direct/workflows/example/triggers/manual/paths/"
     "invoke?api-version=1&sig=synthetic"
 )
+_CHANNEL_LINK = (
+    "https://teams.microsoft.com/l/channel/"
+    "19%3Aexample-channel%40thread.tacv2/General"
+    "?groupId=11111111-1111-4111-8111-111111111111"
+    "&tenantId=22222222-2222-4222-8222-222222222222"
+)
 
 
 def _notification() -> CanonicalNotification:
@@ -71,6 +77,7 @@ class StubDestination:
 
     def send(self, payload: JsonObject) -> DeliveryResult:
         assert payload["type"] == "message"
+        assert payload["channelLink"] == _CHANNEL_LINK
         return self.result
 
 
@@ -91,7 +98,10 @@ def test_entrypoint_renders_and_sends(
         _notification(),
         TeamsTextRenderer(),
         arguments=["--send"],
-        environment={"TEAMS_WORKFLOW_URL": _URL},
+        environment={
+            "TEAMS_WORKFLOW_URL": _URL,
+            "TEAMS_WORKFLOW_CHANNEL_LINK": _CHANNEL_LINK,
+        },
     )
     assert json.loads(capsys.readouterr().out)["state"] == "succeeded"
 
@@ -103,10 +113,23 @@ def test_entrypoint_checks_route_without_rendering(
         _notification(),
         TeamsTextRenderer(),
         arguments=["--check-route"],
-        environment={"TEAMS_WORKFLOW_URL": _URL},
+        environment={
+            "TEAMS_WORKFLOW_URL": _URL,
+            "TEAMS_WORKFLOW_CHANNEL_LINK": _CHANNEL_LINK,
+        },
     )
 
     assert capsys.readouterr().out == "Teams route configured\n"
+
+
+def test_entrypoint_rejects_missing_channel_link() -> None:
+    with pytest.raises(ValueError, match="TEAMS_WORKFLOW_CHANNEL_LINK"):
+        entrypoint.run_teams_workflow_example(
+            _notification(),
+            TeamsTextRenderer(),
+            arguments=["--send"],
+            environment={"TEAMS_WORKFLOW_URL": _URL},
+        )
 
 
 def test_entrypoint_routes_logic_app_delivery(

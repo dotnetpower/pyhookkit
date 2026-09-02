@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare Power Platform deployment settings for Teams Workflow delivery."""
+"""Prepare Power Platform deployment settings for routed Teams delivery."""
 
 from __future__ import annotations
 
@@ -8,6 +8,8 @@ import json
 import re
 from pathlib import Path
 from typing import cast
+from urllib.parse import parse_qs, unquote, urlsplit
+from uuid import UUID
 
 type JsonValue = (
     bool | int | float | str | list[JsonValue] | dict[str, JsonValue] | None
@@ -15,11 +17,6 @@ type JsonValue = (
 
 TEAMS_CONNECTOR_ID = "/providers/Microsoft.PowerApps/apis/shared_teams"
 SIGNED_URL_PATTERN = re.compile(r"https://[^\s]+[?&](?:sig|code)=", re.IGNORECASE)
-TEAM_ID_PATTERN = re.compile(
-    r"[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-"
-    r"[89ab][0-9a-f]{3}-[0-9a-f]{12}",
-    re.IGNORECASE,
-)
 
 
 class DeploymentSettingsError(ValueError):
@@ -30,20 +27,20 @@ def prepare_settings(
     document: JsonValue,
     *,
     teams_connection_id: str,
-    team_schema_name: str,
-    team_id: str,
-    channel_schema_name: str,
-    channel_id: str,
+    allowed_channel_links_schema_name: str,
+    allowed_channel_links: tuple[str, ...],
 ) -> dict[str, JsonValue]:
-    """Bind one Teams connection and two destination environment variables."""
+    """Bind one Teams connection and an exact channel-link allowlist."""
     if not isinstance(document, dict):
         raise DeploymentSettingsError("deployment settings must be a JSON object")
-    if not TEAM_ID_PATTERN.fullmatch(team_id):
-        raise DeploymentSettingsError("team ID must be a GUID")
-    if not channel_id.strip():
-        raise DeploymentSettingsError("channel ID must not be blank")
     if not teams_connection_id.strip():
         raise DeploymentSettingsError("Teams connection ID must not be blank")
+    if not allowed_channel_links:
+        raise DeploymentSettingsError("at least one allowed channel link is required")
+    if len(set(allowed_channel_links)) != len(allowed_channel_links):
+        raise DeploymentSettingsError("allowed channel links must be unique")
+    for channel_link in allowed_channel_links:
+        _validate_channel_link(channel_link)
     if SIGNED_URL_PATTERN.search(json.dumps(document)):
         raise DeploymentSettingsError("deployment settings contain a signed URL")
 
@@ -61,9 +58,42 @@ def prepare_settings(
     teams_references[0]["ConnectionId"] = teams_connection_id
 
     environment_variables = _object_list(document, "EnvironmentVariables")
-    _set_environment_value(environment_variables, team_schema_name, team_id)
-    _set_environment_value(environment_variables, channel_schema_name, channel_id)
+    _set_environment_value(
+        environment_variables,
+        allowed_channel_links_schema_name,
+        json.dumps(allowed_channel_links, separators=(",", ":")),
+    )
     return document
+
+
+def _validate_channel_link(channel_link: str) -> None:
+    parsed = urlsplit(channel_link)
+    path_parts = parsed.path.split("/")
+    if (
+        parsed.scheme != "https"
+        or parsed.netloc.lower() != "teams.microsoft.com"
+        or parsed.fragment
+        or len(path_parts) != 5
+        or path_parts[1:3] != ["l", "channel"]
+        or re.fullmatch(
+            r"19:[A-Za-z0-9_-]+@thread\.(?:tacv2|skype)",
+            unquote(path_parts[3]),
+        )
+        is None
+        or not unquote(path_parts[4]).strip()
+    ):
+        raise DeploymentSettingsError("invalid Microsoft Teams channel link")
+    query = parse_qs(parsed.query, strict_parsing=True)
+    for parameter in ("groupId", "tenantId"):
+        values = query.get(parameter, [])
+        if len(values) != 1:
+            raise DeploymentSettingsError("invalid Microsoft Teams channel link")
+        try:
+            UUID(values[0])
+        except ValueError as error:
+            raise DeploymentSettingsError(
+                "invalid Microsoft Teams channel link"
+            ) from error
 
 
 def _object_list(
@@ -91,10 +121,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--teams-connection-id", required=True)
-    parser.add_argument("--team-schema-name", required=True)
-    parser.add_argument("--team-id", required=True)
-    parser.add_argument("--channel-schema-name", required=True)
-    parser.add_argument("--channel-id", required=True)
+    parser.add_argument("--allowed-channel-links-schema-name", required=True)
+    parser.add_argument("--allowed-channel-link", action="append", required=True)
     return parser.parse_args()
 
 
@@ -105,10 +133,8 @@ def main() -> None:
     prepared = prepare_settings(
         document,
         teams_connection_id=args.teams_connection_id,
-        team_schema_name=args.team_schema_name,
-        team_id=args.team_id,
-        channel_schema_name=args.channel_schema_name,
-        channel_id=args.channel_id,
+        allowed_channel_links_schema_name=args.allowed_channel_links_schema_name,
+        allowed_channel_links=tuple(args.allowed_channel_link),
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w", encoding="utf-8") as destination:

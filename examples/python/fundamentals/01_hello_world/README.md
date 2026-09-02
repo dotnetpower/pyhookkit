@@ -12,7 +12,8 @@ python fundamentals/01_hello_world/teams.py
 
 After loading the repository `.env`, add `--send` to the Slack command to
 deliberately deliver the message through the configured Incoming Webhook. The
-Teams command also accepts `--send` and uses `TEAMS_WORKFLOW_URL`.
+Teams command also accepts `--send` and uses `TEAMS_WORKFLOW_URL` with
+`TEAMS_WORKFLOW_CHANNEL_LINK`.
 
 Both scripts use `example_notification.py`. Provider-specific rendering remains
 under `src/pyhookkit/adapters/outbound`.

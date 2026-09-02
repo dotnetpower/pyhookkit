@@ -34,9 +34,9 @@ mentions, and progress timelines without expanding the provider-neutral domain.
   presentation patterns;
 - [`tests/`](tests/README.md): unit, contract, and integration boundaries.
 
-All library-backed Teams examples render by default. Use `--send` for a Power
-Automate Workflow callback, or `--send-logic-app` for the routed Azure Logic App
-contract:
+All library-backed Teams examples render by default. Use `--send` for the
+channel-link routed Power Automate Workflow, or `--send-logic-app` for the
+direct-ID Azure Logic App contract:
 
 ```shell
 uv run python scenarios/deployment_result/teams.py --send-logic-app

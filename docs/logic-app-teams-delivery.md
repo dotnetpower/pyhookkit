@@ -1,11 +1,12 @@
 # Azure Logic App Teams delivery
 
-This guide deploys and operates the routed Logic App adapter. Use it when a
-caller must choose the target Team and channel for each request or when Teams
-delivery must be managed as Azure infrastructure.
+This guide deploys and operates the direct-ID Logic App adapter. Use it when a
+caller already owns the target Team and Channel IDs or when Teams delivery must
+be managed as Azure infrastructure.
 
-Power Automate Workflow remains the simpler default for one fixed channel. See
-the [Power Automate Teams Workflow guide](power-automate-teams-workflow.md).
+Power Automate Workflow remains the simpler default for routing by an exact
+allowlisted Teams channel link. See the
+[Power Automate Teams Workflow guide](power-automate-teams-workflow.md).
 
 ## Request contract
 

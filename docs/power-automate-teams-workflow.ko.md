@@ -3,7 +3,7 @@
 [English](power-automate-teams-workflow.md)
 
 이 가이드에서는 PyHookKit Teams 예제 및 통합 Bookinfo 시나리오에서 사용하는
-Power Automate 전송 어댑터를 만듭니다. 하나의 Flow가 검증된 Team 및
+Power Automate 전송 어댑터를 만듭니다. 하나의 흐름이 검증된 Team 및
 Channel 식별자를 포함하는 Adaptive Card를 수락한 다음 해당 대상에 카드를
 게시합니다.
 
@@ -15,21 +15,21 @@ Azure 관리형 워크플로에서 직접 Team 및 Channel ID 라우팅을 사�
 [Azure Logic App Teams 전송 가이드](logic-app-teams-delivery.ko.md)를
 사용하세요.
 
-## 빈 Flow에서 만들어야 하는 이유
+## 빈 흐름에서 만들어야 하는 이유
 
-**Send webhook alerts to a channel** 갤러리 템플릿 대신 빈 Flow에서 만든
-Flow를 사용하세요.
+**Send webhook alerts to a channel** 갤러리 템플릿 대신 빈 상태에서 만든
+흐름을 사용하세요.
 
-라이브 테스트를 통해 두 Flow 모두 서식 있는 Adaptive Card 및 네이티브
+라이브 테스트를 통해 두 흐름 모두 서식 있는 Adaptive Card 및 네이티브
 사용자 멘션을 렌더링함을 확인했습니다. 갤러리 템플릿은 Adaptive Card
 페이로드 외부에 소유자 표시와 **Get template** 바닥글도 삽입합니다.
-페이로드를 변경해도 제거할 수 없습니다. 빈 Flow에서 만든 Flow에는
+페이로드를 변경해도 제거할 수 없습니다. 빈 상태에서 만든 흐름에는
 **Original template** 관계가 없었으며 검증된 환경에서 해당 바닥글이
 표시되지 않았습니다.
 
 ## 필수 조건
 
-- Power Automate 클라우드 Flow를 만들 권한
+- Power Automate 클라우드 흐름을 만들 권한
 - 대상 Team에 권한이 부여된 Microsoft Teams 연결
 - 공유 또는 프로덕션 환경을 위한 Microsoft 365 라이선스가 있는 전용 연결
   사용자
@@ -40,19 +40,46 @@ Flow를 사용하세요.
 실제 Team 이름, 채널 이름, ID 또는 콜백 URL을 커밋된 파일이나 스크린샷에
 넣지 마세요.
 
+### 테넌트와 계정 경계
+
+이 가이드에서 Azure 테넌트, Microsoft Entra 테넌트 및 Microsoft 365
+테넌트는 별도의 사용자 디렉터리가 아닙니다. 대상 Microsoft Entra 테넌트가
+사용자와 앱 등록을 소유하고, Microsoft 365/Teams는 같은 디렉터리의
+라이선스가 있는 사용자에게 서비스를 제공합니다. Power Platform 환경도 같은
+테넌트에 속합니다.
+
+이 구성에서는 대상 Team과 채널, Power Platform 환경, Teams 연결 사용자 및
+`TeamsNotifyApp`을 채널 링크의 테넌트 ID와 같은 Entra 테넌트에 두세요.
+Power Automate 워크플로 경로에는 Azure 구독 또는 Azure RBAC 역할이
+필요하지 않습니다. Azure Portal과 Azure CLI는 Entra ID 및 Microsoft Graph
+관리 인터페이스로만 사용합니다. Azure 구독은 [Azure Logic App
+Teams 전송](logic-app-teams-delivery.ko.md)을 선택할 때만 필요합니다.
+
+흐름 작성자는 대상 Power Platform 환경의 **Environment Maker**이고, Teams
+연결 사용자는 같은 테넌트의 Microsoft 365/Teams 라이선스가 있는 일반
+사용자입니다. 두 계정은 같을 필요가 없으며 어느 쪽에도 Azure 구독
+Contributor 또는 Owner가 필요하지 않습니다. 계정 생성 자체는 **User
+Administrator**, 기존 계정의 라이선스 할당만 수행하는 경우에는 **License
+Administrator**가 담당할 수 있습니다.
+
 ## ID 및 권한 설정
 
 작성, 소유권, 커넥터 실행 및 런타임 호출에 별도의 ID를 사용하세요. 한 ID에
 액세스 권한을 부여해도 다른 ID에는 부여되지 않습니다.
 
+최초 흐름을 포털에서 수동으로 만드는 데 필요한 사람은 **흐름 작성자**,
+**Teams 연결 사용자**, **운영 공동 소유자**뿐입니다. 아래 표의 부트스트랩
+관리자와 Dataverse 애플리케이션 사용자는 검증된 흐름을 Solution으로 반복
+배포할 때 추가되는 운영 ID이며, 최초 흐름 작성의 필수 조건이 아닙니다.
+
 | ID | 필요한 액세스 | 필요하지 않은 액세스 |
 |---|---|---|
-| 부트스트랩 관리자 | Solution, 애플리케이션 사용자, 보안 역할 및 연결 참조 만들기 | 일상적인 Flow 실행 |
-| Dataverse 애플리케이션 사용자 | Solution 인식 Flow 소유. 필요한 Process 행 읽기, 업데이트, 할당 및 활성화. 동일한 주체가 배포할 때 Solution 가져오기 및 게시 | Microsoft 365 라이선스, Teams 멤버십 또는 연결 사용자의 암호 |
-| Teams 연결 사용자 | 적절한 Microsoft 365 및 Power Automate 사용 권한. 대상 Power Platform 환경에 로그인. Microsoft Teams 연결 권한 부여. 모든 대상 Team의 멤버십 | 테넌트 관리자 역할 또는 Flow 소유권 |
-| 운영 공동 소유자 | 실행을 검사하고 Flow를 편집, 활성화 또는 비활성화하고 복구하기 위한 대상 환경 액세스 및 공동 소유자 액세스 | 다른 사용자의 연결 자격 증명을 변경할 액세스 |
+| 부트스트랩 관리자 | Solution, 애플리케이션 사용자, 보안 역할 및 연결 참조 만들기 | 일상적인 흐름 실행 |
+| Dataverse 애플리케이션 사용자 | Solution 인식 흐름 소유. 필요한 Process 행 읽기, 업데이트, 할당 및 활성화. 동일한 주체가 배포할 때 Solution 가져오기 및 게시 | Microsoft 365 라이선스, Teams 멤버십 또는 연결 사용자의 암호 |
+| Teams 연결 사용자 | 적절한 Microsoft 365 및 Power Automate 사용 권한. 대상 Power Platform 환경에 로그인. Microsoft Teams 연결 권한 부여. 모든 대상 Team의 멤버십 | 테넌트 관리자 역할 또는 흐름 소유권 |
+| 운영 공동 소유자 | 실행을 검사하고 흐름을 편집, 활성화 또는 비활성화하고 복구하기 위한 대상 환경 액세스 및 공동 소유자 액세스 | 다른 사용자의 연결 자격 증명을 변경할 액세스 |
 | 런타임 호출자 | 비밀 저장소에서 서명된 콜백 URL을 읽고 라우팅된 요청 계약 전송 | Power Automate, Dataverse, Teams 또는 Microsoft Graph 권한 |
-| 채널 인벤토리 호출자 | 인프라 런북에 설명된 범위가 있는 위임 또는 애플리케이션 Microsoft Graph 토큰 | Flow 소유권 또는 콜백 액세스 |
+| 채널 인벤토리 호출자 | 인프라 런북에 설명된 범위가 있는 위임 또는 애플리케이션 Microsoft Graph 토큰 | 흐름 소유권 또는 콜백 액세스 |
 
 초기 부트스트랩 후 애플리케이션 사용자에 대한 사용자 지정 Dataverse 보안
 역할을 만드세요. 이 통합에서 소유하는 Solution 배포 작업과 Process 행만
@@ -75,7 +102,7 @@ Flow를 사용하세요.
    참조는 배포 시점의 간접 참조이며 사용자의 OAuth 연결을 애플리케이션
    인증으로 복사하거나 변환하지 않습니다.
 5. 이름이 지정된 운영 공동 소유자를 두 명 이상 추가합니다. 이들이 실행
-   기록을 검사하고 Flow를 관리할 수 있는지 확인하되 연결 사용자의 암호를
+   기록을 검사하고 흐름을 관리할 수 있는지 확인하되 연결 사용자의 암호를
    제공하지 마세요. 공동 소유자는 다른 사용자가 만든 연결의 자격 증명을
    업데이트할 수 없습니다.
 
@@ -92,9 +119,9 @@ HTTP 트리거 설정과 Teams 커넥터는 실행의 서로 다른 부분에 �
    파생된 `teamId`와 `channelId`만 보냅니다. 직접 예제는 Flow를 호출하기
    전에 구성된 링크에서 동일한 필드를 파생합니다.
 3. Teams 작업은 연결 참조에서 선택한 포함된 Microsoft Teams 연결을
-   사용합니다. 콜백 호출자의 액세스나 Dataverse Flow 소유자의 액세스가
+   사용합니다. 콜백 호출자의 액세스나 Dataverse 흐름 소유자의 액세스가
    아니라 연결 사용자의 Teams 액세스로 실행됩니다.
-4. Flow는 임의의 대상 ID에 권한을 부여하지 않습니다. 콜백 URL은 중앙
+4. 흐름은 임의의 대상 ID에 권한을 부여하지 않습니다. 콜백 URL은 중앙
    라우터 또는 승인된 다른 호출자만 사용할 수 있도록 하세요. 또한 Teams
    서비스는 연결 사용자의 현재 Team 및 채널 액세스를 적용합니다. 동적
    Team 또는 Channel 값은 해당 액세스를 확장할 수 없습니다.
@@ -121,12 +148,12 @@ HTTP 트리거 설정과 Teams 커넥터는 실행의 서로 다른 부분에 �
 변경 후에는 Power Automate 실행, 대상 카드 및 템플릿 표시가 없는지
 확인하세요.
 
-## Flow 만들기
+## 흐름 만들기
 
 1. [Power Automate](https://make.powerautomate.com)를 엽니다.
 2. Teams 연결을 소유한 환경을 선택합니다.
 3. **Create**를 선택한 다음 **Create from blank**를 선택합니다.
-4. `PyHookKit Routed Teams Flow`와 같이 환경 중립적인 이름을 Flow에
+4. `PyHookKit Routed Teams Flow`와 같이 환경 중립적인 이름을 흐름에
    지정합니다.
 5. **When a Teams webhook request is received**를 추가합니다.
 6. 이 예제에서 사용하는 서명된 콜백 URL 모델에 대해 **Who can trigger the
@@ -144,9 +171,9 @@ HTTP 트리거 설정과 Teams 커넥터는 실행의 서로 다른 부분에 �
 유지됩니다. 본문은 최상위 `teamId`와 `channelId` 속성 및 하나의 Adaptive
 Card 첨부 파일이 있는 Teams `message` 봉투입니다. 중앙 라우터는 채널
 링크를 유지하고 해당 테넌트, Team, 채널 및 표시 이름 메타데이터를 별도로
-저장합니다. 서명된 Workflow URL은 SQLite에 저장되지 않습니다.
+저장합니다. 서명된 워크플로 URL은 SQLite에 저장되지 않습니다.
 
-![Teams Webhook 트리거 및 카드 게시 작업이 있는 Power Automate Flow](assets/power-automate-teams-workflow/power-automate-flow-designer.png)
+![Teams Webhook 트리거 및 카드 게시 작업이 있는 Power Automate 흐름.](assets/power-automate-teams-workflow/power-automate-flow-designer.png)
 
 ## 대상 검증
 
@@ -156,7 +183,7 @@ Card 첨부 파일이 있는 Teams `message` 봉투입니다. 중앙 라우터�
 하나, 지원되는 채널 ID 및 비어 있지 않은 채널 이름이 필요합니다. SQLite는
 원본 링크와 파생된 메타데이터를 별도 열에 저장합니다.
 
-Workflow 콜백은 권한 있는 전송 자격 증명입니다. Flow는 라우터가 제공한
+워크플로 콜백은 권한 있는 전송 자격 증명입니다. 흐름은 라우터가 제공한
 검증된 `teamId`와 `channelId`를 신뢰하므로 해당 URL을 일반 생성자에게
 노출하지 마세요.
 
@@ -175,7 +202,7 @@ Channel 컨트롤에서 **Enter custom value**를 선택합니다.
 | **Channel** | `triggerBody()?['channelId']` |
 | **Adaptive Card** | `first(triggerBody()?['attachments'])?['content']` |
 
-![Power Automate Teams 카드 게시 작업 설정](assets/power-automate-teams-workflow/power-automate-teams-action.png)
+![Power Automate Teams 카드 게시 작업 설정.](assets/power-automate-teams-workflow/power-automate-teams-action.png)
 
 Teams Webhook 트리거에는 메시지 봉투가 필요합니다. Power Automate는 대상
 선택을 위해 라우팅 속성을 읽지만 Teams 작업은 첫 번째 첨부 파일의
@@ -199,7 +226,7 @@ Teams Webhook 트리거에는 메시지 봉투가 필요합니다. Power Automat
 7. 선택한 채널 링크를 동일하게 보호된 환경에
    `TEAMS_WORKFLOW_CHANNEL_LINK`로 저장합니다. 자격 증명이 아니라
    구성이지만 실제 테넌트 및 대상 식별자를 포함합니다.
-8. Flow를 공유 또는 장기 통합으로 사용하기 전에 이름이 지정된 운영 공동
+8. 흐름을 공유 또는 장기 통합으로 사용하기 전에 이름이 지정된 운영 공동
    소유자를 두 명 이상 추가합니다.
 
 ## 스모크 테스트
@@ -232,24 +259,24 @@ CLI는 다음을 반환해야 합니다.
 다음 네 가지 결과를 모두 확인하세요.
 
 1. 카드가 예상한 Teams 채널에 표시됩니다.
-2. 구성되지 않은 경로에 대한 라우터 요청은 Workflow에 도달하기 전에
+2. 구성되지 않은 경로에 대한 라우터 요청은 워크플로에 도달하기 전에
    거부됩니다.
 3. 카드에 소유자 표시 또는 **Get template** 바닥글이 없습니다.
 4. 해당 Power Automate 실행이 **Succeeded** 상태입니다.
 
 ## 런타임 증거
 
-검증된 Flow가 활성화되어 있습니다. 실행 기록에는 통합 시나리오에서 사용한
+검증된 흐름이 활성화되어 있습니다. 실행 기록에는 통합 시나리오에서 사용한
 Webhook 요청이 성공적으로 완료된 것으로 표시됩니다.
 
-![Power Automate Flow 세부 정보 및 성공한 실행 기록](assets/power-automate-teams-workflow/power-automate-flow-history.png)
+![Power Automate 흐름 세부 정보 및 성공한 실행 기록.](assets/power-automate-teams-workflow/power-automate-flow-history.png)
 
 ## 문제 해결
 
 ### 카드에 Get template 바닥글이 있음
 
-Flow 세부 정보 페이지를 열고 **Original template**이 있는지 확인합니다.
-해당 관계가 있으면 빈 Flow에서 Flow를 다시 만드세요. Flow의 이름을
+흐름 세부 정보 페이지를 열고 **Original template**이 있는지 확인합니다.
+해당 관계가 있으면 빈 상태에서 흐름을 다시 만드세요. 흐름의 이름을
 바꾸거나 Adaptive Card를 변경하거나 콜백 URL을 복사해도 템플릿
 메타데이터는 제거되지 않습니다.
 
@@ -297,8 +324,8 @@ Teams는 공개 HTTPS를 통해 이미지 URL을 가져올 수 있어야 합니�
 
 ## 수명 주기 및 자동화
 
-첫 번째 Flow에서는 Microsoft 연결을 선택하고 권한을 부여해야 합니다. 반복
-환경의 경우 검증된 Flow를 Power Platform Solution에 배치하고 구체적인
+첫 번째 흐름에서는 Microsoft 연결을 선택하고 권한을 부여해야 합니다. 반복
+환경의 경우 검증된 흐름을 Power Platform Solution에 배치하고 구체적인
 연결을 연결 참조로 교체한 다음 Power Platform CLI로 배포하세요.
 
 생성된 콜백 URL은 환경별 런타임 상태로 유지됩니다. 활성화 후 URL을
@@ -307,11 +334,11 @@ Teams는 공개 HTTPS를 통해 이미지 URL을 가져올 수 있어야 합니�
 ALM 로드맵, 소유권 요구 사항 및 바닥글 검증 체크리스트는 [Teams Workflows
 인프라 런북](../infra/teams-workflows/README.md)을 참조하세요.
 
-Microsoft의 소유권 및 연결 의미 체계는 [클라우드 Flow
+Microsoft의 소유권 및 연결 의미 체계는 [클라우드 흐름
 공유](https://learn.microsoft.com/power-automate/create-team-flows),
-[클라우드 Flow 소유자 변경](https://learn.microsoft.com/power-automate/change-cloud-flow-owner),
+[클라우드 흐름 소유자 변경](https://learn.microsoft.com/power-automate/change-cloud-flow-owner),
 [Solution 인식 클라우드
-Flow](https://learn.microsoft.com/power-automate/guidance/coding-guidelines/understand-benefits-solution-aware-flows)
+흐름](https://learn.microsoft.com/power-automate/guidance/coding-guidelines/understand-benefits-solution-aware-flows)
 및 [Teams에서 메시지
 보내기](https://learn.microsoft.com/power-automate/teams/send-a-message-in-teams)에
 문서화되어 있습니다.

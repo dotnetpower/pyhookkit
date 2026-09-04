@@ -53,22 +53,22 @@ Microsoft 연결 선택과 동의 부여는 환경별 작업이므로 최초의 
 Workflow는 수동으로 생성합니다. 하나의 콜백이 라우팅된 카드 본문을
 수신하므로 알림 채널마다 별도의 Flow가 필요하지 않습니다.
 
-반복 배포의 경우 Power Platform Solution에 Flow를 패키징하고 연결 참조를
+반복 배포의 경우 Power Platform Solution에 흐름을 패키징하고 연결 참조를
 사용하여 Power Platform CLI로 배포하세요. 연결 권한 부여와 소유권을
 명시적인 부트스트랩 요구 사항으로 취급하고, 생성된 콜백 URL을 비밀 저장소에
 직접 기록하세요.
 
-빈 Flow에서 시작해 만든 최초 Flow를 내보낸 뒤에는 Power Automate 포털을
+빈 상태에서 만든 최초 흐름을 내보낸 뒤에는 Power Automate 포털을
 열지 않고도 이후 환경을 프로비저닝할 수 있습니다.
 
 1. Power Platform CLI로 Solution을 패키징하고 가져옵니다.
 2. Teams 연결 참조를 바인딩합니다.
-3. Flow를 활성화합니다.
+3. 흐름을 활성화합니다.
 4. `listCallbackUrl`을 통해 트리거 URL을 가져옵니다.
 5. 환경의 비밀 저장소에 직접 저장합니다.
 6. 바닥글 및 리치 카드 스모크 테스트를 실행합니다.
 
-Power Platform CLI는 Solution 아티팩트를 배포하지만 단계별 Flow 디자이너를
+Power Platform CLI는 Solution 아티팩트를 배포하지만 단계별 흐름 디자이너를
 제공하지는 않습니다. Dataverse 워크플로 JSON을 통한 직접 생성은 버전에
 민감한 고급 대안이며 권장되는 부트스트랩 경로가 아닙니다.
 
@@ -114,25 +114,25 @@ Teams에서 이미지를 렌더링하려면 이미지 URL에 공개 HTTPS로 접
 
 라이브 테스트에서 확인된 결과는 다음과 같습니다.
 
-| 전송 Flow | 리치 카드 | 네이티브 사용자 멘션 | `Get template` |
+| 전송 흐름 | 리치 카드 | 네이티브 사용자 멘션 | `Get template` |
 |---|---:|---:|---:|
 | Teams Workflow 갤러리 템플릿 | 예 | 예 | 표시됨 |
-| 빈 상태에서 만든 Power Automate Flow | 예 | 예 | 표시되지 않음 |
+| 빈 상태에서 만든 Power Automate 흐름 | 예 | 예 | 표시되지 않음 |
 
 갤러리 바닥글은 알림 페이로드가 아니라 Teams에서 생성합니다. 페이로드를
 변경해도 제거할 수 없습니다. 현재 빈 상태에서 만든 Flow에는 바닥글이
 표시되지 않습니다. 발신자 신원과 귀속 표시를 계약에 따라 제어해야 하는
 경우에는 Teams 봇이나 적합한 Graph 어댑터를 사용하세요.
 
-Power Automate는 Flow 세부 정보 페이지에서 인과 관계의 차이를 보여 줍니다.
-템플릿에서 생성된 Flow에는 **Original template** 관계가 있지만, 검증된 빈
-상태에서 만든 Flow에는 없습니다. 바닥글의 **Get template** 링크는 해당 원본
-템플릿으로 연결됩니다. 따라서 배포 검증 시 Flow 이름이나 복사된 작업 정의에
+Power Automate는 흐름 세부 정보 페이지에서 인과 관계의 차이를 보여 줍니다.
+템플릿에서 생성된 흐름에는 **Original template** 관계가 있지만, 검증된 빈
+상태에서 만든 흐름에는 없습니다. 바닥글의 **Get template** 링크는 해당 원본
+템플릿으로 연결됩니다. 따라서 배포 검증 시 흐름 이름이나 복사된 작업 정의에
 의존하지 말고 세부 정보 페이지와 실제 게시된 카드를 모두 확인해야 합니다.
 
 이 바닥글은
 [Microsoft 365 Roadmap 393923](https://www.microsoft.com/microsoft-365/roadmap?featureid=393923)에서
 추적하는 Teams Workflow 템플릿 검색 기능입니다. 이 기능은 템플릿에서 생성된
-Flow에 적용되며 수신 웹후크 페이로드 외부에 있습니다. 이름 변경, 메타데이터가
+흐름에 적용되며 수신 웹후크 페이로드 외부에 있습니다. 이름 변경, 메타데이터가
 불확실한 복제 또는 Adaptive Card 요소 변경은 신뢰할 수 있는 제거 방법이
 아닙니다.

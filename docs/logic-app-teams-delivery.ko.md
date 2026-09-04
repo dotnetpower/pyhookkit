@@ -98,13 +98,13 @@ Bicep 템플릿과 커밋된 워크플로 정의가 정보의 기준 원본입�
 활성 워크플로는 HTTP 요청을 수락하고 라우팅 및 카드 필드를 검증하며, 유효한
 카드를 Teams에 게시하고 모든 경로에서 명시적인 상태를 반환합니다.
 
-![검증, Teams 전송 및 응답 분기가 펼쳐진 Logic App 워크플로](assets/logic-app-teams-delivery/logic-app-workflow-expanded.png)
+![검증, Teams 전송 및 응답 분기가 펼쳐진 Logic App 워크플로.](assets/logic-app-teams-delivery/logic-app-workflow-expanded.png)
 
 **When a HTTP request is received → Settings**를 선택합니다. 콜백과 알림
 데이터가 실행 진단에 나타나지 않도록 **Secure inputs**와 **Secure outputs**
 를 모두 켜야 합니다.
 
-![보안 입력 및 출력을 사용하도록 설정한 Logic App HTTP 트리거](assets/logic-app-teams-delivery/logic-app-trigger-security.png)
+![보안 입력 및 출력을 사용하도록 설정한 Logic App HTTP 트리거.](assets/logic-app-teams-delivery/logic-app-trigger-security.png)
 
 **Post card to channel → Parameters**를 선택하고 다음을 확인합니다.
 
@@ -116,7 +116,7 @@ Bicep 템플릿과 커밋된 워크플로 정의가 정보의 기준 원본입�
 | **Channel** | `triggerBody()?['channelId']` |
 | **Adaptive Card** | `string(triggerBody()?['card'])` |
 
-![동적 경로와 Adaptive Card 입력이 있는 Logic App Teams 작업](assets/logic-app-teams-delivery/logic-app-teams-action.png)
+![동적 경로와 Adaptive Card 입력이 있는 Logic App Teams 작업.](assets/logic-app-teams-delivery/logic-app-teams-action.png)
 
 문서화를 위해 트리거의 **Parameters** 탭을 열거나 캡처하지 마세요. 이 탭에는
 서명된 콜백 URL이 표시됩니다.
@@ -242,12 +242,12 @@ uv run python scenarios/deployment_result/teams.py --send-logic-app
 아니라 GitHub, GitLab, Argo CD 및 AKS 자동화 경로에서도 성공적인 실행이
 생성되었습니다.
 
-![알림 실행에 성공한 Logic App 실행 기록](assets/logic-app-teams-delivery/logic-app-run-history.png)
+![알림 실행에 성공한 Logic App 실행 기록.](assets/logic-app-teams-delivery/logic-app-run-history.png)
 
 성공한 실행을 열고 HTTP 트리거, 검증, Teams 게시 및 `Response created`
 단계가 모두 성공했는지 확인합니다.
 
-![라우팅된 전체 전송 경로를 보여 주는 성공한 Logic App 실행](assets/logic-app-teams-delivery/logic-app-run-success.png)
+![라우팅된 전체 전송 경로를 보여 주는 성공한 Logic App 실행.](assets/logic-app-teams-delivery/logic-app-run-success.png)
 
 검증된 환경에서는 Logic App을 통해 배포, 인시던트, 유지 관리 및 승인
 시나리오가 성공적으로 전송되었습니다. 또한 선택 사항이 없는 파이프라인이

@@ -4,7 +4,7 @@
 
 Slack 참조는 종속성 없는 HTTP 요청에서 시작하여 라이브러리 기반 렌더링을
 거쳐 명시적인 Web API 경계까지 진행됩니다. `examples/python`에서 명령을
-실행하십시오.
+실행하세요.
 
 ## 원시 HTTP 부트스트랩
 
@@ -122,7 +122,7 @@ F09는 의도적으로 렌더링만 수행합니다. 실제 업데이트 및 삭
 - 해당 봇이 원래 작성한 메시지에서 반환된 `ts`
 
 다른 앱이나 사용자가 소유한 메시지에 Web API 변경 작업을 사용하지
-마십시오.
+마세요.
 
 ## 안정성 동작
 
@@ -178,7 +178,7 @@ O06은 현재 절차를 사용합니다.
 [Slack Incoming Webhooks 문서](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks)와
 [`chat.update`](https://docs.slack.dev/reference/methods/chat.update) /
 [`chat.delete`](https://docs.slack.dev/reference/methods/chat.delete) 참조를
-확인하십시오. 운영 예제는 공식
+확인하세요. 운영 예제는 공식
 [`conversations.list`](https://docs.slack.dev/reference/methods/conversations.list/),
 [메시지 서식](https://docs.slack.dev/messaging/formatting-message-text/),
 [요청 검증](https://docs.slack.dev/authentication/verifying-requests-from-slack/),

@@ -24,11 +24,11 @@ Teams는 더 새로운 스키마 버전을 지원하지만 보수적인 기준�
   크기는 1024 x 1024픽셀과 1MB 이하여야 합니다. 리디렉션과 SVG는 피합니다.
 - `TextBlock`에서는 HTML보다 Markdown을 우선합니다. Teams는 일부만
   지원하므로 Markdown 헤더, 표, 이미지, 서식이 미리 지정된 텍스트 또는
-  인용문에 의존하지 마십시오.
+  인용문에 의존하지 마세요.
 - 구체적이고 레이블이 명확한 작업을 소수만 사용합니다.
 - 넓은 데스크톱 레이아웃과 좁은 모바일 레이아웃을 모두 검증합니다.
 
-Workflow 갤러리는 Flow 봇 호스트에서 검증된 `Action.OpenUrl` 및
+워크플로 갤러리는 Flow 봇 호스트에서 검증된 `Action.OpenUrl` 및
 `Action.ToggleVisibility` 작업만 허용합니다. `Action.Submit`,
 `Action.Execute` 및 서버 측 상태가 필요한 기타 작업에는 적절한 봇이나
 다른 인증된 어댑터가 필요하며 갤러리 검증에서 허용되지 않습니다.
@@ -82,7 +82,7 @@ OfficeDev/Microsoft-Teams-Adaptive-Card-Samples 저장소에서 변경 없이
 갤러리 템플릿 흐름은 **Original template** 관계를 유지하며 Adaptive Card
 페이로드 외부에서 바닥글을 받습니다. 저작자 표시가 없어야 할 때는
 [Power Automate Teams Workflow 가이드](power-automate-teams-workflow.ko.md)의
-검증된 빈 상태 기반 흐름을 사용하십시오.
+검증된 빈 상태 기반 흐름을 사용하세요.
 
 ## 검증
 

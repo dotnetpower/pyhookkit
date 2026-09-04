@@ -8,6 +8,7 @@
 
 | 파일 | 증거 자료 |
 |---|---|
+| `microsoft-365-service-account.svg` | Microsoft 365 관리 센터의 합성 Teams 연결 서비스 계정 |
 | `power-automate-flow-designer.png` | Webhook 트리거 및 Teams 동작 |
 | `power-automate-teams-action.png` | Teams 동작 구성 |
 | `power-automate-flow-history.png` | 활성화된 흐름 및 성공한 실행 |

@@ -10,6 +10,13 @@ It replaces saved Azure CLI delegated access tokens. The router obtains a
 short-lived app-only Microsoft Graph token whenever it performs membership
 registration.
 
+`TeamsNotifyApp` is not an Azure resource created in an Azure subscription. It
+is an app registration and Service Principal in the same Microsoft Entra
+tenant as the Microsoft 365 tenant that owns the destination Team and channel.
+A "Microsoft 365 user" is a user from that same Entra directory with Teams
+licensing, not a user from a separate directory. Azure CLI signs in to this
+Entra tenant; no Azure subscription or Azure RBAC role is required.
+
 ## Identity boundaries
 
 Do not combine these identities merely to simplify bootstrap:

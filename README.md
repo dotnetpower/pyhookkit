@@ -82,37 +82,82 @@ membership diagnostics.
 
 ## End-to-end Teams setup
 
-This walkthrough starts with a new tenant and finishes with one canonical
-notification delivered through the SQLite central router, Power Automate, and
-Microsoft Teams. Commands run from the repository root unless a step says
-otherwise.
+This walkthrough starts in one target Microsoft Entra tenant and finishes with
+one canonical notification delivered through the SQLite central router, Power
+Automate, and Microsoft Teams. Commands run from the repository root unless a
+step says otherwise.
+
+### Distinguish the tenants and users first
+
+In this walkthrough, **Azure tenant**, **Microsoft Entra tenant**, and
+**Microsoft 365 tenant** do not mean separate user directories. The Microsoft
+Entra tenant is the identity directory. Microsoft 365 and Teams provide
+licensed services to users from that directory. A "Microsoft 365 user" is
+therefore a user in the **same Entra tenant with Microsoft 365/Teams licenses**,
+not a separate type of account.
+
+The Power Platform environment also belongs to the target Entra tenant. This
+PyHookKit walkthrough keeps all of the following in the **same Entra tenant
+identified by the channel link**:
+
+- the destination Team and channel;
+- the Power Platform environment and Power Automate Flow;
+- the `svc-teams-notification` Teams connection user;
+- the `TeamsNotifyApp` app registration and Service Principal.
+
+An Azure subscription is an Azure resource and billing boundary, separate from
+the Entra tenant. This Power Automate path uses Azure CLI only for Entra ID and
+Microsoft Graph calls, so **no Azure subscription or Azure RBAC role is
+required**. Azure subscription Contributor or Owner does not grant any of the
+Entra, Power Platform, or Teams permissions in this walkthrough. A subscription
+is required only when deploying the optional [Azure Logic App Teams
+delivery](docs/logic-app-teams-delivery.md).
 
 ### Prerequisites
 
 | Requirement | Purpose |
 |---|---|
 | Python 3.12 and `uv` | Install and run PyHookKit |
-| Azure CLI | Create and verify `TeamsNotifyApp` |
-| Microsoft 365 tenant with Teams | Own the destination Teams and channels |
-| Power Platform environment | Own the Power Automate Flow and Teams connection |
+| Azure CLI | Create and verify `TeamsNotifyApp` in the target Entra tenant, not an Azure subscription |
+| Microsoft 365 tenant with Teams | Own destination Teams, channels, and all user identities |
+| Power Platform environment in the same tenant | Own the Power Automate Flow and Teams connection |
 | Dedicated licensed user such as `svc-teams-notification` | Authorize the Teams connector and post notifications |
 | Teams channel link | Derive tenant, Team, channel, and display-name metadata |
-| Bootstrap identity | Create an app registration and grant Graph application consent |
 
-The bootstrap identity needs the following minimum access:
+### Identity and minimum-permission matrix
 
-- no directory role when tenant policy permits user app registrations;
-  otherwise **Application Developer**;
-- ownership of the new `TeamsNotifyApp` to manage its credential;
-- **Privileged Role Administrator** to grant tenant-wide consent for the
-  Microsoft Graph `GroupMember.ReadWrite.All` application permission.
+One person can perform more than one role, but permissions do not transfer
+between roles. For example, an Azure subscription Owner cannot create the Flow,
+and a Flow author cannot post a card when the Teams connection user is not a
+member of the destination Team.
 
-Use PIM to activate Privileged Role Administrator only for bootstrap when
-available. The Flow author needs Power Platform **Environment Maker**. The
-Teams connection user needs Microsoft 365/Teams and Power Automate licensing,
-but no Entra administrator role.
+| Identity or actor | Account boundary | Minimum permission or license | Steps |
+|---|---|---|---|
+| Local operator | Developer or operator; need not be a tenant account | Repository and local `.env` access | 1, 4, 8-10 |
+| User and license provisioner | Administrator in the target Entra tenant | **User Administrator** can create the account and assign its licenses. For license-only work on an existing account, use **License Administrator** or the organization's existing provisioning process | 2 |
+| Team owner or existing member | User in the target Microsoft 365 tenant | Initial channel access and permission to obtain its link; Team owner when manually adding members | 2 |
+| Flow author | Person with access to the Power Platform environment in the target Entra tenant | **Environment Maker** in the target environment and any Power Automate entitlement required by tenant policy | 3 |
+| Teams connection user | Ordinary user in the same Entra tenant, such as `svc-teams-notification` | Microsoft 365/Teams and Power Automate entitlements, membership in every destination Team, and ability to complete interactive OAuth/MFA; no Entra administrator role | 2, 3, 7 |
+| Flow operational co-owner | Named person with access to the target Power Platform environment | Co-owner access to the Flow; cannot manage another user's Teams connection credential | 3, 7 |
+| Bootstrap app creator | Person signed in to the target Entra tenant | No directory role if user app registration is allowed; otherwise **Application Developer**; owner of the created `TeamsNotifyApp` | 5, 6 |
+| Consent approver | Administrator in the target Entra tenant | **Privileged Role Administrator** to grant admin consent for Microsoft Graph application permission `GroupMember.ReadWrite.All`; activate temporarily through PIM when available | 5, 6 |
+| `TeamsNotifyApp` | Non-human app registration and Service Principal in the target tenant | Admin-consented Graph application permission `GroupMember.ReadWrite.All`; no Microsoft 365 license, Azure RBAC, or Power Platform role | 6, 8, 9 |
+| Notification producer and central router | Local process or CI/CD workload | Producer uses a router bearer token; router uses the signed Workflow callback secret; neither must be a Microsoft 365 user or Entra administrator | 8-10 |
+
+To create the app registration and grant admin consent in one
+`bootstrap-teams-app` invocation, the signed-in bootstrap identity must have
+**both the app-creator and consent-approver permissions**. To separate duties,
+have the app creator create the app, have the consent approver complete admin
+consent, and then rerun the command to verify it.
+
+The **Dataverse application user** used for repeat Solution deployment is not
+`TeamsNotifyApp`. The former owns and deploys the Flow; the latter manages Team
+membership through Graph. The first manually authored end-to-end setup does not
+require a Dataverse application user.
 
 ### Step 1: Install the project
+
+**Actor:** local operator. No Microsoft cloud permission is required.
 
 ```shell
 cp .env.example .env
@@ -128,6 +173,10 @@ attach it to an issue.
 
 ### Step 2: Prepare the Teams connection user and channel
 
+**Actors:** user/license provisioner and Team owner. After provisioning,
+`svc-teams-notification` operates as an ordinary user with no administrator
+role.
+
 1. Create or designate the dedicated `svc-teams-notification` user.
 2. Assign the Microsoft 365/Teams and Power Automate entitlements required by
    the tenant.
@@ -141,6 +190,10 @@ The link contains the tenant ID, Team backing-group ID, channel ID, and channel
 name. PyHookKit validates and stores those values separately in SQLite.
 
 ### Step 3: Create and configure the Power Automate Flow
+
+**Actor:** Flow author. The Teams connection sign-in and MFA in item 7 are
+completed as `svc-teams-notification`. These accounts do not need to be the
+same.
 
 1. Open [Power Automate](https://make.powerautomate.com) and select the target
    environment.
@@ -172,6 +225,8 @@ Teams message envelope; only the first attachment's `content` is the card.
 
 ### Step 4: Store the Workflow callback
 
+**Actor:** local operator with write access to the callback secret store.
+
 Add the complete callback to the repository root `.env`:
 
 ```dotenv
@@ -182,6 +237,9 @@ Treat this URL as a credential. The central router SQLite database stores only
 the environment variable name, never the callback value.
 
 ### Step 5: Register TeamsNotifyApp in Azure Portal
+
+**Actors:** bootstrap app creator and consent approver. Azure Portal is used
+only as an Entra administration UI; no Azure subscription role is involved.
 
 The automated bootstrap in the next step can create the app. For explicit
 Portal review and ownership, create it first:
@@ -205,7 +263,8 @@ local example credential.
 
 ### Step 6: Bootstrap the app and first route
 
-Sign in with the bootstrap identity. An Azure subscription is not required:
+**Actor:** bootstrap identity holding both the app-creator and consent-approver
+permissions. An Azure subscription is not required:
 
 ```shell
 az login \
@@ -242,6 +301,9 @@ TEAMS_CONNECTION_USER_ID="<connection user object GUID>"
 
 ### Step 7: Verify Azure Portal and Power Automate
 
+**Actors:** `TeamsNotifyApp` owner and Flow operational co-owner. They can be
+different people.
+
 In **App registrations** > `TeamsNotifyApp`:
 
 - confirm **API permissions** contains Microsoft Graph
@@ -261,6 +323,9 @@ In Power Automate:
 - confirm the Team, Channel, and Adaptive Card expressions exactly match step 3.
 
 ### Step 8: Add another channel
+
+**Actor:** central-router operator. It uses the `TeamsNotifyApp` credential and
+callback secret from `.env`, not a person's Azure or Microsoft 365 permissions.
 
 The command loads `.env`, obtains a new app-only Graph token, ensures Team
 membership, and stores the channel metadata:
@@ -283,6 +348,8 @@ Repeat with a unique target ID for every channel. Destinations using the same
 route receive the same notification independently.
 
 ### Step 9: Run diagnostics
+
+**Actor:** central-router operator.
 
 ```shell
 uv run python -m pyhookkit.entrypoints.notification_router \
@@ -308,6 +375,9 @@ role, all enabled Team memberships, and SQLite permissions. It does not send a
 notification.
 
 ### Step 10: Send an end-to-end test
+
+**Actors:** local notification producer and central-router operator. Neither
+process signs in as a Microsoft 365 user.
 
 Terminal 1, from `examples/python`:
 

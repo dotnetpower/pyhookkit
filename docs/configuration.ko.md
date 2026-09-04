@@ -45,7 +45,7 @@ SLACK_WEBHOOK_URL="<Slack Incoming Webhook URL>"
 
 이전 Slack 안내에서는 **Blank app**을 **From scratch**라고 부를 수
 있습니다. 둘 다 동일한 최소 앱 생성 경로를 의미합니다. 이 예제에서는
-**AI agent** 또는 **Starter app**을 선택하지 마십시오.
+**AI agent** 또는 **Starter app**을 선택하지 마세요.
 
 발급된 전체 URL을 `SLACK_WEBHOOK_URL`에 복사합니다. Incoming Webhook은
 선택한 워크스페이스와 대상에 바인딩됩니다. 따라서 이 초기 환경 계약에는
@@ -69,7 +69,7 @@ SLACK_USER_GROUP_ID="<test Slack user-group ID>"
 
 - 앱을 설치하거나 재설치한 후 **OAuth & Permissions → OAuth Tokens for Your
   Workspace**에서 봇 토큰을 찾습니다. 일반적으로 `xoxb-`로 시작합니다.
-  비밀 정보로 취급하십시오.
+  비밀 정보로 취급하세요.
 - 테스트하는 작업에 필요한 범위만 추가합니다. 전체 합성 매니페스트에는
   `chat:write`, `channels:read`, `groups:read`, `users:read`,
   `usergroups:read`, `files:write`, `reactions:write`,
@@ -86,7 +86,7 @@ SLACK_USER_GROUP_ID="<test Slack user-group ID>"
   멤버를 찾을 수 있습니다. 표시 이름은 활성 상태인 봇이 아닌 멤버
   정확히 한 명으로 확인되어야 합니다.
 - HTTP 상호 작용과 Events API 예제에는 서명 비밀이 필요합니다. 더 이상
-  사용되지 않는 확인 토큰을 대신 사용하지 마십시오.
+  사용되지 않는 확인 토큰을 대신 사용하지 마세요.
 - Socket Mode에는 `connections:write`가 있는 앱 수준 토큰이 필요합니다.
   해당 값은 일반적으로 `xapp-`로 시작하며 Web API 쓰기에는 여전히 봇
   토큰을 사용합니다.
@@ -95,7 +95,7 @@ F08-F09는 합성 페이로드를 렌더링하며 Web API 요청을 수행하지
 `slack_operations` 예제에서 실제 Web API 수명 주기를 제공합니다.
 
 [Slack Incoming Webhooks 문서](https://docs.slack.dev/messaging/sending-messages-using-incoming-webhooks)를
-사용하여 Incoming Webhook을 생성하고 관리하십시오.
+사용하여 Incoming Webhook을 생성하고 관리하세요.
 
 ## Microsoft Teams
 
@@ -135,10 +135,10 @@ NOTIFICATION_ROUTER_TOKEN="<producer-specific router bearer token>"
 
 두 `NOTIFICATION_ROUTER_*` 값은 선택 사항입니다. 생산자가
 [중앙 알림 라우터](central-notification-router.ko.md)를 통해 정규 JSON을
-제출할 때만 구성하십시오. 모든 생산자는 서로 다른 토큰을 사용해야 합니다.
+제출할 때만 구성하세요. 모든 생산자는 서로 다른 토큰을 사용해야 합니다.
 
 `TEAMS_NOTIFY_*` 및 연결 사용자에 해당하는 네 값은 수동으로 생성하지
-마십시오.
+마세요.
 중앙 라우터의 `bootstrap-teams-app` 명령은 표시되는 단일 테넌트 앱을
 생성하거나 재사용하고, 앱 전용 토큰을 검증하고, 사용자를 확인한 뒤 모드
 `0600`으로 `.env`에 값을 씁니다. 런타임 등록은 수명이 짧은 Graph 토큰을
@@ -160,17 +160,17 @@ Adaptive Card 예제에서 Workflow 및 Logic App 전송 모두에 사용됩니�
 `EXAMPLE_ASSET_BASE_URL`이 비어 있을 때만 호환되는 대체 값으로
 `TEAMS_ASSET_BASE_URL`을 읽습니다. 두 `TEAMS_TEST_*` 값은 선택 사항이며
 독립 실행형 멘션 예제에서만 사용됩니다. 공유 프로덕션 알림 구성에는 이러한
-예제 값을 설정하지 마십시오.
+예제 값을 설정하지 마세요.
 
 [Power Automate Teams Workflow 가이드](power-automate-teams-workflow.ko.md)를
-사용하여 빈 상태에서 흐름을 생성하고 스모크 테스트하십시오.
+사용하여 빈 상태에서 흐름을 생성하고 스모크 테스트하세요.
 Solution 배포, 서비스 주체 소유권 및 채널 접근 도구는
 [Teams Workflows 런북](../infra/teams-workflows/README.md)에 있습니다.
 
 반복되는 환경에서는 Power Platform CLI로 검증된 흐름을 Power Platform
 Solution으로 배포하고 관리 API를 통해 각 환경의 콜백 URL을 가져옵니다.
 한 환경의 서명된 URL을 다른 환경에 복사하거나 Solution 소스에 저장하지
-마십시오.
+마세요.
 
 ## 파일 로드
 
@@ -201,11 +201,11 @@ test -n "$TEAMS_LOGIC_APP_URL" && echo "Teams Logic App configured"
 
 - 테스트 채널을 대상으로 하더라도 두 URL을 모두 자격 증명으로 취급합니다.
 - 어떤 값도 소스, 테스트, 픽스처, 스크린샷, 로그, 명령 기록, 이슈 또는
-  풀 리퀘스트에 붙여 넣지 마십시오.
-- 디버깅이나 CI 중에 환경 값을 출력하지 마십시오.
+  풀 리퀘스트에 붙여 넣지 마세요.
+- 디버깅이나 CI 중에 환경 값을 출력하지 마세요.
 - URL이 노출되면 Slack Webhook을 취소 또는 교체하거나 Teams Workflow
-  콜백 URL을 다시 생성한 다음 승인된 비밀 저장소를 업데이트하십시오.
+  콜백 URL을 다시 생성한 다음 승인된 비밀 저장소를 업데이트하세요.
 - 프로덕션 배포에서는 `.env`를 복사하는 대신 비밀 관리자를 통해 동일한
   변수를 주입해야 합니다.
 - 구체적인 고급 어댑터에 필요한 경우에만 봇 토큰, OAuth 자격 증명, 테넌트
-  ID 또는 클라이언트 자격 증명을 추가하십시오.
+  ID 또는 클라이언트 자격 증명을 추가하세요.

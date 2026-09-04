@@ -40,11 +40,40 @@ and avoided that footer in the verified environment.
 Do not place real Team names, channel names, identities, or callback URLs in
 committed files or screenshots.
 
+### Tenant and account boundaries
+
+In this guide, Azure tenant, Microsoft Entra tenant, and Microsoft 365 tenant
+do not represent separate user directories. The target Microsoft Entra tenant
+owns users and app registrations. Microsoft 365 and Teams provide services to
+licensed users from that same directory, and the Power Platform environment
+also belongs to that tenant.
+
+Keep the destination Team and channel, Power Platform environment, Teams
+connection user, and `TeamsNotifyApp` in the Entra tenant identified by the
+channel link. The Power Automate Workflow path requires no Azure subscription
+or Azure RBAC role. Azure Portal and Azure CLI are used only as Entra ID and
+Microsoft Graph administration interfaces. An Azure subscription is required
+only for [Azure Logic App Teams delivery](logic-app-teams-delivery.md).
+
+The Flow author is an **Environment Maker** in the target Power Platform
+environment. The Teams connection user is an ordinary, Microsoft 365/Teams
+licensed user in the same tenant. These accounts do not need to be the same,
+and neither needs Azure subscription Contributor or Owner. **User
+Administrator** can create the account and assign its licenses; for
+license-only work on an existing account, **License Administrator** is
+sufficient.
+
 ## Identity and permission setup
 
 Use separate identities for authoring, ownership, connector execution, and
 runtime invocation. Granting one identity access does not grant it to the
 others.
+
+The first portal-authored Flow requires only a **Flow author**, **Teams
+connection user**, and **operational co-owners**. The bootstrap administrator
+and Dataverse application user in the following table are operational
+identities added for repeat Solution deployment; they are not prerequisites
+for authoring the first Flow.
 
 | Identity | Required access | Not required |
 |---|---|---|

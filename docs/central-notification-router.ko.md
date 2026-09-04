@@ -129,7 +129,7 @@ uv run python -m pyhookkit.entrypoints.notification_router \
 | 앱 등록 만들기 | 부트스트랩 앱 생성자 | 테넌트 정책에서 사용자의 앱 등록을 허용하면 디렉터리 역할 불필요. 허용하지 않으면 **Application Developer** |
 | 새로 만든 앱과 자격 증명 관리 | 앱 생성자/소유자 | `TeamsNotifyApp` 소유권. 별도 운영자가 자신이 소유하지 않은 애플리케이션을 관리해야 할 때만 **Cloud Application Administrator** 사용 |
 | Microsoft Graph 애플리케이션 권한 부여 | 동의 승인자 | **Privileged Role Administrator**. 사용할 수 있는 경우 PIM을 통해 부트스트랩 동안에만 활성화 |
-| Flow 만들기 및 편집 | Flow 작성자 | 대상 환경의 Power Platform **Environment Maker** |
+| 흐름 만들기 및 편집 | 흐름 작성자 | 대상 환경의 Power Platform **Environment Maker** |
 | Teams 커넥터 권한 부여 | `svc-teams-notification` | Microsoft 365/Teams 및 Power Automate 라이선스가 있는 사용자. Entra 관리자 역할 불필요 |
 | 런타임에 Team 멤버십 추가 | `TeamsNotifyApp` 서비스 주체 | Microsoft Graph 애플리케이션 권한 `GroupMember.ReadWrite.All` |
 | 알림 제출 | GitLab, Argo CD 또는 다른 생성자 | 라우터 전달자 자격 증명만 필요. Graph 또는 Power Platform 역할 불필요 |
@@ -148,10 +148,10 @@ Microsoft 참고 자료:
 
 - [작업별 최소 권한 역할](https://learn.microsoft.com/entra/identity/role-based-access-control/delegate-by-task)
 - [테넌트 전체 관리자 동의 부여](https://learn.microsoft.com/entra/identity/enterprise-apps/grant-admin-consent)
-- [애플리케이션 및 Service Principal 개체](https://learn.microsoft.com/entra/identity-platform/app-objects-and-service-principals)
-- [Microsoft 365 Group 구성원 추가](https://learn.microsoft.com/graph/api/group-post-members?view=graph-rest-1.0)
+- [애플리케이션 및 서비스 주체 개체](https://learn.microsoft.com/entra/identity-platform/app-objects-and-service-principals)
+- [Microsoft 365 그룹 구성원 추가](https://learn.microsoft.com/graph/api/group-post-members?view=graph-rest-1.0)
 
-ID는 Power Automate Teams 연결에 바인딩된 계정과 동일해야 합니다. Flow
+ID는 Power Automate Teams 연결에 바인딩된 계정과 동일해야 합니다. 흐름
 공동 소유자를 추가해도 커넥터 실행 ID는 변경되지 않습니다. 표준 채널
 액세스는 Team 멤버십을 따릅니다. 비공개 및 공유 채널에는 명시적인 채널
 멤버십이 필요할 수 있으며 비공개 채널로의 Flow bot 전송은 계속 지원되지

@@ -50,18 +50,18 @@ Workflow 및 Logic App 콜백 자격 증명은 GitLab에만 저장됩니다.
 참조 환경은 OIDC가 활성화된 AKS 노드 하나를 사용하며 Istio, 인그레스,
 ACR 및 모니터링 스택은 의도적으로 제외합니다.
 
-![Azure Portal 검색에서 반환된 AKS 리소스](assets/integrated-scenario/azure-aks-resources.png)
+![Azure Portal 검색에서 반환된 AKS 리소스.](assets/integrated-scenario/azure-aks-resources.png)
 
 Bookinfo는 `bookinfo-staging`에서 실행됩니다. 제품 페이지를 통해
 `productpage`, `details`, `ratings` 및 `reviews`가 클러스터 내부에서
 통신하는지 확인합니다.
 
-![AKS의 Bookinfo 제품 페이지](assets/integrated-scenario/bookinfo-productpage.png)
+![AKS의 Bookinfo 제품 페이지.](assets/integrated-scenario/bookinfo-productpage.png)
 
 Argo CD는 애플리케이션을 `Healthy`이면서 `Synced`인 상태로 보고하며
 트리에는 공급자 중립적인 Kubernetes 리소스가 표시됩니다.
 
-![Argo CD Bookinfo 애플리케이션 트리](assets/integrated-scenario/argocd-bookinfo-application.png)
+![Argo CD Bookinfo 애플리케이션 트리.](assets/integrated-scenario/argocd-bookinfo-application.png)
 
 ## 시나리오 1: 배포 승인
 
@@ -75,17 +75,17 @@ Argo CD는 애플리케이션을 `Healthy`이면서 `Synced`인 상태로 보고
 
 Teams 버튼은 GitHub 실행을 열 뿐 배포를 직접 승인하지 않습니다.
 
-![환경 승인을 기다리는 GitHub 배포](assets/integrated-scenario/github-approval-pending.png)
+![환경 승인을 기다리는 GitHub 배포.](assets/integrated-scenario/github-approval-pending.png)
 
 승인 후 요청 및 승격 작업이 모두 완료됩니다.
 
-![GitHub 배포 승인 및 완료된 승격](assets/integrated-scenario/github-approval-complete.png)
+![GitHub 배포 승인 및 완료된 승격.](assets/integrated-scenario/github-approval-complete.png)
 
 간결한 승인 카드는 정규 대체 본문을 반복하지 않으면서 선택한
 애플리케이션과 Reviews 버전, 요청자, GitHub 환경 검토자 경계, 기한 및 검토
 작업을 보존합니다.
 
-![Teams 배포 승인 요청](assets/card-previews/approval-request-teams.png)
+![Teams 배포 승인 요청.](assets/card-previews/approval-request-teams.png)
 
 ## 시나리오 2: GitOps 승격 및 배포 결과
 
@@ -93,15 +93,15 @@ GitLab 승격 파이프라인은 활성 Reviews 패치를 변경하기 전에 �
 트리를 검증합니다. CI 작업 토큰은 보호된 `gitops-staging` 브랜치에만
 씁니다.
 
-![GitLab 검증 및 Bookinfo 승격 작업](assets/integrated-scenario/gitlab-promotion-pipeline.png)
+![GitLab 검증 및 Bookinfo 승격 작업.](assets/integrated-scenario/gitlab-promotion-pipeline.png)
 
 Argo CD는 커밋을 감지하고 PostSync 스모크 Job을 실행한 후 성공한 작업을
 보고합니다. 그러면 알림 컨트롤러가 GitLab 정규 알림 파이프라인을
 시작합니다.
 
-![Argo CD가 시작한 GitLab 파이프라인](assets/integrated-scenario/gitlab-argocd-notification-pipeline.png)
+![Argo CD가 시작한 GitLab 파이프라인.](assets/integrated-scenario/gitlab-argocd-notification-pipeline.png)
 
-![Teams Bookinfo 배포 결과](assets/card-previews/deployment-result-teams.png)
+![Teams Bookinfo 배포 결과.](assets/card-previews/deployment-result-teams.png)
 
 ## 시나리오 3: 인시던트 경고 및 확인
 
@@ -112,12 +112,12 @@ Argo CD는 커밋을 감지하고 PostSync 스모크 Job을 실행한 후 성공
 GitLab은 매니페스트를 검증하고 동일한 공급자 어댑터를 통해 인시던트 카드를
 보냅니다.
 
-![GitLab 인시던트 검증 및 알림 작업](assets/integrated-scenario/gitlab-incident-pipeline.png)
+![GitLab 인시던트 검증 및 알림 작업.](assets/integrated-scenario/gitlab-incident-pipeline.png)
 
 확인 작업은 GitLab 새 이슈 페이지를 엽니다. 확인을 위한 기록 시스템은
 Teams가 아니라 GitLab Issues입니다.
 
-![Teams Bookinfo 인시던트 경고 및 확인 작업](assets/card-previews/incident-alert-acknowledgment-teams.png)
+![Teams Bookinfo 인시던트 경고 및 확인 작업.](assets/card-previews/incident-alert-acknowledgment-teams.png)
 
 ## 시나리오 4: 유지 관리 공지
 
@@ -125,13 +125,13 @@ Teams가 아니라 GitLab Issues입니다.
 제공합니다. 작업은 제한된 스테이징 기간을 파생하고 카드를 정확한
 파이프라인에 연결합니다.
 
-![GitLab 유지 관리 알림 작업](assets/integrated-scenario/gitlab-maintenance-pipeline.png)
+![GitLab 유지 관리 알림 작업.](assets/integrated-scenario/gitlab-maintenance-pipeline.png)
 
 라이브 Teams 렌더러는 간결한 표시를 사용합니다. 필수 의미는 정규 대체
 콘텐츠에 유지되는 한편 표시되는 카드는 본문을 반복하지 않으며 지원되지
 않는 그룹 확장 공지를 작업으로 표시하지 않습니다.
 
-![Teams 예약 유지 관리 공지](assets/card-previews/maintenance-notice-teams.png)
+![Teams 예약 유지 관리 공지.](assets/card-previews/maintenance-notice-teams.png)
 
 ## Teams 전송 종속성
 

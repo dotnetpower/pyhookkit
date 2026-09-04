@@ -92,6 +92,14 @@ def test_http_accepts_duplicate_and_returns_delivery_status(tmp_path: Path) -> N
     assert status.status_code == 200
     assert status.body["state"] == "delivered"
 
+    delivered_duplicate = application.handle(
+        "POST",
+        "/v1/notifications",
+        _HEADERS,
+        body,
+    )
+    assert delivered_duplicate.body["state"] == "delivered"
+
 
 def test_http_authentication_and_ownership_are_isolated(tmp_path: Path) -> None:
     application, _ = _application(tmp_path)

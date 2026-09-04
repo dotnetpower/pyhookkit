@@ -9,7 +9,7 @@ def submission_receipt_to_json(receipt: SubmissionReceipt) -> JsonObject:
     return {
         "notificationId": receipt.notification_id,
         "duplicate": receipt.duplicate,
-        "state": "queued",
+        "state": receipt.state.value,
     }
 
 

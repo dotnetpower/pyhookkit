@@ -137,6 +137,7 @@ def test_duplicate_is_idempotent_and_changed_content_conflicts(
 
     assert duplicate.notification_id == first.notification_id
     assert duplicate.duplicate is True
+    assert duplicate.state is NotificationState.QUEUED
     with pytest.raises(NotificationConflictError, match="different content"):
         router.submit("argocd", _notification(body="Changed content"))
 
@@ -252,6 +253,8 @@ def test_store_reports_delivering_and_all_failed_states(tmp_path: Path) -> None:
 
     assert failed is not None
     assert failed.state is NotificationState.FAILED
+    duplicate = store.submit("gitlab", _notification())
+    assert duplicate.state is NotificationState.FAILED
     with pytest.raises(RuntimeError, match="no longer active"):
         store.complete(delivery, failure, completed_at=_NOW)
 

@@ -32,6 +32,7 @@ class SubmissionReceipt:
 
     notification_id: str
     duplicate: bool
+    state: NotificationState
 
 
 @dataclass(frozen=True, slots=True)

@@ -156,6 +156,10 @@ class SqliteRouteStore:
                 return SubmissionReceipt(
                     notification_id=cast(str, existing["notification_id"]),
                     duplicate=True,
+                    state=self._notification_state(
+                        connection,
+                        cast(str, existing["notification_id"]),
+                    ),
                 )
 
             target_rows = connection.execute(
@@ -211,7 +215,11 @@ class SqliteRouteStore:
                     for row in target_rows
                 ),
             )
-        return SubmissionReceipt(notification_id=notification_id, duplicate=False)
+        return SubmissionReceipt(
+            notification_id=notification_id,
+            duplicate=False,
+            state=NotificationState.QUEUED,
+        )
 
     def status(
         self,
@@ -351,6 +359,22 @@ class SqliteRouteStore:
             )
             if updated.rowcount != 1:
                 raise RuntimeError("target delivery lease is no longer active")
+
+    def _notification_state(
+        self,
+        connection: sqlite3.Connection,
+        notification_id: str,
+    ) -> NotificationState:
+        rows = connection.execute(
+            """
+            SELECT target_id, state, attempts, error_kind, status_code
+            FROM target_deliveries
+            WHERE notification_id = ?
+            ORDER BY target_id
+            """,
+            (notification_id,),
+        ).fetchall()
+        return _aggregate_state(tuple(_delivery_status_from_row(row) for row in rows))
 
     def _initialize(self) -> None:
         with self._connection() as connection:

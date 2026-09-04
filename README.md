@@ -73,7 +73,10 @@ while reusing the existing Slack and Teams adapters. Direct delivery remains an
 explicit migration and fallback path.
 
 See the [central notification router guide](docs/central-notification-router.md)
-for route configuration, local execution, and producer integration.
+for route configuration, local execution, and producer integration. Use the
+[TeamsNotifyApp bootstrap guide](docs/teams-notify-app-bootstrap.md) for visible
+app registration, minimum operator roles, automatic environment setup, and
+membership diagnostics.
 
 ### Example coverage
 

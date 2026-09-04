@@ -110,9 +110,10 @@ EXAMPLE_ASSET_BASE_URL="<direct HTTPS base URL for committed example images>"
 TEAMS_ASSET_BASE_URL="<legacy fallback; leave blank for new configuration>"
 TEAMS_TEST_USER_ID="<test member Microsoft Entra object ID or UPN>"
 TEAMS_TEST_USER_NAME="<test member display name>"
-TEAMS_CONNECTION_USER="<dedicated Teams connection user object ID or UPN>"
-TEAMS_TENANT_ID="<expected Microsoft Entra tenant GUID>"
-MICROSOFT_GRAPH_ACCESS_TOKEN="<short-lived registration token>"
+TEAMS_NOTIFY_TENANT_ID="<TeamsNotifyApp tenant GUID>"
+TEAMS_NOTIFY_CLIENT_ID="<TeamsNotifyApp application/client GUID>"
+TEAMS_NOTIFY_CLIENT_SECRET="<TeamsNotifyApp client secret>"
+TEAMS_CONNECTION_USER_ID="<dedicated Teams connection user object GUID>"
 NOTIFICATION_ROUTER_URL="<central router HTTPS base URL>"
 NOTIFICATION_ROUTER_TOKEN="<producer-specific router bearer token>"
 ```
@@ -135,11 +136,11 @@ producer submits canonical JSON through the
 [central notification router](central-notification-router.md). Every producer
 must use a distinct token.
 
-The three Graph membership values are optional and are read only when
-`add-destination --ensure-team-membership` is selected. The token requires
-`GroupMember.ReadWrite.All` or `Group.ReadWrite.All`; use the connection user's
-object ID to avoid an additional UPN lookup permission. Never persist the Graph
-token in SQLite.
+Do not manually create the four `TEAMS_NOTIFY_*` and connection-user values.
+The central router `bootstrap-teams-app` command creates or reuses the visible
+single-tenant app, validates its app-only token, resolves the user, and writes
+the values to `.env` with mode `0600`. Runtime registration obtains short-lived
+Graph tokens automatically; it does not persist an access token.
 
 Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`, and copy an
 exact allowlisted Teams channel link into `TEAMS_WORKFLOW_CHANNEL_LINK`. The

@@ -9,7 +9,9 @@ data. Inject runtime secrets by reference from an approved secret manager.
 `.env` is ignored and intended only for local development.
 `.env.example` defines variable names with blank values and must never contain
 credentials. Treat webhook URLs, `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`,
-`SLACK_SIGNING_SECRET`, and the Teams Workflow URL as credentials.
+`SLACK_SIGNING_SECRET`, the Teams Workflow URL, and the TeamsNotifyApp client
+secret as credentials. TeamsNotifyApp bootstrap updates `.env` atomically with
+mode `0600`.
 
 ## Credential ownership
 
@@ -22,7 +24,7 @@ credentials. Treat webhook URLs, `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`,
 | Argo CD GitLab project token | `argocd-notifications-secret` |
 | Central router producer tokens | Producer-specific secret store |
 | Central router provider credentials | Router runtime secret store |
-| Microsoft Graph Team membership token | Short-lived administrator environment or secret store |
+| TeamsNotifyApp client credential | Router runtime secret store or owner-only local `.env` |
 | Kubernetes administrator credentials | Operator kubeconfig outside Git |
 
 Use a distinct revocable token for each producer. GitHub and the AKS incident

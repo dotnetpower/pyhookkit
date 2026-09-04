@@ -3,6 +3,8 @@
 import argparse
 import json
 import os
+import re
+import stat
 from collections.abc import Mapping, Sequence
 from http.server import ThreadingHTTPServer
 from pathlib import Path
@@ -17,17 +19,36 @@ from pyhookkit.adapters.inbound.router_http import (
 from pyhookkit.adapters.outbound.configured_notification_delivery import (
     ConfiguredNotificationDelivery,
 )
+from pyhookkit.adapters.outbound.runtime_environment_file import (
+    RuntimeEnvironmentFile,
+    RuntimeEnvironmentFileError,
+)
 from pyhookkit.adapters.outbound.sqlite_route_store import (
     SqliteRouteStore,
     StoredDestination,
 )
 from pyhookkit.adapters.outbound.teams.channel_link import TeamsChannelLink
+from pyhookkit.adapters.outbound.teams.entra_app_bootstrap import (
+    AzureCliTeamsNotifyAppBootstrapper,
+    TeamsNotifyAppBootstrapError,
+    TeamsNotifyAppSecret,
+)
 from pyhookkit.adapters.outbound.teams.graph_membership import (
     MicrosoftGraphAccessToken,
+    TeamsGraphMembershipError,
     TeamsGraphMembershipProvisioner,
 )
+from pyhookkit.adapters.outbound.teams.graph_token import (
+    MicrosoftGraphClientCredentialsTokenProvider,
+    MicrosoftGraphTokenError,
+    TeamsNotifyAppCredentials,
+)
+from pyhookkit.adapters.outbound.teams.workflow_url import TeamsWorkflowUrl
 from pyhookkit.application.notification_router import NotificationRouter
 from pyhookkit.application.notification_worker import NotificationWorker
+
+_REPOSITORY_ENV_FILE = Path(__file__).resolve().parents[5] / ".env"
+_TARGET_SLUG = re.compile(r"[^a-z0-9]+")
 
 
 def run_notification_router(
@@ -38,11 +59,19 @@ def run_notification_router(
     """Configure, inspect, or run the central router."""
     parser = _build_parser()
     parsed = parser.parse_args(arguments)
-    active_environment = os.environ if environment is None else environment
+    active_environment = _runtime_environment(parsed.env_file, environment)
     store = SqliteRouteStore(parsed.database)
 
     if parsed.command == "init-db":
         print(f"Initialized router database: {parsed.database}")
+        return
+    if parsed.command == "bootstrap-teams-app":
+        _bootstrap_teams_app(
+            parsed,
+            store,
+            environment_file=RuntimeEnvironmentFile(parsed.env_file),
+            environment=active_environment,
+        )
         return
     if parsed.command == "add-destination":
         if parsed.ensure_team_membership:
@@ -58,6 +87,13 @@ def run_notification_router(
             )
         )
         print(f"Configured destination: {parsed.target_id}")
+        return
+    if parsed.command == "doctor":
+        _run_doctor(
+            store,
+            database=parsed.database,
+            environment=active_environment,
+        )
         return
     if parsed.command == "list-destinations":
         print(
@@ -132,7 +168,13 @@ def main() -> None:
     """Run with concise CLI errors."""
     try:
         run_notification_router()
-    except ValueError as error:
+    except (
+        MicrosoftGraphTokenError,
+        RuntimeEnvironmentFileError,
+        TeamsGraphMembershipError,
+        TeamsNotifyAppBootstrapError,
+        ValueError,
+    ) as error:
         raise SystemExit(str(error)) from error
 
 
@@ -145,8 +187,23 @@ def _build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("pyhookkit-router.sqlite3"),
     )
+    parser.add_argument(
+        "--env-file",
+        type=Path,
+        default=_REPOSITORY_ENV_FILE,
+    )
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("init-db")
+
+    bootstrap = commands.add_parser("bootstrap-teams-app")
+    bootstrap.add_argument("--channel-link", required=True)
+    bootstrap.add_argument("--connection-user", required=True)
+    bootstrap.add_argument("--app-name", default="TeamsNotifyApp")
+    bootstrap.add_argument("--route", default="release-notifications")
+    bootstrap.add_argument("--target-id")
+    bootstrap.add_argument("--endpoint-env", default="TEAMS_WORKFLOW_URL")
+    bootstrap.add_argument("--rotate-secret", action="store_true")
+    bootstrap.add_argument("--secret-years", type=int, default=1)
 
     add_destination = commands.add_parser("add-destination")
     add_destination.add_argument("--target-id", required=True)
@@ -162,11 +219,11 @@ def _build_parser() -> argparse.ArgumentParser:
     add_destination.add_argument("--ensure-team-membership", action="store_true")
     add_destination.add_argument(
         "--connection-user-env",
-        default="TEAMS_CONNECTION_USER",
+        default="TEAMS_CONNECTION_USER_ID",
     )
     add_destination.add_argument(
         "--tenant-id-env",
-        default="TEAMS_TENANT_ID",
+        default="TEAMS_NOTIFY_TENANT_ID",
     )
     add_destination.add_argument(
         "--graph-token-env",
@@ -174,6 +231,7 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     commands.add_parser("list-destinations")
+    commands.add_parser("doctor")
 
     work_once = commands.add_parser("work-once")
     work_once.add_argument("--limit", type=int, default=100)
@@ -230,15 +288,187 @@ def _ensure_team_membership(
         environment,
         parsed.connection_user_env,
     )
-    graph_token = _required_environment(
-        environment,
-        parsed.graph_token_env,
-    )
     result = TeamsGraphMembershipProvisioner(
-        MicrosoftGraphAccessToken(graph_token)
+        _membership_token(
+            environment,
+            legacy_token_variable=parsed.graph_token_env,
+        )
     ).ensure_member(channel_link.team_id, connection_user)
     state = "added" if result.added else "already present"
     print(f"Teams connection user membership: {state}")
+
+
+def _bootstrap_teams_app(
+    parsed: argparse.Namespace,
+    store: SqliteRouteStore,
+    *,
+    environment_file: RuntimeEnvironmentFile,
+    environment: Mapping[str, str],
+) -> None:
+    channel_link = TeamsChannelLink(parsed.channel_link)
+    TeamsWorkflowUrl(_required_environment(environment, parsed.endpoint_env))
+    bootstrapper = AzureCliTeamsNotifyAppBootstrapper()
+    result = bootstrapper.bootstrap(
+        channel_link.tenant_id,
+        parsed.connection_user,
+        app_name=parsed.app_name,
+    )
+    existing_client_id = environment.get("TEAMS_NOTIFY_CLIENT_ID", "").strip()
+    existing_secret = environment.get("TEAMS_NOTIFY_CLIENT_SECRET", "").strip()
+    reuse_secret = (
+        not parsed.rotate_secret
+        and existing_client_id == str(result.client_id)
+        and bool(existing_secret)
+    )
+    created_secret: TeamsNotifyAppSecret | None = None
+    if reuse_secret:
+        client_secret = existing_secret
+    else:
+        created_secret = bootstrapper.create_secret(
+            result.client_id,
+            years=parsed.secret_years,
+        )
+        client_secret = created_secret.value
+    credentials = TeamsNotifyAppCredentials(
+        channel_link.tenant_id,
+        result.client_id,
+        client_secret,
+    )
+    try:
+        token = MicrosoftGraphClientCredentialsTokenProvider(credentials).token()
+        environment_file.update(
+            {
+                "TEAMS_NOTIFY_TENANT_ID": str(channel_link.tenant_id),
+                "TEAMS_NOTIFY_CLIENT_ID": str(result.client_id),
+                "TEAMS_NOTIFY_CLIENT_SECRET": client_secret,
+                "TEAMS_CONNECTION_USER_ID": str(result.connection_user_id),
+            }
+        )
+    except (MicrosoftGraphTokenError, RuntimeEnvironmentFileError):
+        if created_secret is not None:
+            bootstrapper.delete_secret(result.client_id, created_secret.key_id)
+        raise
+    membership = TeamsGraphMembershipProvisioner(token).ensure_member(
+        channel_link.team_id,
+        str(result.connection_user_id),
+    )
+    target_id = parsed.target_id or _default_target_id(channel_link)
+    store.configure_destination(
+        StoredDestination(
+            target_id=target_id,
+            route=parsed.route,
+            provider="teams-workflow",
+            endpoint_environment_variable=parsed.endpoint_env,
+            channel_link=channel_link.value,
+            enabled=True,
+        )
+    )
+    app_state = "created" if result.created else "reused"
+    membership_state = "added" if membership.added else "already present"
+    print(f"TeamsNotifyApp: {app_state}")
+    print(f"Teams connection user membership: {membership_state}")
+    print(f"Configured destination: {target_id}")
+    print(f"Protected environment updated: {parsed.env_file}")
+
+
+def _run_doctor(
+    store: SqliteRouteStore,
+    *,
+    database: Path,
+    environment: Mapping[str, str],
+) -> None:
+    TeamsWorkflowUrl(_required_environment(environment, "TEAMS_WORKFLOW_URL"))
+    tenant_id = _required_uuid_environment(
+        environment,
+        "TEAMS_NOTIFY_TENANT_ID",
+    )
+    user_id = _required_uuid_environment(
+        environment,
+        "TEAMS_CONNECTION_USER_ID",
+    )
+    token = _teams_notify_app_token(environment)
+    provisioner = TeamsGraphMembershipProvisioner(token)
+    destinations = tuple(
+        destination
+        for destination in store.destinations()
+        if destination.provider == "teams-workflow" and destination.enabled
+    )
+    if not destinations:
+        raise ValueError("no enabled Teams Workflow destinations are configured")
+    missing: list[str] = []
+    for destination in destinations:
+        if destination.tenant_id != str(tenant_id) or destination.team_id is None:
+            raise ValueError(
+                f"Teams destination tenant metadata is invalid: {destination.target_id}"
+            )
+        if not provisioner.is_member(UUID(destination.team_id), user_id):
+            missing.append(destination.target_id)
+    if missing:
+        raise ValueError(
+            "Teams connection user is not a member for destinations: "
+            + ", ".join(sorted(missing))
+        )
+    if stat.S_IMODE(database.stat().st_mode) != 0o600:
+        raise ValueError("router database must use owner-only permissions")
+    print(
+        json.dumps(
+            {
+                "state": "healthy",
+                "workflowUrl": "valid",
+                "graphAppToken": "valid",
+                "teamsDestinations": len(destinations),
+                "memberships": "verified",
+                "databaseMode": "0600",
+            },
+            indent=2,
+        )
+    )
+
+
+def _runtime_environment(
+    path: Path,
+    provided: Mapping[str, str] | None,
+) -> dict[str, str]:
+    if provided is not None:
+        return dict(provided)
+    values = RuntimeEnvironmentFile(path).load()
+    values.update(os.environ)
+    return values
+
+
+def _membership_token(
+    environment: Mapping[str, str],
+    *,
+    legacy_token_variable: str,
+) -> MicrosoftGraphAccessToken:
+    new_values = (
+        "TEAMS_NOTIFY_TENANT_ID",
+        "TEAMS_NOTIFY_CLIENT_ID",
+        "TEAMS_NOTIFY_CLIENT_SECRET",
+    )
+    if any(environment.get(name, "").strip() for name in new_values):
+        return _teams_notify_app_token(environment)
+    return MicrosoftGraphAccessToken(
+        _required_environment(environment, legacy_token_variable)
+    )
+
+
+def _teams_notify_app_token(
+    environment: Mapping[str, str],
+) -> MicrosoftGraphAccessToken:
+    credentials = TeamsNotifyAppCredentials(
+        _required_uuid_environment(environment, "TEAMS_NOTIFY_TENANT_ID"),
+        _required_uuid_environment(environment, "TEAMS_NOTIFY_CLIENT_ID"),
+        _required_environment(environment, "TEAMS_NOTIFY_CLIENT_SECRET"),
+    )
+    return MicrosoftGraphClientCredentialsTokenProvider(credentials).token()
+
+
+def _default_target_id(channel_link: TeamsChannelLink) -> str:
+    slug = _TARGET_SLUG.sub("-", channel_link.channel_name.lower()).strip("-")
+    if not slug:
+        slug = "channel"
+    return f"teams-{slug[:32]}-{str(channel_link.team_id)[:8]}"
 
 
 def _required_environment(environment: Mapping[str, str], name: str) -> str:

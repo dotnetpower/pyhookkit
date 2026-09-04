@@ -81,6 +81,10 @@ class StubMembershipProvisioner:
             added=True,
         )
 
+    def is_member(self, team_id: object, user_id: object) -> bool:
+        self.calls.append((team_id, str(user_id)))
+        return True
+
 
 def test_entrypoint_ensures_team_membership_before_registration(
     tmp_path: Path,
@@ -111,6 +115,10 @@ def test_entrypoint_ensures_team_membership_before_registration(
             "--channel-link",
             _CHANNEL_LINK,
             "--ensure-team-membership",
+            "--connection-user-env",
+            "TEAMS_CONNECTION_USER",
+            "--tenant-id-env",
+            "TEAMS_TENANT_ID",
         ],
         environment={
             "TEAMS_CONNECTION_USER": "svc-teams-notification@example.com",
@@ -150,6 +158,10 @@ def test_entrypoint_rejects_cross_tenant_membership_registration(
                 "--channel-link",
                 _CHANNEL_LINK,
                 "--ensure-team-membership",
+                "--connection-user-env",
+                "TEAMS_CONNECTION_USER",
+                "--tenant-id-env",
+                "TEAMS_TENANT_ID",
             ],
             environment={
                 "TEAMS_CONNECTION_USER": "svc@example.com",

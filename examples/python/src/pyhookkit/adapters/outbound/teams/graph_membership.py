@@ -77,7 +77,7 @@ class TeamsGraphMembershipProvisioner:
     ) -> TeamMembershipResult:
         """Add a standard Team member only when it is currently absent."""
         user_id = self._resolve_user_id(user)
-        if self._is_member(team_id, user_id):
+        if self.is_member(team_id, user_id):
             return TeamMembershipResult(user_id, added=False)
 
         response = self._send(
@@ -89,7 +89,7 @@ class TeamsGraphMembershipProvisioner:
         )
         if response.status_code == 204:
             return TeamMembershipResult(user_id, added=True)
-        if response.status_code in {400, 409} and self._is_member(team_id, user_id):
+        if response.status_code in {400, 409} and self.is_member(team_id, user_id):
             return TeamMembershipResult(user_id, added=False)
         raise TeamsGraphMembershipError(
             f"Microsoft Graph group member creation failed with HTTP "
@@ -126,7 +126,8 @@ class TeamsGraphMembershipProvisioner:
                 "Microsoft Graph user lookup returned an invalid user ID"
             ) from error
 
-    def _is_member(self, team_id: UUID, user_id: UUID) -> bool:
+    def is_member(self, team_id: UUID, user_id: UUID) -> bool:
+        """Return whether the user belongs to the Team's backing group."""
         next_url: str | None = (
             f"{_GRAPH_ORIGIN}/v1.0/groups/{team_id}/members?$select=id"
         )

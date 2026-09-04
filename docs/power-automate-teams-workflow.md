@@ -7,6 +7,9 @@ that destination.
 
 For the GitHub, GitLab, Argo CD, and AKS sequence, see the
 [integrated Bookinfo scenario](integrated-bookinfo-scenario.md).
+For the visible Entra application, minimum bootstrap roles, and automatic Team
+membership setup, see
+[TeamsNotifyApp bootstrap](teams-notify-app-bootstrap.md).
 For direct Team and Channel ID routing with an Azure-managed workflow, use the
 [Azure Logic App Teams delivery guide](logic-app-teams-delivery.md).
 

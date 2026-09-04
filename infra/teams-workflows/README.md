@@ -156,8 +156,23 @@ Before the first production deployment, verify each permission independently:
 | Destination access | Dedicated connection user | The approved standard channel is visible to the user and receives a synthetic card |
 | Optional channel inventory | Graph delegated or application principal | `list-team-channels.py` writes the expected access-scoped `0600` report |
 | Runtime invocation | Central router or approved CI/CD identity | It can read the callback secret and validated destination metadata, but has no connection-user credentials |
-| Destination registration | Approved Graph principal | `GroupMember.ReadWrite.All` or `Group.ReadWrite.All` to ensure the Teams connection user is a normal member of the Team's backing Microsoft 365 Group |
+| Destination registration | `TeamsNotifyApp` | `GroupMember.ReadWrite.All` application permission to ensure the Teams connection user is a normal member of the Team's backing Microsoft 365 Group |
 | Operational recovery | Two named administrators | Both appear as co-owners and can inspect run history without assuming the connection user's account |
+
+`TeamsNotifyApp` is separate from the Dataverse application user that owns the
+Solution-aware Flow. Bootstrap requires:
+
+- no directory role when tenant policy already permits the operator to register
+  apps, otherwise **Application Developer**;
+- ownership of the newly created app for its credential management; use
+  **Cloud Application Administrator** only when managing an app owned by
+  another identity;
+- **Privileged Role Administrator** to grant tenant-wide consent for the
+  Microsoft Graph `GroupMember.ReadWrite.All` application role.
+
+Use PIM to activate Privileged Role Administrator only for bootstrap when the
+tenant supports it. Do not use Global Administrator as the routine bootstrap
+identity. The Teams connection user needs no Entra administrator role.
 
 Run the checks again after replacing a connection user, changing a Dataverse
 role, changing Team membership, importing into another environment, or rotating

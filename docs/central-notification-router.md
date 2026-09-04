@@ -71,33 +71,80 @@ uv run python -m pyhookkit.entrypoints.notification_router \
   --channel-link "$TEAMS_WORKFLOW_CHANNEL_LINK"
 ```
 
-For administrator-controlled registration, ensure that the dedicated Teams
-connection user belongs to the target Team before the destination is stored:
+## Bootstrap TeamsNotifyApp
+
+Use a visible, single-tenant `TeamsNotifyApp` registration instead of persisting
+an Azure CLI delegated token. Sign in to the channel tenant once:
+
+The complete identity, minimum-role, rotation, and recovery runbook is in
+[TeamsNotifyApp bootstrap](teams-notify-app-bootstrap.md).
 
 ```shell
-export TEAMS_CONNECTION_USER="<Entra object ID or UPN>"
-export TEAMS_TENANT_ID="<expected tenant GUID>"
-export MICROSOFT_GRAPH_ACCESS_TOKEN="<short-lived Graph token>"
-
-uv run python -m pyhookkit.entrypoints.notification_router \
-  --database .local/router.sqlite3 \
-  add-destination \
-  --target-id teams-release \
-  --route release-notifications \
-  --provider teams-workflow \
-  --endpoint-env TEAMS_WORKFLOW_URL \
-  --channel-link "$TEAMS_WORKFLOW_CHANNEL_LINK" \
-  --ensure-team-membership
+az login \
+  --tenant "<channel tenant ID>" \
+  --use-device-code \
+  --allow-no-subscriptions
 ```
 
-The Graph principal requires `GroupMember.ReadWrite.All` or the broader
-`Group.ReadWrite.All` with administrator consent. The channel link's `groupId`
-identifies the Team's backing Microsoft 365 Group. Prefer the connection user's
-Entra object ID; resolving a UPN additionally requires permission to read that
-user. The command adds only a normal member, never an owner. It first checks
-existing members, making repeated registration idempotent. A tenant mismatch,
-Graph denial, or malformed response prevents the destination from being
-configured.
+Then run:
+
+```shell
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  bootstrap-teams-app \
+  --channel-link "$TEAMS_WORKFLOW_CHANNEL_LINK" \
+  --connection-user "svc-teams-notification@example.com" \
+  --route release-notifications \
+  --target-id teams-release
+```
+
+The command:
+
+1. derives the tenant and Team IDs from the channel link;
+2. creates or uniquely reuses `TeamsNotifyApp`;
+3. creates its tenant Service Principal;
+4. resolves the Microsoft Graph application-role ID dynamically;
+5. adds `GroupMember.ReadWrite.All` and grants tenant-wide admin consent;
+6. resolves the connection user once through the bootstrap identity;
+7. creates a one-year client secret when no reusable local credential exists;
+8. proves that client credentials issue a matching app-only Graph token;
+9. adds the connection user to the Team's backing Microsoft 365 Group;
+10. writes the app identifiers and secret atomically to the repository `.env`
+    with mode `0600`;
+11. registers the destination in SQLite.
+
+The client secret is never printed. Re-run with `--rotate-secret` to create and
+store a replacement credential. Remove obsolete credentials in the Entra portal
+after the replacement succeeds.
+
+### Minimum bootstrap permissions
+
+| Task | Identity | Least privilege |
+|---|---|---|
+| Create the app registration | Bootstrap app creator | No directory role when tenant policy permits users to register apps; otherwise **Application Developer** |
+| Manage the newly created app and credential | App creator/owner | Ownership of `TeamsNotifyApp`; use **Cloud Application Administrator** only when a separate operator must manage applications it does not own |
+| Grant Microsoft Graph application permission | Consent approver | **Privileged Role Administrator**, activated only for bootstrap through PIM where available |
+| Create and edit the Flow | Flow author | Power Platform **Environment Maker** in the target environment |
+| Authorize the Teams connector | `svc-teams-notification` | Licensed Microsoft 365/Teams and Power Automate user; no Entra administrator role |
+| Add Team memberships at runtime | `TeamsNotifyApp` service principal | Microsoft Graph application permission `GroupMember.ReadWrite.All` |
+| Submit notifications | GitLab, Argo CD, or another producer | Router bearer credential only; no Graph or Power Platform role |
+
+Microsoft Graph application permissions require tenant-wide admin consent.
+**Privileged Role Administrator** is the least privileged built-in role that can
+grant consent for Microsoft Graph app roles. Global Administrator also works
+but is intentionally not the recommended bootstrap role.
+
+The user running the complete automated command therefore needs both permission
+to create an app registration and an active Privileged Role Administrator role.
+These duties can be separated operationally, but the current one-command
+bootstrap expects both capabilities to be active.
+
+Microsoft references:
+
+- [least-privileged roles by task](https://learn.microsoft.com/entra/identity/role-based-access-control/delegate-by-task);
+- [grant tenant-wide admin consent](https://learn.microsoft.com/entra/identity/enterprise-apps/grant-admin-consent);
+- [application and Service Principal objects](https://learn.microsoft.com/entra/identity-platform/app-objects-and-service-principals);
+- [add a Microsoft 365 Group member](https://learn.microsoft.com/graph/api/group-post-members?view=graph-rest-1.0).
 
 The identity must be the same account bound to the Power Automate Teams
 connection. Adding a Flow co-owner does not change the connector execution
@@ -112,6 +159,22 @@ sends a Teams `message` envelope with top-level `teamId` and `channelId` plus
 one Adaptive Card attachment; it does not send the channel link or callback URL.
 
 Repeat `add-destination` with another unique target ID to fan out one route.
+The repository `.env` is loaded automatically. With TeamsNotifyApp configured,
+the command acquires a fresh app-only token rather than reading a saved Graph
+access token:
+
+```shell
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  add-destination \
+  --target-id teams-another-channel \
+  --route release-notifications \
+  --provider teams-workflow \
+  --endpoint-env TEAMS_WORKFLOW_URL \
+  --channel-link "<Teams channel link>" \
+  --ensure-team-membership
+```
+
 Inspect non-secret configuration with:
 
 ```shell
@@ -119,6 +182,18 @@ uv run python -m pyhookkit.entrypoints.notification_router \
   --database .local/router.sqlite3 \
   list-destinations
 ```
+
+Verify the complete local setup without sending a notification:
+
+```shell
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  doctor
+```
+
+`doctor` validates the Workflow URL, obtains and validates an app-only Graph
+token, verifies the connection user's membership in every enabled Team, and
+checks the SQLite file's owner-only mode. It never prints credentials.
 
 ## Run locally
 

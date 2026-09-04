@@ -80,6 +80,277 @@ for route configuration, local execution, and producer integration. Use the
 app registration, minimum operator roles, automatic environment setup, and
 membership diagnostics.
 
+## End-to-end Teams setup
+
+This walkthrough starts with a new tenant and finishes with one canonical
+notification delivered through the SQLite central router, Power Automate, and
+Microsoft Teams. Commands run from the repository root unless a step says
+otherwise.
+
+### Prerequisites
+
+| Requirement | Purpose |
+|---|---|
+| Python 3.12 and `uv` | Install and run PyHookKit |
+| Azure CLI | Create and verify `TeamsNotifyApp` |
+| Microsoft 365 tenant with Teams | Own the destination Teams and channels |
+| Power Platform environment | Own the Power Automate Flow and Teams connection |
+| Dedicated licensed user such as `svc-teams-notification` | Authorize the Teams connector and post notifications |
+| Teams channel link | Derive tenant, Team, channel, and display-name metadata |
+| Bootstrap identity | Create an app registration and grant Graph application consent |
+
+The bootstrap identity needs the following minimum access:
+
+- no directory role when tenant policy permits user app registrations;
+  otherwise **Application Developer**;
+- ownership of the new `TeamsNotifyApp` to manage its credential;
+- **Privileged Role Administrator** to grant tenant-wide consent for the
+  Microsoft Graph `GroupMember.ReadWrite.All` application permission.
+
+Use PIM to activate Privileged Role Administrator only for bootstrap when
+available. The Flow author needs Power Platform **Environment Maker**. The
+Teams connection user needs Microsoft 365/Teams and Power Automate licensing,
+but no Entra administrator role.
+
+### Step 1: Install the project
+
+```shell
+cp .env.example .env
+chmod 600 .env
+
+cd examples/python
+uv sync --extra dev --python 3.12
+cd ../..
+```
+
+The ignored `.env` contains local credentials. Never commit, print, paste, or
+attach it to an issue.
+
+### Step 2: Prepare the Teams connection user and channel
+
+1. Create or designate the dedicated `svc-teams-notification` user.
+2. Assign the Microsoft 365/Teams and Power Automate entitlements required by
+   the tenant.
+3. Keep the account as an ordinary user; do not assign an Entra administrator
+   role.
+4. In Teams, open the initial standard channel, select **More options** >
+   **Get link to channel**, and retain the complete
+   `https://teams.cloud.microsoft/l/channel/...` link.
+
+The link contains the tenant ID, Team backing-group ID, channel ID, and channel
+name. PyHookKit validates and stores those values separately in SQLite.
+
+### Step 3: Create and configure the Power Automate Flow
+
+1. Open [Power Automate](https://make.powerautomate.com) and select the target
+   environment.
+2. Select **Create** and create an automated cloud Flow from blank.
+3. Use an environment-neutral name such as `PyHookKit Routed Teams Flow`.
+4. Add **When a Teams webhook request is received**.
+5. Set **Who can trigger the flow?** to **Anyone** for the signed callback model.
+6. Add **Post card in a chat or channel** directly after the trigger.
+7. Under **Change connection**, sign in as `svc-teams-notification`. The account
+   shown under **Connected to** is the identity whose Team access is enforced.
+8. Configure the action:
+
+   | Field | Value |
+   |---|---|
+   | **Post as** | `Flow bot` |
+   | **Post in** | `Channel` |
+   | **Team** | Custom expression `triggerBody()?['teamId']` |
+   | **Channel** | Custom expression `triggerBody()?['channelId']` |
+   | **Adaptive Card** | Expression `first(triggerBody()?['attachments'])?['content']` |
+
+9. Save the Flow.
+10. Reopen the trigger and copy its complete **HTTP URL**, including all query
+    parameters and the signature.
+11. Add at least two named Flow co-owners for recovery. Co-ownership does not
+    change the Teams connection identity.
+
+Do not use `triggerBody()` as the Adaptive Card value. The trigger body is a
+Teams message envelope; only the first attachment's `content` is the card.
+
+### Step 4: Store the Workflow callback
+
+Add the complete callback to the repository root `.env`:
+
+```dotenv
+TEAMS_WORKFLOW_URL="<complete signed Power Automate HTTP URL>"
+```
+
+Treat this URL as a credential. The central router SQLite database stores only
+the environment variable name, never the callback value.
+
+### Step 5: Register TeamsNotifyApp in Azure Portal
+
+The automated bootstrap in the next step can create the app. For explicit
+Portal review and ownership, create it first:
+
+1. Open **Microsoft Entra ID** > **App registrations** > **New registration**.
+2. Set the name to `TeamsNotifyApp`.
+3. Select **Accounts in this organizational directory only**.
+4. Leave the redirect URI empty and select **Register**.
+5. Open **API permissions** > **Add a permission** > **Microsoft Graph** >
+   **Application permissions**.
+6. Search for and select `GroupMember.ReadWrite.All`.
+7. Select **Add permissions**.
+8. A user with **Privileged Role Administrator** selects **Grant admin consent
+   for \<tenant\>** and confirms.
+9. Under **Owners**, add at least two named operational owners.
+
+Do not add `Group.ReadWrite.All`; it is broader than the required membership
+permission. Do not manually create a client secret unless an external secret
+manager owns it. The bootstrap command creates, validates, and protects the
+local example credential.
+
+### Step 6: Bootstrap the app and first route
+
+Sign in with the bootstrap identity. An Azure subscription is not required:
+
+```shell
+az login \
+  --tenant "<tenant ID from the channel link>" \
+  --use-device-code \
+  --allow-no-subscriptions
+```
+
+Run from `examples/python`:
+
+```shell
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  bootstrap-teams-app \
+  --channel-link "<initial Teams channel link>" \
+  --connection-user "svc-teams-notification@example.com" \
+  --route release-notifications
+```
+
+The command creates or reuses `TeamsNotifyApp` and its Service Principal,
+verifies the Graph app-role assignment, creates and validates a client
+credential, resolves the connection user's object ID, writes generated values
+to `.env` with mode `0600`, adds the user to the Team when absent, and stores
+the route in SQLite. Secrets are never printed.
+
+Generated values are:
+
+```dotenv
+TEAMS_NOTIFY_TENANT_ID="<tenant GUID>"
+TEAMS_NOTIFY_CLIENT_ID="<TeamsNotifyApp client GUID>"
+TEAMS_NOTIFY_CLIENT_SECRET="<generated secret>"
+TEAMS_CONNECTION_USER_ID="<connection user object GUID>"
+```
+
+### Step 7: Verify Azure Portal and Power Automate
+
+In **App registrations** > `TeamsNotifyApp`:
+
+- confirm **API permissions** contains Microsoft Graph
+  `GroupMember.ReadWrite.All` as an **Application** permission;
+- confirm its status is **Granted for \<tenant\>**;
+- confirm expected owners and only expected credentials.
+
+In **Enterprise applications** > `TeamsNotifyApp`:
+
+- confirm the Service Principal is visible;
+- confirm the same granted application permission.
+
+In Power Automate:
+
+- confirm the Flow is enabled;
+- confirm the Teams action is **Connected to** `svc-teams-notification`;
+- confirm the Team, Channel, and Adaptive Card expressions exactly match step 3.
+
+### Step 8: Add another channel
+
+The command loads `.env`, obtains a new app-only Graph token, ensures Team
+membership, and stores the channel metadata:
+
+```shell
+cd examples/python
+
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  add-destination \
+  --target-id teams-example-channel \
+  --route release-notifications \
+  --provider teams-workflow \
+  --endpoint-env TEAMS_WORKFLOW_URL \
+  --channel-link "<another Teams channel link>" \
+  --ensure-team-membership
+```
+
+Repeat with a unique target ID for every channel. Destinations using the same
+route receive the same notification independently.
+
+### Step 9: Run diagnostics
+
+```shell
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  doctor
+```
+
+Expected healthy output:
+
+```json
+{
+  "state": "healthy",
+  "workflowUrl": "valid",
+  "graphAppToken": "valid",
+  "teamsDestinations": 2,
+  "memberships": "verified",
+  "databaseMode": "0600"
+}
+```
+
+`doctor` validates the callback format, app-only token, token tenant/client and
+role, all enabled Team memberships, and SQLite permissions. It does not send a
+notification.
+
+### Step 10: Send an end-to-end test
+
+Terminal 1, from `examples/python`:
+
+```shell
+export PYHOOKKIT_LOCAL_ROUTER_TOKEN="$(
+  python -c 'import secrets; print(secrets.token_urlsafe(32))'
+)"
+
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  serve \
+  --producer local=PYHOOKKIT_LOCAL_ROUTER_TOKEN
+```
+
+Terminal 2, using the same generated token:
+
+```shell
+cd examples/python
+export NOTIFICATION_ROUTER_URL="http://127.0.0.1:8080"
+export NOTIFICATION_ROUTER_TOKEN="<same local router token>"
+
+uv run python -m pyhookkit.entrypoints.notification_router_client \
+  --producer local \
+  --input ../../contracts/test-vectors/scenarios/deployment-result/notification.json
+```
+
+The submit command returns `202`-style `queued` state and a notification ID.
+Query its final state:
+
+```shell
+curl --fail --silent \
+  -H "X-PyHookKit-Producer: local" \
+  -H "Authorization: Bearer $NOTIFICATION_ROUTER_TOKEN" \
+  "$NOTIFICATION_ROUTER_URL/v1/notifications/<notification ID>"
+```
+
+Confirm `delivered` and one `succeeded` item per destination. In Power Automate,
+confirm one successful run per destination, and in Teams confirm that the card
+appears once in every configured channel.
+
+For secret rotation, failure recovery, and removal, use the detailed
+[TeamsNotifyApp bootstrap guide](docs/teams-notify-app-bootstrap.md).
+
 ### Example coverage
 
 | Example | Slack | Microsoft Teams |

@@ -81,6 +81,278 @@ Route 설정, 로컬 실행 및 생산자 통합은 [중앙 알림 라우터
 [TeamsNotifyApp 한국어 부트스트랩
 가이드](docs/teams-notify-app-bootstrap.ko.md)를 사용한다.
 
+## Teams end-to-end 설정
+
+이 절차는 새 tenant에서 시작해 하나의 canonical notification이 SQLite
+중앙 라우터, Power Automate, Microsoft Teams를 거쳐 전달되는 단계까지
+다룬다. 별도 안내가 없다면 저장소 루트에서 명령을 실행한다.
+
+### 사전 요구사항
+
+| 요구사항 | 목적 |
+|---|---|
+| Python 3.12 및 `uv` | PyHookKit 설치와 실행 |
+| Azure CLI | `TeamsNotifyApp` 생성 및 검증 |
+| Teams가 포함된 Microsoft 365 tenant | 대상 Team과 채널 소유 |
+| Power Platform 환경 | Power Automate Flow와 Teams connection 소유 |
+| `svc-teams-notification` 같은 라이선스가 있는 전용 사용자 | Teams connector 승인 및 알림 게시 |
+| Teams 채널 링크 | tenant, Team, channel 및 표시 이름 메타데이터 추출 |
+| 부트스트랩 ID | App registration 생성 및 Graph application consent 부여 |
+
+부트스트랩 ID에는 다음 최소 권한이 필요하다.
+
+- tenant 정책에서 일반 사용자의 앱 등록을 허용하면 디렉터리 역할 불필요,
+  그렇지 않으면 **Application Developer**
+- 새 `TeamsNotifyApp`의 credential을 관리하기 위한 앱 소유권
+- Microsoft Graph `GroupMember.ReadWrite.All` application permission에
+  tenant-wide consent를 부여하기 위한 **Privileged Role Administrator**
+
+가능하면 PIM을 사용해 부트스트랩할 때만 Privileged Role Administrator를
+활성화한다. Flow 작성자에게는 Power Platform **Environment Maker**가
+필요하다. Teams 연결 사용자는 Microsoft 365/Teams 및 Power Automate
+라이선스가 필요하지만 Entra 관리자 역할은 필요하지 않다.
+
+### 1단계: 프로젝트 설치
+
+```shell
+cp .env.example .env
+chmod 600 .env
+
+cd examples/python
+uv sync --extra dev --python 3.12
+cd ../..
+```
+
+Git에서 제외된 `.env`에는 로컬 credential이 저장된다. 이 파일을 커밋하거나
+출력하거나 채팅 또는 issue에 첨부하지 않는다.
+
+### 2단계: Teams 연결 사용자 및 채널 준비
+
+1. 전용 `svc-teams-notification` 사용자를 생성하거나 지정한다.
+2. tenant에서 요구하는 Microsoft 365/Teams 및 Power Automate 라이선스를
+   할당한다.
+3. 일반 사용자로 유지하고 Entra 관리자 역할을 부여하지 않는다.
+4. Teams에서 최초 표준 채널을 열고 **기타 옵션** > **채널 링크
+   가져오기**를 선택한 뒤
+   `https://teams.cloud.microsoft/l/channel/...` 전체 링크를 보관한다.
+
+채널 링크에는 tenant ID, Team 기반 Group ID, channel ID, channel name이
+포함된다. PyHookKit은 이 값들을 검증하고 SQLite에 별도 컬럼으로 저장한다.
+
+### 3단계: Power Automate Flow 생성 및 구성
+
+1. [Power Automate](https://make.powerautomate.com)를 열고 대상 환경을
+   선택한다.
+2. **만들기**를 선택하고 빈 상태에서 자동화된 cloud Flow를 생성한다.
+3. `PyHookKit Routed Teams Flow`처럼 환경 중립적인 이름을 사용한다.
+4. **When a Teams webhook request is received** trigger를 추가한다.
+5. 서명된 callback 모델을 사용하기 위해 **Who can trigger the flow?**를
+   **Anyone**으로 설정한다.
+6. Trigger 바로 다음에 **Post card in a chat or channel**을 추가한다.
+7. **Change connection**에서 `svc-teams-notification`으로 로그인한다.
+   **Connected to**에 표시되는 계정의 Team 접근 권한으로 action이
+   실행된다.
+8. Action을 다음과 같이 설정한다.
+
+   | 필드 | 값 |
+   |---|---|
+   | **Post as** | `Flow bot` |
+   | **Post in** | `Channel` |
+   | **Team** | 사용자 지정 식 `triggerBody()?['teamId']` |
+   | **Channel** | 사용자 지정 식 `triggerBody()?['channelId']` |
+   | **Adaptive Card** | 식 `first(triggerBody()?['attachments'])?['content']` |
+
+9. Flow를 저장한다.
+10. Trigger를 다시 열고 모든 query parameter와 서명을 포함한 **HTTP
+    URL** 전체를 복사한다.
+11. 복구를 위해 이름이 명시된 Flow 공동 소유자를 최소 두 명 추가한다.
+    공동 소유권은 Teams connection 실행 ID를 변경하지 않는다.
+
+Adaptive Card 값으로 `triggerBody()`를 사용하면 안 된다. Trigger body는
+Teams message envelope이며 첫 번째 attachment의 `content`만 카드다.
+
+### 4단계: Workflow callback 저장
+
+Callback URL 전체를 저장소 루트 `.env`에 추가한다.
+
+```dotenv
+TEAMS_WORKFLOW_URL="<서명된 Power Automate HTTP URL 전체>"
+```
+
+이 URL은 credential로 취급한다. 중앙 라우터 SQLite DB에는 callback 값이
+아니라 환경변수 이름만 저장한다.
+
+### 5단계: Azure Portal에 TeamsNotifyApp 등록
+
+다음 단계의 자동 부트스트랩으로 앱을 생성할 수도 있다. Portal에서
+소유권과 권한을 명시적으로 검토하려면 먼저 다음과 같이 생성한다.
+
+1. **Microsoft Entra ID** > **App registrations** > **New registration**을
+   연다.
+2. 이름을 `TeamsNotifyApp`으로 설정한다.
+3. **Accounts in this organizational directory only**를 선택한다.
+4. Redirect URI는 비워 두고 **Register**를 선택한다.
+5. **API permissions** > **Add a permission** > **Microsoft Graph** >
+   **Application permissions**를 연다.
+6. `GroupMember.ReadWrite.All`을 검색해 선택한다.
+7. **Add permissions**를 선택한다.
+8. **Privileged Role Administrator** 사용자가 **Grant admin consent for
+   \<tenant\>**를 선택하고 승인한다.
+9. **Owners**에 이름이 명시된 운영 소유자를 최소 두 명 추가한다.
+
+필요한 멤버십 권한보다 범위가 큰 `Group.ReadWrite.All`은 추가하지 않는다.
+외부 secret manager가 credential을 관리하는 경우가 아니라면 client
+secret을 수동으로 생성하지 않는다. 부트스트랩 명령이 로컬 예제
+credential을 생성하고 검증한 뒤 보호한다.
+
+### 6단계: 앱과 최초 route 부트스트랩
+
+부트스트랩 ID로 로그인한다. Azure subscription은 필요하지 않다.
+
+```shell
+az login \
+  --tenant "<채널 링크의 tenant ID>" \
+  --use-device-code \
+  --allow-no-subscriptions
+```
+
+`examples/python`에서 실행한다.
+
+```shell
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  bootstrap-teams-app \
+  --channel-link "<최초 Teams 채널 링크>" \
+  --connection-user "svc-teams-notification@example.com" \
+  --route release-notifications
+```
+
+이 명령은 `TeamsNotifyApp`과 Service Principal을 생성하거나 재사용하고,
+Graph app-role assignment를 검증하며, client credential을 생성 및
+검증한다. 이어서 연결 사용자 object ID를 조회하고 생성된 값을 권한
+`0600`의 `.env`에 기록하며, 사용자가 Team에 없을 때 추가하고, SQLite에
+route를 저장한다. Secret 값은 출력하지 않는다.
+
+자동 생성되는 값:
+
+```dotenv
+TEAMS_NOTIFY_TENANT_ID="<tenant GUID>"
+TEAMS_NOTIFY_CLIENT_ID="<TeamsNotifyApp client GUID>"
+TEAMS_NOTIFY_CLIENT_SECRET="<생성된 secret>"
+TEAMS_CONNECTION_USER_ID="<연결 사용자 object GUID>"
+```
+
+### 7단계: Azure Portal 및 Power Automate 확인
+
+**App registrations** > `TeamsNotifyApp`에서 다음을 확인한다.
+
+- **API permissions**에 Microsoft Graph `GroupMember.ReadWrite.All`이
+  **Application** permission으로 존재한다.
+- 상태가 **Granted for \<tenant\>**다.
+- 예상한 owner 및 credential만 존재한다.
+
+**Enterprise applications** > `TeamsNotifyApp`에서 다음을 확인한다.
+
+- Service Principal이 표시된다.
+- 같은 application permission이 승인돼 있다.
+
+Power Automate에서 다음을 확인한다.
+
+- Flow가 활성화돼 있다.
+- Teams action의 **Connected to**가 `svc-teams-notification`이다.
+- Team, Channel, Adaptive Card 식이 3단계의 값과 정확히 일치한다.
+
+### 8단계: 추가 채널 등록
+
+명령은 `.env`를 불러오고 새 app-only Graph token을 발급하며, Team
+멤버십을 보장하고 채널 메타데이터를 저장한다.
+
+```shell
+cd examples/python
+
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  add-destination \
+  --target-id teams-example-channel \
+  --route release-notifications \
+  --provider teams-workflow \
+  --endpoint-env TEAMS_WORKFLOW_URL \
+  --channel-link "<추가 Teams 채널 링크>" \
+  --ensure-team-membership
+```
+
+채널마다 고유한 target ID를 사용해 반복한다. 동일한 route를 사용하는
+destination은 같은 알림을 서로 독립적으로 수신한다.
+
+### 9단계: 진단 실행
+
+```shell
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  doctor
+```
+
+정상 결과 예시:
+
+```json
+{
+  "state": "healthy",
+  "workflowUrl": "valid",
+  "graphAppToken": "valid",
+  "teamsDestinations": 2,
+  "memberships": "verified",
+  "databaseMode": "0600"
+}
+```
+
+`doctor`는 callback 형식, app-only token, token tenant/client와 role,
+활성화된 모든 Team의 멤버십, SQLite 권한을 검증한다. 알림은 보내지
+않는다.
+
+### 10단계: End-to-end 테스트 전송
+
+터미널 1에서 `examples/python`으로 이동한 뒤 실행한다.
+
+```shell
+export PYHOOKKIT_LOCAL_ROUTER_TOKEN="$(
+  python -c 'import secrets; print(secrets.token_urlsafe(32))'
+)"
+
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  serve \
+  --producer local=PYHOOKKIT_LOCAL_ROUTER_TOKEN
+```
+
+터미널 2에서 같은 token을 사용한다.
+
+```shell
+cd examples/python
+export NOTIFICATION_ROUTER_URL="http://127.0.0.1:8080"
+export NOTIFICATION_ROUTER_TOKEN="<동일한 로컬 라우터 token>"
+
+uv run python -m pyhookkit.entrypoints.notification_router_client \
+  --producer local \
+  --input ../../contracts/test-vectors/scenarios/deployment-result/notification.json
+```
+
+제출 명령은 `202`에 해당하는 `queued` 상태와 notification ID를 반환한다.
+최종 상태를 조회한다.
+
+```shell
+curl --fail --silent \
+  -H "X-PyHookKit-Producer: local" \
+  -H "Authorization: Bearer $NOTIFICATION_ROUTER_TOKEN" \
+  "$NOTIFICATION_ROUTER_URL/v1/notifications/<notification ID>"
+```
+
+`delivered`와 destination마다 하나의 `succeeded` 항목을 확인한다. Power
+Automate에서는 destination별로 하나의 실행이 성공했는지, Teams에서는
+설정된 모든 채널에 카드가 정확히 한 번 표시되는지 확인한다.
+
+Secret 회전, 장애 복구 및 제거 방법은 [TeamsNotifyApp 한국어 부트스트랩
+가이드](docs/teams-notify-app-bootstrap.ko.md)를 참고한다.
+
 ### 예제 범위
 
 | 예제 | Slack | Microsoft Teams |

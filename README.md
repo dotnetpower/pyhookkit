@@ -1,5 +1,7 @@
 # PyHookKit
 
+[한국어](README.ko.md)
+
 Typed Slack and Microsoft Teams notification delivery with semantic parity,
 followed by a controlled migration path.
 

@@ -1,6 +1,8 @@
 """Build a dynamically routed Microsoft Teams Workflow request."""
 
-from pyhookkit.adapters.outbound.teams.channel_link import TeamsChannelLink
+from re import fullmatch
+from uuid import UUID
+
 from pyhookkit.json_types import JsonObject
 
 
@@ -10,9 +12,11 @@ class TeamsWorkflowRequestError(ValueError):
 
 def build_teams_workflow_request(
     envelope: JsonObject,
-    channel_link: TeamsChannelLink,
+    *,
+    team_id: UUID,
+    channel_id: str,
 ) -> JsonObject:
-    """Add an allowed channel link without changing the rendered message."""
+    """Build the routed Adaptive Card body consumed by Power Automate."""
     if envelope.get("type") != "message":
         raise TeamsWorkflowRequestError("Teams envelope type must be message")
     attachments = envelope.get("attachments")
@@ -29,11 +33,21 @@ def build_teams_workflow_request(
         raise TeamsWorkflowRequestError(
             "Teams envelope attachment must contain Adaptive Card content"
         )
-    if "channelLink" in envelope:
-        raise TeamsWorkflowRequestError("Teams envelope already contains channelLink")
+    content = attachment["content"]
+    if not isinstance(content, dict):
+        raise TeamsWorkflowRequestError(
+            "Teams envelope attachment must contain Adaptive Card content"
+        )
+    if content.get("type") != "AdaptiveCard":
+        raise TeamsWorkflowRequestError("Teams attachment content must be AdaptiveCard")
+    if fullmatch(r"19:[A-Za-z0-9_-]+@thread\.(?:tacv2|skype)", channel_id) is None:
+        raise TeamsWorkflowRequestError("Teams channel ID is invalid")
+    if "teamId" in content or "channelId" in content:
+        raise TeamsWorkflowRequestError(
+            "Adaptive Card content cannot contain routing identifiers"
+        )
     return {
-        **envelope,
-        "channelLink": channel_link.value,
-        "teamId": str(channel_link.team_id),
-        "channelId": channel_link.channel_id,
+        **content,
+        "teamId": str(team_id),
+        "channelId": channel_id,
     }

@@ -1,5 +1,6 @@
 """SQLite-backed central notification router tests."""
 
+import sqlite3
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -25,7 +26,7 @@ from pyhookkit.domain.routing import NotificationState, TargetDeliveryState
 
 _NOW = datetime(2026, 9, 4, 1, 0, tzinfo=UTC)
 _CHANNEL_LINK = (
-    "https://teams.microsoft.com/l/channel/"
+    "https://teams.cloud.microsoft/l/channel/"
     "19%3Aexample-channel%40thread.tacv2/General"
     "?groupId=11111111-1111-4111-8111-111111111111"
     "&tenantId=22222222-2222-4222-8222-222222222222"
@@ -218,6 +219,52 @@ def test_store_lists_and_updates_non_secret_destinations(tmp_path: Path) -> None
     assert len(destinations) == 2
     assert destinations[0].endpoint_environment_variable == "NEW_SLACK_WEBHOOK_URL"
     assert destinations[0].enabled is False
+    teams = destinations[1]
+    assert teams.tenant_id == "22222222-2222-4222-8222-222222222222"
+    assert teams.team_id == "11111111-1111-4111-8111-111111111111"
+    assert teams.channel_id == "19:example-channel@thread.tacv2"
+    assert teams.channel_name == "General"
+
+
+def test_store_migrates_existing_channel_links_to_metadata(tmp_path: Path) -> None:
+    database = tmp_path / "router.sqlite3"
+    with sqlite3.connect(database) as connection:
+        connection.execute(
+            """
+            CREATE TABLE route_destinations (
+                target_id TEXT PRIMARY KEY,
+                route TEXT NOT NULL,
+                provider TEXT NOT NULL,
+                endpoint_environment_variable TEXT NOT NULL,
+                channel_link TEXT,
+                enabled INTEGER NOT NULL
+            )
+            """
+        )
+        connection.execute(
+            """
+            INSERT INTO route_destinations
+                (target_id, route, provider, endpoint_environment_variable,
+                 channel_link, enabled)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (
+                "teams-staging",
+                "release-notifications",
+                "teams-workflow",
+                "TEAMS_WORKFLOW_URL",
+                _CHANNEL_LINK,
+                1,
+            ),
+        )
+
+    destination = SqliteRouteStore(database).destination("teams-staging")
+
+    assert destination is not None
+    assert destination.tenant_id == "22222222-2222-4222-8222-222222222222"
+    assert destination.team_id == "11111111-1111-4111-8111-111111111111"
+    assert destination.channel_id == "19:example-channel@thread.tacv2"
+    assert destination.channel_name == "General"
 
 
 def test_store_reports_delivering_and_all_failed_states(tmp_path: Path) -> None:

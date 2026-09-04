@@ -5,6 +5,8 @@ from re import fullmatch
 from urllib.parse import parse_qs, unquote, urlsplit
 from uuid import UUID
 
+_ALLOWED_HOSTS = frozenset({"teams.cloud.microsoft", "teams.microsoft.com"})
+
 
 class TeamsChannelLinkError(ValueError):
     """A Teams channel link cannot identify a supported destination."""
@@ -17,17 +19,19 @@ class TeamsChannelLink:
     value: str
     team_id: UUID = field(init=False)
     channel_id: str = field(init=False)
+    channel_name: str = field(init=False)
     tenant_id: UUID = field(init=False)
 
     def __post_init__(self) -> None:
         parsed = urlsplit(self.value)
         if (
             parsed.scheme != "https"
-            or parsed.netloc.lower() != "teams.microsoft.com"
+            or parsed.hostname not in _ALLOWED_HOSTS
+            or parsed.port not in {None, 443}
             or parsed.fragment
         ):
             raise TeamsChannelLinkError(
-                "Teams channel link must use https://teams.microsoft.com"
+                "Teams channel link must use an approved Microsoft Teams host"
             )
 
         path_parts = parsed.path.split("/")
@@ -53,6 +57,7 @@ class TeamsChannelLink:
         tenant_id = _single_uuid(query, "tenantId")
         object.__setattr__(self, "team_id", team_id)
         object.__setattr__(self, "channel_id", channel_id)
+        object.__setattr__(self, "channel_name", channel_name)
         object.__setattr__(self, "tenant_id", tenant_id)
 
     def __repr__(self) -> str:

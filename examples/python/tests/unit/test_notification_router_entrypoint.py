@@ -45,6 +45,10 @@ def test_entrypoint_initializes_configures_lists_and_drains(
             "provider": "slack",
             "endpointEnvironmentVariable": "SLACK_WEBHOOK_URL",
             "channelLinkConfigured": False,
+            "tenantId": None,
+            "teamId": None,
+            "channelId": None,
+            "channelName": None,
             "enabled": True,
         }
     ]

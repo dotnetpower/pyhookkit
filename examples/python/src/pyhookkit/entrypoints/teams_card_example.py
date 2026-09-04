@@ -100,9 +100,11 @@ def run_teams_card_example(
     if not raw_channel_link:
         raise TeamsCardExampleError(f"{_CHANNEL_LINK_VARIABLE} is required with --send")
     payload = resolve_example_asset_urls(payload, environment=active_environment)
+    channel_link = TeamsChannelLink(raw_channel_link)
     request = build_teams_workflow_request(
         payload,
-        TeamsChannelLink(raw_channel_link),
+        team_id=channel_link.team_id,
+        channel_id=channel_link.channel_id,
     )
     result = TeamsWorkflowDestination(TeamsWorkflowUrl(raw_url)).send(request)
     print(json.dumps(delivery_result_to_json(result), indent=2))

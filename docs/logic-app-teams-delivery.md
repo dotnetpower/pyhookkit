@@ -4,8 +4,8 @@ This guide deploys and operates the direct-ID Logic App adapter. Use it when a
 caller already owns the target Team and Channel IDs or when Teams delivery must
 be managed as Azure infrastructure.
 
-Power Automate Workflow remains the simpler default for routing by an exact
-allowlisted Teams channel link. See the
+Power Automate Workflow remains the simpler default when the central router
+stores channel links and supplies their derived Team and Channel IDs. See the
 [Power Automate Teams Workflow guide](power-automate-teams-workflow.md).
 
 ## Request contract

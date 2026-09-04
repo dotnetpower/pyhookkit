@@ -1,54 +1,39 @@
 {
   "type": "object",
-  "additionalProperties": false,
   "required": [
     "type",
-    "channelLink",
+    "version",
+    "body",
     "teamId",
-    "channelId",
-    "attachments"
+    "channelId"
   ],
   "properties": {
-    "type": {
-      "const": "message"
+    "$schema": {
+      "type": "string"
     },
-    "channelLink": {
-      "type": "string",
-      "maxLength": 2048
+    "type": {
+      "const": "AdaptiveCard"
+    },
+    "version": {
+      "type": "string"
+    },
+    "body": {
+      "type": "array"
+    },
+    "actions": {
+      "type": "array"
+    },
+    "msteams": {
+      "type": "object"
+    },
+    "fallbackText": {
+      "type": "string"
     },
     "teamId": {
-      "type": "string",
-      "format": "uuid"
+      "type": "string"
     },
     "channelId": {
       "type": "string"
-    },
-    "attachments": {
-      "type": "array",
-      "minItems": 1,
-      "maxItems": 1,
-      "items": {
-        "type": "object",
-        "additionalProperties": false,
-        "required": [
-          "contentType",
-          "content"
-        ],
-        "properties": {
-          "contentType": {
-            "const": "application/vnd.microsoft.card.adaptive"
-          },
-          "contentUrl": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "content": {
-            "type": "object"
-          }
-        }
-      }
     }
   }
 }

@@ -13,8 +13,6 @@ Required:
   --package-type Unmanaged|Managed|Both
   --environment URL_OR_ID
   --teams-connection-id ID
-  --allowed-channel-links-schema-name NAME
-  --allowed-channel-link URL (repeat for each approved destination)
 
 Optional ownership verification:
   --flow-id GUID
@@ -38,8 +36,6 @@ solution_zip=""
 package_type=""
 environment=""
 teams_connection_id=""
-allowed_channel_links_schema_name=""
-allowed_channel_links=()
 inventory_team_id=""
 flow_id=""
 application_id=""
@@ -54,8 +50,6 @@ while (($# > 0)); do
     --package-type) package_type="${2:-}"; shift 2 ;;
     --environment) environment="${2:-}"; shift 2 ;;
     --teams-connection-id) teams_connection_id="${2:-}"; shift 2 ;;
-    --allowed-channel-links-schema-name) allowed_channel_links_schema_name="${2:-}"; shift 2 ;;
-    --allowed-channel-link) allowed_channel_links+=("${2:-}"); shift 2 ;;
     --inventory-team-id) inventory_team_id="${2:-}"; shift 2 ;;
     --flow-id) flow_id="${2:-}"; shift 2 ;;
     --application-id) application_id="${2:-}"; shift 2 ;;
@@ -68,18 +62,12 @@ while (($# > 0)); do
 done
 
 for required_name in \
-  solution_folder solution_zip package_type environment teams_connection_id \
-  allowed_channel_links_schema_name; do
+  solution_folder solution_zip package_type environment teams_connection_id; do
   if [[ -z "${!required_name}" ]]; then
     echo "error: --${required_name//_/-} is required" >&2
     exit 2
   fi
 done
-if ((${#allowed_channel_links[@]} == 0)); then
-  echo "error: at least one --allowed-channel-link is required" >&2
-  exit 2
-fi
-
 if [[ ! -d "$solution_folder" ]]; then
   echo "error: solution folder does not exist: $solution_folder" >&2
   exit 2
@@ -116,18 +104,9 @@ if [[ "$smoke_test" == true && -z "${TEAMS_WORKFLOW_URL:-}" ]]; then
   echo "error: TEAMS_WORKFLOW_URL is required for the smoke test" >&2
   exit 2
 fi
-if [[ "$smoke_test" == true ]]; then
-  smoke_link_allowed=false
-  for allowed_channel_link in "${allowed_channel_links[@]}"; do
-    if [[ "$allowed_channel_link" == "${TEAMS_WORKFLOW_CHANNEL_LINK:-}" ]]; then
-      smoke_link_allowed=true
-      break
-    fi
-  done
-  if [[ "$smoke_link_allowed" == false ]]; then
-    echo "error: TEAMS_WORKFLOW_CHANNEL_LINK must be an allowed channel link" >&2
-    exit 2
-  fi
+if [[ "$smoke_test" == true && -z "${TEAMS_WORKFLOW_CHANNEL_LINK:-}" ]]; then
+  echo "error: TEAMS_WORKFLOW_CHANNEL_LINK is required for the smoke test" >&2
+  exit 2
 fi
 
 command -v pac >/dev/null || {
@@ -149,11 +128,6 @@ temporary_directory="$(mktemp -d)"
 trap 'rm -rf -- "$temporary_directory"' EXIT
 generated_settings="$temporary_directory/generated-settings.json"
 prepared_settings="$temporary_directory/prepared-settings.json"
-allowed_link_arguments=()
-for allowed_channel_link in "${allowed_channel_links[@]}"; do
-  allowed_link_arguments+=(--allowed-channel-link "$allowed_channel_link")
-done
-
 mkdir -p -- "$(dirname -- "$solution_zip")"
 pac auth list >/dev/null
 pac solution pack \
@@ -166,9 +140,7 @@ pac solution create-settings \
 python3 "$SCRIPT_DIR/prepare-deployment-settings.py" \
   --input "$generated_settings" \
   --output "$prepared_settings" \
-  --teams-connection-id "$teams_connection_id" \
-  --allowed-channel-links-schema-name "$allowed_channel_links_schema_name" \
-  "${allowed_link_arguments[@]}"
+  --teams-connection-id "$teams_connection_id"
 pac solution import \
   --path "$solution_zip" \
   --environment "$environment" \

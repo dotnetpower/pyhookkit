@@ -4,7 +4,7 @@ import json
 import runpy
 import sys
 from pathlib import Path
-from typing import ClassVar, cast
+from typing import ClassVar
 
 import pytest
 
@@ -15,7 +15,7 @@ from pyhookkit.adapters.outbound.teams.identity import TeamsIdentityNotFoundErro
 from pyhookkit.adapters.outbound.teams.logic_app_url import TeamsLogicAppUrl
 from pyhookkit.adapters.outbound.teams.workflow_url import TeamsWorkflowUrl
 from pyhookkit.domain.delivery import DeliveryResult, DeliveryState
-from pyhookkit.json_types import JsonObject, JsonValue
+from pyhookkit.json_types import JsonObject
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 _PYTHON_ROOT = _REPOSITORY_ROOT / "examples" / "python"
@@ -65,17 +65,6 @@ class StubLogicAppDestination:
     def send(self, request: JsonObject) -> DeliveryResult:
         self.__class__.requests.append(request)
         return _SUCCESS
-
-
-def _card(envelope: JsonObject) -> JsonObject:
-    attachments = envelope["attachments"]
-    assert isinstance(attachments, list)
-    attachment_value: JsonValue = attachments[0]
-    assert isinstance(attachment_value, dict)
-    attachment = cast(JsonObject, attachment_value)
-    card = attachment["content"]
-    assert isinstance(card, dict)
-    return cast(JsonObject, card)
 
 
 def _run_example(
@@ -160,12 +149,16 @@ def test_example_preserves_card_between_delivery_adapters(
     assert len(StubLogicAppDestination.requests) == 1
     workflow_payload = StubWorkflowDestination.payloads[0]
     logic_app_request = StubLogicAppDestination.requests[0]
-    channel_link = workflow_payload["channelLink"]
-    assert isinstance(channel_link, str)
-    assert channel_link.startswith("https://teams.microsoft.com/")
+    workflow_card: JsonObject = {
+        key: value
+        for key, value in workflow_payload.items()
+        if key not in {"teamId", "channelId"}
+    }
+    assert workflow_payload["teamId"] == "11111111-1111-4111-8111-111111111111"
+    assert workflow_payload["channelId"] == "19:example-channel@thread.tacv2"
     assert logic_app_request["teamId"] == "team-example"
     assert logic_app_request["channelId"] == "channel-example"
-    assert logic_app_request["card"] == _card(workflow_payload)
+    assert logic_app_request["card"] == workflow_card
     serialized_request = json.dumps(logic_app_request)
     assert "assets.pyhookkit.example" not in serialized_request
     assert "legacy.pyhookkit.example" not in serialized_request

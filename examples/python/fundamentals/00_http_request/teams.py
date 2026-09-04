@@ -63,8 +63,7 @@ def build_logic_app_payload(
 def build_workflow_payload(channel_link: str) -> dict[str, object]:
     team_id, channel_id = _channel_target(channel_link)
     return {
-        **build_payload(),
-        "channelLink": channel_link,
+        **build_card(),
         "teamId": team_id,
         "channelId": channel_id,
     }
@@ -132,7 +131,8 @@ def _channel_target(channel_link: str) -> tuple[str, str]:
     path_parts = parsed.path.split("/")
     if (
         parsed.scheme != "https"
-        or parsed.netloc.lower() != "teams.microsoft.com"
+        or parsed.hostname not in {"teams.cloud.microsoft", "teams.microsoft.com"}
+        or parsed.port not in {None, 443}
         or parsed.fragment
         or len(path_parts) != 5
         or path_parts[1:3] != ["l", "channel"]

@@ -15,7 +15,7 @@ from pyhookkit.adapters.outbound.teams.workflow_request import (
 from pyhookkit.json_types import JsonObject
 
 _LINK = (
-    "https://teams.microsoft.com/l/channel/"
+    "https://teams.cloud.microsoft/l/channel/"
     "19%3Aexample-channel%40thread.tacv2/General"
     "?groupId=11111111-1111-4111-8111-111111111111"
     "&tenantId=22222222-2222-4222-8222-222222222222"
@@ -28,7 +28,12 @@ def _envelope() -> JsonObject:
         "attachments": [
             {
                 "contentType": "application/vnd.microsoft.card.adaptive",
-                "content": {"type": "AdaptiveCard"},
+                "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "body": [],
+                },
             }
         ],
     }
@@ -39,6 +44,7 @@ def test_channel_link_extracts_provider_identifiers() -> None:
 
     assert link.team_id == UUID("11111111-1111-4111-8111-111111111111")
     assert link.channel_id == "19:example-channel@thread.tacv2"
+    assert link.channel_name == "General"
     assert link.tenant_id == UUID("22222222-2222-4222-8222-222222222222")
     assert _LINK not in repr(link)
 
@@ -67,16 +73,22 @@ def test_channel_link_rejects_invalid_destinations(link: str) -> None:
         TeamsChannelLink(link)
 
 
-def test_workflow_request_adds_link_and_preserves_message() -> None:
+def test_workflow_request_adds_target_to_adaptive_card() -> None:
     envelope = _envelope()
+    channel_link = TeamsChannelLink(_LINK)
 
-    request = build_teams_workflow_request(envelope, TeamsChannelLink(_LINK))
+    request = build_teams_workflow_request(
+        envelope,
+        team_id=channel_link.team_id,
+        channel_id=channel_link.channel_id,
+    )
 
-    assert request["channelLink"] == _LINK
     assert request["teamId"] == "11111111-1111-4111-8111-111111111111"
     assert request["channelId"] == "19:example-channel@thread.tacv2"
-    assert request["attachments"] is envelope["attachments"]
-    assert "channelLink" not in envelope
+    assert request["type"] == "AdaptiveCard"
+    assert request["version"] == "1.4"
+    assert request["body"] == []
+    assert "attachments" not in request
 
 
 @pytest.mark.parametrize(
@@ -88,5 +100,11 @@ def test_workflow_request_adds_link_and_preserves_message() -> None:
     ],
 )
 def test_workflow_request_rejects_incomplete_message(envelope: JsonObject) -> None:
+    channel_link = TeamsChannelLink(_LINK)
+
     with pytest.raises(TeamsWorkflowRequestError):
-        build_teams_workflow_request(envelope, TeamsChannelLink(_LINK))
+        build_teams_workflow_request(
+            envelope,
+            team_id=channel_link.team_id,
+            channel_id=channel_link.channel_id,
+        )

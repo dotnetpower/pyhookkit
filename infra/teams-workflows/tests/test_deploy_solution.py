@@ -66,10 +66,6 @@ class DeploySolutionTests(unittest.TestCase):
                     "https://example.crm.dynamics.com",
                     "--teams-connection-id",
                     "shared-teams-example",
-                    "--allowed-channel-links-schema-name",
-                    "pyk_AllowedChannelLinks",
-                    "--allowed-channel-link",
-                    CHANNEL_LINK,
                     "--smoke-test",
                 ],
                 check=False,
@@ -95,9 +91,7 @@ class DeploySolutionTests(unittest.TestCase):
 def _fake_pac() -> str:
     settings = json.dumps(
         {
-            "EnvironmentVariables": [
-                {"SchemaName": "pyk_AllowedChannelLinks", "Value": ""},
-            ],
+            "EnvironmentVariables": [],
             "ConnectionReferences": [
                 {
                     "LogicalName": "pyk_Teams",

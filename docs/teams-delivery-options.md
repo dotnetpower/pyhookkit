@@ -14,8 +14,8 @@ are different:
 
 | Surface | Power Automate Workflow | Azure Logic App `post-card` |
 |---|---|---|
-| Request body | `channelLink`, derived `teamId`/`channelId`, and Teams `message` envelope | `teamId`, `channelId`, optional `eventId`, and inner `card` |
-| Routing | Exact allowlisted channel link per request | Explicit Team and Channel IDs per request |
+| Request body | Adaptive Card with top-level `teamId` and `channelId` | `teamId`, `channelId`, optional `eventId`, and inner `card` |
+| Routing | Router-stored channel link resolved to explicit IDs | Explicit Team and Channel IDs per request |
 | Endpoint success | Workflow 2xx status | `post-card` returns `201` with Teams message identifiers |
 | Authentication | Signed Workflow callback URL | Signed Logic App trigger URL plus authorized Teams API connection |
 
@@ -50,19 +50,19 @@ example has the equivalent assertion for its standard-library request builders.
 
 The initial routed Workflow is created manually because selecting a Microsoft
 connection and granting consent are environment-specific operations. One
-callback accepts approved channel links, so a separate Flow is not required for
+callback accepts routed card bodies, so a separate Flow is not required for
 each notification channel.
 
 For repeated deployments, package the flow in a Power Platform Solution and
-deploy it through Power Platform CLI with connection references and environment
-variables. Treat connection authorization and ownership as explicit bootstrap
+deploy it through Power Platform CLI with a connection reference. Treat
+connection authorization and ownership as explicit bootstrap
 requirements, and write the generated callback URL directly to a secret store.
 
 After the initial from-blank flow is exported, later environments can be
 provisioned without opening the Power Automate portal:
 
 1. pack and import the Solution with Power Platform CLI;
-2. bind the Teams connection reference and approved channel-link allowlist;
+2. bind the Teams connection reference;
 3. activate the flow;
 4. retrieve the trigger URL through `listCallbackUrl`;
 5. place it directly into the environment's secret store;

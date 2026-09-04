@@ -27,9 +27,9 @@ from blank. The flow receives the Adaptive Card envelope through **When a Teams
 webhook request is received** and posts its card content to the configured
 channel with **Post card in a chat or channel**.
 
-This is the recommended default for channel notifications. One routed Flow
-accepts an exact allowlisted Teams channel link with each message, extracts the
-Team and Channel IDs, and reuses one callback across approved destinations.
+This is the recommended default for channel notifications. The central router
+stores approved channel links and their derived metadata, then sends an
+Adaptive Card with `teamId` and `channelId` through one shared Flow callback.
 Live testing confirmed rich cards and native user mentions without the owner attribution and
 **Get template** footer added by gallery-template Workflows. A gallery template
 remains useful for a quick proof of concept, while Azure Logic Apps are better

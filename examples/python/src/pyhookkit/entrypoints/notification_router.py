@@ -63,6 +63,10 @@ def run_notification_router(
                             destination.endpoint_environment_variable
                         ),
                         "channelLinkConfigured": destination.channel_link is not None,
+                        "tenantId": destination.tenant_id,
+                        "teamId": destination.team_id,
+                        "channelId": destination.channel_id,
+                        "channelName": destination.channel_name,
                         "enabled": destination.enabled,
                     }
                     for destination in store.destinations()

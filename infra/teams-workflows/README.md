@@ -111,24 +111,23 @@ has been authored and exported as a Solution:
 
 1. add the verified from-blank flow to an unmanaged Solution;
 2. replace its concrete Teams connection with a connection reference;
-3. represent the exact approved channel links with one environment variable;
-4. authenticate Power Platform CLI with an approved service principal;
-5. export and unpack the unmanaged Solution as the source artifact;
-6. pack and import the Solution into the target environment;
-7. bind the target connection reference and environment variables;
-8. activate the imported flow;
-9. assign and verify the Dataverse application user as flow owner;
-10. optionally inventory the channels visible through Microsoft Graph;
-11. retrieve the HTTP trigger callback URL and write it directly to the target
+3. authenticate Power Platform CLI with an approved service principal;
+4. export and unpack the unmanaged Solution as the source artifact;
+5. pack and import the Solution into the target environment;
+6. bind the target connection reference;
+7. activate the imported flow;
+8. assign and verify the Dataverse application user as flow owner;
+9. optionally inventory the channels visible through Microsoft Graph;
+10. retrieve the HTTP trigger callback URL and write it directly to the target
     secret store;
-12. run a synthetic rich-card smoke test and assert that the posted card has no
+11. run a synthetic rich-card smoke test and assert that the posted card has no
     template attribution.
 
-Steps 1-3 and the first Teams OAuth authorization are one-time environment
+Steps 1-2 and the first Teams OAuth authorization are one-time environment
 bootstrap operations. The flow must contain exactly one
-`/providers/Microsoft.PowerApps/apis/shared_teams` connection reference and the
-`pyk_AllowedChannelLinks` text environment variable. Its current value is a
-JSON array of exact Teams channel links.
+`/providers/Microsoft.PowerApps/apis/shared_teams` connection reference.
+Approved channel links and their parsed metadata belong in the central router's
+SQLite store rather than the Power Platform Solution.
 
 Authenticate `pac` before running the deployment. In CI, inject the client
 secret from the approved secret store; never place it in a repository file or
@@ -156,7 +155,7 @@ Before the first production deployment, verify each permission independently:
 | Teams connection binding | Dedicated connection user | The connection reference resolves to a valid Microsoft Teams connection in the target environment |
 | Destination access | Dedicated connection user | The approved standard channel is visible to the user and receives a synthetic card |
 | Optional channel inventory | Graph delegated or application principal | `list-team-channels.py` writes the expected access-scoped `0600` report |
-| Runtime invocation | CI/CD or workload identity | It can read the callback secret and the allowlisted channel link, but has no connection-user credentials |
+| Runtime invocation | Central router or approved CI/CD identity | It can read the callback secret and validated destination metadata, but has no connection-user credentials |
 | Operational recovery | Two named administrators | Both appear as co-owners and can inspect run history without assuming the connection user's account |
 
 Run the checks again after replacing a connection user, changing a Dataverse
@@ -186,8 +185,6 @@ infra/teams-workflows/bin/deploy-solution.sh \
   --package-type Managed \
   --environment "https://example.crm.dynamics.com" \
   --teams-connection-id "$TEAMS_CONNECTION_ID" \
-  --allowed-channel-links-schema-name pyk_AllowedChannelLinks \
-  --allowed-channel-link "$TEAMS_WORKFLOW_CHANNEL_LINK" \
   --flow-id "$TEAMS_FLOW_ID" \
   --application-id "$POWER_PLATFORM_APPLICATION_ID" \
   --inventory-team-id "$TEAMS_TEAM_ID" \
@@ -197,10 +194,8 @@ infra/teams-workflows/bin/deploy-solution.sh \
 ```
 
 `prepare-deployment-settings.py` rejects missing or duplicate Teams connection
-references, missing allowlist variables, duplicate or invalid channel links,
-and signed URLs. Repeat `--allowed-channel-link` for every approved notification
-destination; each link is stored in the environment variable as one JSON
-array.
+references and signed URLs. Router destination registration validates each
+channel link and persists its tenant, Team, channel, and display-name metadata.
 `set-flow-owner.py` resolves exactly one enabled Dataverse application user,
 updates the flow `ownerid`, and reads it back. `list-team-channels.py` requests
 only `id`, `displayName`, and `membershipType`, follows Graph pagination, and
@@ -255,13 +250,11 @@ The gallery-template footer problem must be checked independently of card
 rendering:
 
 1. On the flow details page, confirm that **Original template** is absent.
-2. Confirm the trigger is **When an HTTP request is received** with the routed
-  request schema.
-3. Confirm an exact `pyk_AllowedChannelLinks` check precedes URL parsing and the
-  Teams connector action.
-4. Confirm the action uses the request Team and Channel IDs derived from the
-  validated link and passes only
-  `first(triggerBody()?['attachments'])?['content']` as the Adaptive Card.
+2. Confirm the trigger is **When a Teams webhook request is received**.
+3. Confirm the callback URL is available only to the router or another approved
+   delivery caller.
+4. Confirm the action uses `triggerBody()?['teamId']` and
+   `triggerBody()?['channelId']` and passes `triggerBody()` as the Adaptive Card.
 5. Retrieve a fresh callback URL after deployment instead of copying one from a
    different environment.
 6. Send a synthetic card containing a title, `FactSet`, and `Action.OpenUrl`.

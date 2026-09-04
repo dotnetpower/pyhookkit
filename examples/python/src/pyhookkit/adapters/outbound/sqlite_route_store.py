@@ -17,6 +17,7 @@ from pyhookkit.adapters.inbound.canonical_notification_json import (
 from pyhookkit.adapters.outbound.canonical_notification_json import (
     canonical_notification_to_json,
 )
+from pyhookkit.adapters.outbound.teams.channel_link import TeamsChannelLink
 from pyhookkit.application.notification_router import (
     NotificationConflictError,
     RouteNotConfiguredError,
@@ -48,6 +49,10 @@ class StoredDestination:
     endpoint_environment_variable: str
     channel_link: str | None
     enabled: bool
+    tenant_id: str | None = None
+    team_id: str | None = None
+    channel_id: str | None = None
+    channel_name: str | None = None
 
 
 class SqliteRouteStore:
@@ -61,7 +66,7 @@ class SqliteRouteStore:
 
     def configure_destination(self, destination: StoredDestination) -> None:
         """Create or replace one non-secret route destination."""
-        _validate_destination(destination)
+        channel_link = _validate_destination(destination)
         with self._connection() as connection:
             connection.execute(
                 """
@@ -71,14 +76,22 @@ class SqliteRouteStore:
                     provider,
                     endpoint_environment_variable,
                     channel_link,
+                    tenant_id,
+                    team_id,
+                    channel_id,
+                    channel_name,
                     enabled
-                ) VALUES (?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(target_id) DO UPDATE SET
                     route = excluded.route,
                     provider = excluded.provider,
                     endpoint_environment_variable =
                         excluded.endpoint_environment_variable,
                     channel_link = excluded.channel_link,
+                    tenant_id = excluded.tenant_id,
+                    team_id = excluded.team_id,
+                    channel_id = excluded.channel_id,
+                    channel_name = excluded.channel_name,
                     enabled = excluded.enabled
                 """,
                 (
@@ -87,6 +100,10 @@ class SqliteRouteStore:
                     destination.provider,
                     destination.endpoint_environment_variable,
                     destination.channel_link,
+                    str(channel_link.tenant_id) if channel_link is not None else None,
+                    str(channel_link.team_id) if channel_link is not None else None,
+                    channel_link.channel_id if channel_link is not None else None,
+                    channel_link.channel_name if channel_link is not None else None,
                     int(destination.enabled),
                 ),
             )
@@ -102,6 +119,10 @@ class SqliteRouteStore:
                     provider,
                     endpoint_environment_variable,
                     channel_link,
+                    tenant_id,
+                    team_id,
+                    channel_id,
+                    channel_name,
                     enabled
                 FROM route_destinations
                 ORDER BY route, target_id
@@ -120,6 +141,10 @@ class SqliteRouteStore:
                     provider,
                     endpoint_environment_variable,
                     channel_link,
+                    tenant_id,
+                    team_id,
+                    channel_id,
+                    channel_name,
                     enabled
                 FROM route_destinations
                 WHERE target_id = ?
@@ -386,6 +411,10 @@ class SqliteRouteStore:
                     provider TEXT NOT NULL,
                     endpoint_environment_variable TEXT NOT NULL,
                     channel_link TEXT,
+                    tenant_id TEXT,
+                    team_id TEXT,
+                    channel_id TEXT,
+                    channel_name TEXT,
                     enabled INTEGER NOT NULL CHECK (enabled IN (0, 1))
                 );
 
@@ -423,6 +452,48 @@ class SqliteRouteStore:
                     ON target_deliveries(state, updated_at);
                 """
             )
+            self._migrate_destination_metadata(connection)
+
+    def _migrate_destination_metadata(self, connection: sqlite3.Connection) -> None:
+        existing_columns = {
+            cast(str, row["name"])
+            for row in connection.execute(
+                "PRAGMA table_info(route_destinations)"
+            ).fetchall()
+        }
+        for column_name in ("tenant_id", "team_id", "channel_id", "channel_name"):
+            if column_name not in existing_columns:
+                connection.execute(
+                    f"ALTER TABLE route_destinations ADD COLUMN {column_name} TEXT"
+                )
+        rows = connection.execute(
+            """
+            SELECT target_id, channel_link
+            FROM route_destinations
+            WHERE provider = 'teams-workflow'
+            """
+        ).fetchall()
+        for row in rows:
+            raw_link = cast(str | None, row["channel_link"])
+            if raw_link is None:
+                raise ValueError(
+                    "stored Teams Workflow destination has no channel link"
+                )
+            link = TeamsChannelLink(raw_link)
+            connection.execute(
+                """
+                UPDATE route_destinations
+                SET tenant_id = ?, team_id = ?, channel_id = ?, channel_name = ?
+                WHERE target_id = ?
+                """,
+                (
+                    str(link.tenant_id),
+                    str(link.team_id),
+                    link.channel_id,
+                    link.channel_name,
+                    cast(str, row["target_id"]),
+                ),
+            )
 
     @contextmanager
     def _connection(self) -> Generator[sqlite3.Connection]:
@@ -443,7 +514,9 @@ class SqliteRouteStore:
             yield connection
 
 
-def _validate_destination(destination: StoredDestination) -> None:
+def _validate_destination(
+    destination: StoredDestination,
+) -> TeamsChannelLink | None:
     if _TARGET_ID.fullmatch(destination.target_id) is None:
         raise ValueError("target ID must use lower-case kebab-case")
     if _ROUTE.fullmatch(destination.route) is None:
@@ -460,6 +533,9 @@ def _validate_destination(destination: StoredDestination) -> None:
         raise ValueError("Teams Workflow destination requires a channel link")
     if destination.provider == "slack" and destination.channel_link is not None:
         raise ValueError("Slack destination cannot contain a Teams channel link")
+    if destination.channel_link is not None:
+        return TeamsChannelLink(destination.channel_link)
+    return None
 
 
 def _destination_from_row(row: sqlite3.Row) -> StoredDestination:
@@ -473,6 +549,10 @@ def _destination_from_row(row: sqlite3.Row) -> StoredDestination:
         ),
         channel_link=cast(str | None, row["channel_link"]),
         enabled=bool(row["enabled"]),
+        tenant_id=cast(str | None, row["tenant_id"]),
+        team_id=cast(str | None, row["team_id"]),
+        channel_id=cast(str | None, row["channel_id"]),
+        channel_name=cast(str | None, row["channel_name"]),
     )
 
 

@@ -58,27 +58,36 @@ def test_routed_workflow_request_matches_schema() -> None:
             {
                 "contentType": "application/vnd.microsoft.card.adaptive",
                 "contentUrl": None,
-                "content": {"type": "AdaptiveCard"},
+                "content": {
+                    "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                    "type": "AdaptiveCard",
+                    "version": "1.4",
+                    "body": [],
+                },
             }
         ],
     }
 
-    request = build_teams_workflow_request(envelope, TeamsChannelLink(_LINK))
+    channel_link = TeamsChannelLink(_LINK)
+    request = build_teams_workflow_request(
+        envelope,
+        team_id=channel_link.team_id,
+        channel_id=channel_link.channel_id,
+    )
 
     _validator().validate(request)
     _validator(_POWER_AUTOMATE_SCHEMA_PATH).validate(request)
 
 
-def test_routed_workflow_schema_requires_channel_link() -> None:
+def test_routed_workflow_schema_requires_card_and_target() -> None:
     schema = _load_json(_SCHEMA_PATH)
 
-    assert schema["additionalProperties"] is False
     assert schema["required"] == [
         "type",
-        "channelLink",
+        "version",
+        "body",
         "teamId",
         "channelId",
-        "attachments",
     ]
 
 
@@ -89,4 +98,4 @@ def test_power_automate_schema_preserves_required_fields_without_patterns() -> N
     assert trigger_schema["required"] == canonical_schema["required"]
     assert trigger_schema["properties"].keys() == canonical_schema["properties"].keys()
     assert "pattern" not in json.dumps(trigger_schema)
-    assert "format" not in trigger_schema["properties"]["channelLink"]
+    assert "format" not in trigger_schema["properties"]["teamId"]

@@ -21,7 +21,7 @@ _TEAMS_URL = (
     "workflows/example/triggers/manual/paths/invoke?sig=synthetic"
 )
 _CHANNEL_LINK = (
-    "https://teams.microsoft.com/l/channel/"
+    "https://teams.cloud.microsoft/l/channel/"
     "19%3Aexample-channel%40thread.tacv2/General"
     "?groupId=11111111-1111-4111-8111-111111111111"
     "&tenantId=22222222-2222-4222-8222-222222222222"
@@ -86,10 +86,14 @@ def test_configured_delivery_sends_slack_and_teams_payloads(tmp_path: Path) -> N
     assert teams_result.state is DeliveryState.SUCCEEDED
 
     assert CapturingDestination.payloads[0]["attachments"]
-    assert CapturingDestination.payloads[1]["channelLink"] == _CHANNEL_LINK
     assert CapturingDestination.payloads[1]["teamId"] == (
         "11111111-1111-4111-8111-111111111111"
     )
+    assert CapturingDestination.payloads[1]["channelId"] == (
+        "19:example-channel@thread.tacv2"
+    )
+    assert CapturingDestination.payloads[1]["type"] == "AdaptiveCard"
+    assert "attachments" not in CapturingDestination.payloads[1]
 
 
 def test_configured_delivery_redacts_configuration_failures(tmp_path: Path) -> None:

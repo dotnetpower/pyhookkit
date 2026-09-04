@@ -49,6 +49,16 @@ def test_workflow_url_is_validated_and_redacted() -> None:
         TeamsWorkflowUrl("https://example.com/workflows/test?sig=synthetic")
 
 
+def test_workflow_url_accepts_teams_webhook_callback_shape() -> None:
+    url = (
+        "https://default-example.environment.api.powerplatform.com:443/"
+        "powerautomate/automations/direct/cu/25/workflows/example/"
+        "triggers/manual/paths/invoke?api-version=1&sig=synthetic"
+    )
+
+    assert TeamsWorkflowUrl(url).value == url
+
+
 @pytest.mark.parametrize(
     ("status", "state"),
     [(202, DeliveryState.SUCCEEDED), (400, DeliveryState.FAILED)],
@@ -76,8 +86,9 @@ class StubDestination:
         assert url.value == _URL
 
     def send(self, payload: JsonObject) -> DeliveryResult:
-        assert payload["type"] == "message"
-        assert payload["channelLink"] == _CHANNEL_LINK
+        assert payload["type"] == "AdaptiveCard"
+        assert payload["teamId"] == "11111111-1111-4111-8111-111111111111"
+        assert payload["channelId"] == "19:example-channel@thread.tacv2"
         return self.result
 
 

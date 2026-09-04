@@ -118,9 +118,9 @@ You need:
 
 1. A Microsoft 365 account that can create Workflows in Teams.
 2. A synthetic test team and channel.
-3. One Power Automate flow created from blank with the HTTP request trigger,
-  routed request schema, exact channel-link allowlist, link parsing, and
-  dynamic post action.
+3. One Power Automate flow created from blank with the Teams webhook trigger
+   and a dynamic post action that reads `teamId`, `channelId`, and the Adaptive
+   Card from the request body.
 4. An authorized Teams connection owned by a dedicated licensed Microsoft 365
   user that is a member of the destination Team.
 5. A Dataverse application user for service-principal ownership in shared or
@@ -134,9 +134,9 @@ must use a distinct token.
 
 Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`, and copy an
 exact allowlisted Teams channel link into `TEAMS_WORKFLOW_CHANNEL_LINK`. The
-callback is shared by all approved destinations; the link selects the Team and
-Channel for each request. Do not accept arbitrary links merely because the
-connection user can access them.
+callback is shared by all approved destinations. A direct example derives Team
+and Channel IDs from the configured link. The central router instead persists
+the link and its derived metadata in SQLite.
 
 For Azure Logic App delivery, configure the signed HTTP trigger URL separately
 from the explicit Team and channel IDs. Follow the

@@ -2,6 +2,7 @@
 
 from collections.abc import Callable, Mapping
 from typing import Protocol
+from uuid import UUID
 
 from pyhookkit.adapters.outbound.slack.message_renderer import SlackMessageRenderer
 from pyhookkit.adapters.outbound.slack.webhook_destination import (
@@ -9,7 +10,6 @@ from pyhookkit.adapters.outbound.slack.webhook_destination import (
 )
 from pyhookkit.adapters.outbound.slack.webhook_url import SlackWebhookUrl
 from pyhookkit.adapters.outbound.sqlite_route_store import SqliteRouteStore
-from pyhookkit.adapters.outbound.teams.channel_link import TeamsChannelLink
 from pyhookkit.adapters.outbound.teams.message_renderer import TeamsMessageRenderer
 from pyhookkit.adapters.outbound.teams.workflow_destination import (
     TeamsWorkflowDestination,
@@ -79,14 +79,15 @@ class ConfiguredNotificationDelivery:
                     payload
                 )
             if destination.provider == "teams-workflow":
-                if destination.channel_link is None:
+                if destination.team_id is None or destination.channel_id is None:
                     return _failure(DeliveryErrorKind.PERMANENT_PROVIDER)
                 envelope = TeamsMessageRenderer(hero_image_url=None).render(
                     notification
                 )
                 request = build_teams_workflow_request(
                     envelope,
-                    TeamsChannelLink(destination.channel_link),
+                    team_id=UUID(destination.team_id),
+                    channel_id=destination.channel_id,
                 )
                 return self._teams_destination(TeamsWorkflowUrl(raw_endpoint)).send(
                     request

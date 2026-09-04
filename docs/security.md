@@ -22,6 +22,7 @@ credentials. Treat webhook URLs, `SLACK_BOT_TOKEN`, `SLACK_APP_TOKEN`,
 | Argo CD GitLab project token | `argocd-notifications-secret` |
 | Central router producer tokens | Producer-specific secret store |
 | Central router provider credentials | Router runtime secret store |
+| Microsoft Graph Team membership token | Short-lived administrator environment or secret store |
 | Kubernetes administrator credentials | Operator kubeconfig outside Git |
 
 Use a distinct revocable token for each producer. GitHub and the AKS incident

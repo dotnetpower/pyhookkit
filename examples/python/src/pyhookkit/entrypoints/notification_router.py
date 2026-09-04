@@ -7,6 +7,7 @@ from collections.abc import Mapping, Sequence
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from threading import Event, Thread
+from uuid import UUID
 
 from pyhookkit.adapters.inbound.router_http import (
     ProducerAuthenticator,
@@ -19,6 +20,11 @@ from pyhookkit.adapters.outbound.configured_notification_delivery import (
 from pyhookkit.adapters.outbound.sqlite_route_store import (
     SqliteRouteStore,
     StoredDestination,
+)
+from pyhookkit.adapters.outbound.teams.channel_link import TeamsChannelLink
+from pyhookkit.adapters.outbound.teams.graph_membership import (
+    MicrosoftGraphAccessToken,
+    TeamsGraphMembershipProvisioner,
 )
 from pyhookkit.application.notification_router import NotificationRouter
 from pyhookkit.application.notification_worker import NotificationWorker
@@ -39,6 +45,8 @@ def run_notification_router(
         print(f"Initialized router database: {parsed.database}")
         return
     if parsed.command == "add-destination":
+        if parsed.ensure_team_membership:
+            _ensure_team_membership(parsed, environment=active_environment)
         store.configure_destination(
             StoredDestination(
                 target_id=parsed.target_id,
@@ -151,6 +159,19 @@ def _build_parser() -> argparse.ArgumentParser:
     add_destination.add_argument("--endpoint-env", required=True)
     add_destination.add_argument("--channel-link")
     add_destination.add_argument("--disabled", action="store_true")
+    add_destination.add_argument("--ensure-team-membership", action="store_true")
+    add_destination.add_argument(
+        "--connection-user-env",
+        default="TEAMS_CONNECTION_USER",
+    )
+    add_destination.add_argument(
+        "--tenant-id-env",
+        default="TEAMS_TENANT_ID",
+    )
+    add_destination.add_argument(
+        "--graph-token-env",
+        default="MICROSOFT_GRAPH_ACCESS_TOKEN",
+    )
 
     commands.add_parser("list-destinations")
 
@@ -187,6 +208,55 @@ def _producer_secrets(
             raise ValueError(f"producer token variable is empty: {variable_name}")
         secrets[producer] = secret
     return secrets
+
+
+def _ensure_team_membership(
+    parsed: argparse.Namespace,
+    *,
+    environment: Mapping[str, str],
+) -> None:
+    if parsed.provider != "teams-workflow" or parsed.channel_link is None:
+        raise ValueError(
+            "--ensure-team-membership requires a Teams Workflow channel link"
+        )
+    channel_link = TeamsChannelLink(parsed.channel_link)
+    expected_tenant = _required_uuid_environment(
+        environment,
+        parsed.tenant_id_env,
+    )
+    if channel_link.tenant_id != expected_tenant:
+        raise ValueError("Teams channel link tenant does not match configured tenant")
+    connection_user = _required_environment(
+        environment,
+        parsed.connection_user_env,
+    )
+    graph_token = _required_environment(
+        environment,
+        parsed.graph_token_env,
+    )
+    result = TeamsGraphMembershipProvisioner(
+        MicrosoftGraphAccessToken(graph_token)
+    ).ensure_member(channel_link.team_id, connection_user)
+    state = "added" if result.added else "already present"
+    print(f"Teams connection user membership: {state}")
+
+
+def _required_environment(environment: Mapping[str, str], name: str) -> str:
+    value = environment.get(name, "").strip()
+    if not value:
+        raise ValueError(f"environment variable is required: {name}")
+    return value
+
+
+def _required_uuid_environment(
+    environment: Mapping[str, str],
+    name: str,
+) -> UUID:
+    value = _required_environment(environment, name)
+    try:
+        return UUID(value)
+    except ValueError as error:
+        raise ValueError(f"environment variable must contain a GUID: {name}") from error
 
 
 if __name__ == "__main__":

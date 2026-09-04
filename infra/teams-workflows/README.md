@@ -156,6 +156,7 @@ Before the first production deployment, verify each permission independently:
 | Destination access | Dedicated connection user | The approved standard channel is visible to the user and receives a synthetic card |
 | Optional channel inventory | Graph delegated or application principal | `list-team-channels.py` writes the expected access-scoped `0600` report |
 | Runtime invocation | Central router or approved CI/CD identity | It can read the callback secret and validated destination metadata, but has no connection-user credentials |
+| Destination registration | Approved Graph principal | `TeamMember.ReadWriteNonOwnerRole.All` to ensure the Teams connection user is a normal member of an explicitly registered Team |
 | Operational recovery | Two named administrators | Both appear as co-owners and can inspect run history without assuming the connection user's account |
 
 Run the checks again after replacing a connection user, changing a Dataverse

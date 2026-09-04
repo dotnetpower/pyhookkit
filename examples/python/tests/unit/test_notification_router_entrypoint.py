@@ -8,6 +8,14 @@ from typing import ClassVar
 import pytest
 
 import pyhookkit.entrypoints.notification_router as entrypoint
+from pyhookkit.adapters.outbound.teams.graph_membership import TeamMembershipResult
+
+_CHANNEL_LINK = (
+    "https://teams.cloud.microsoft/l/channel/"
+    "19%3Aexample-channel%40thread.tacv2/General"
+    "?groupId=11111111-1111-4111-8111-111111111111"
+    "&tenantId=22222222-2222-4222-8222-222222222222"
+)
 
 
 def test_entrypoint_initializes_configures_lists_and_drains(
@@ -58,6 +66,97 @@ def test_entrypoint_initializes_configures_lists_and_drains(
         environment={},
     )
     assert json.loads(capsys.readouterr().out) == {"deliveriesProcessed": 0}
+
+
+class StubMembershipProvisioner:
+    calls: ClassVar[list[tuple[object, str]]] = []
+
+    def __init__(self, token: object) -> None:
+        assert "synthetic-graph-token" not in repr(token)
+
+    def ensure_member(self, team_id: object, user: str) -> TeamMembershipResult:
+        self.calls.append((team_id, user))
+        return TeamMembershipResult(
+            user_id=entrypoint.UUID("33333333-3333-4333-8333-333333333333"),
+            added=True,
+        )
+
+
+def test_entrypoint_ensures_team_membership_before_registration(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    database = tmp_path / "router.sqlite3"
+    StubMembershipProvisioner.calls = []
+    monkeypatch.setattr(
+        entrypoint,
+        "TeamsGraphMembershipProvisioner",
+        StubMembershipProvisioner,
+    )
+
+    entrypoint.run_notification_router(
+        arguments=[
+            "--database",
+            str(database),
+            "add-destination",
+            "--target-id",
+            "teams-release",
+            "--route",
+            "release-notifications",
+            "--provider",
+            "teams-workflow",
+            "--endpoint-env",
+            "TEAMS_WORKFLOW_URL",
+            "--channel-link",
+            _CHANNEL_LINK,
+            "--ensure-team-membership",
+        ],
+        environment={
+            "TEAMS_CONNECTION_USER": "svc-teams-notification@example.com",
+            "TEAMS_TENANT_ID": "22222222-2222-4222-8222-222222222222",
+            "MICROSOFT_GRAPH_ACCESS_TOKEN": "synthetic-graph-token",
+        },
+    )
+
+    output = capsys.readouterr().out
+    assert "membership: added" in output
+    assert "Configured destination" in output
+    assert StubMembershipProvisioner.calls == [
+        (
+            entrypoint.UUID("11111111-1111-4111-8111-111111111111"),
+            "svc-teams-notification@example.com",
+        )
+    ]
+
+
+def test_entrypoint_rejects_cross_tenant_membership_registration(
+    tmp_path: Path,
+) -> None:
+    with pytest.raises(ValueError, match="tenant does not match"):
+        entrypoint.run_notification_router(
+            arguments=[
+                "--database",
+                str(tmp_path / "router.sqlite3"),
+                "add-destination",
+                "--target-id",
+                "teams-release",
+                "--route",
+                "release-notifications",
+                "--provider",
+                "teams-workflow",
+                "--endpoint-env",
+                "TEAMS_WORKFLOW_URL",
+                "--channel-link",
+                _CHANNEL_LINK,
+                "--ensure-team-membership",
+            ],
+            environment={
+                "TEAMS_CONNECTION_USER": "svc@example.com",
+                "TEAMS_TENANT_ID": "44444444-4444-4444-8444-444444444444",
+                "MICROSOFT_GRAPH_ACCESS_TOKEN": "synthetic-graph-token",
+            },
+        )
 
 
 class StubServer:

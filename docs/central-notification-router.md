@@ -71,6 +71,39 @@ uv run python -m pyhookkit.entrypoints.notification_router \
   --channel-link "$TEAMS_WORKFLOW_CHANNEL_LINK"
 ```
 
+For administrator-controlled registration, ensure that the dedicated Teams
+connection user belongs to the target Team before the destination is stored:
+
+```shell
+export TEAMS_CONNECTION_USER="<Entra object ID or UPN>"
+export TEAMS_TENANT_ID="<expected tenant GUID>"
+export MICROSOFT_GRAPH_ACCESS_TOKEN="<short-lived Graph token>"
+
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  add-destination \
+  --target-id teams-release \
+  --route release-notifications \
+  --provider teams-workflow \
+  --endpoint-env TEAMS_WORKFLOW_URL \
+  --channel-link "$TEAMS_WORKFLOW_CHANNEL_LINK" \
+  --ensure-team-membership
+```
+
+The Graph principal requires
+`TeamMember.ReadWriteNonOwnerRole.All` with administrator consent. Prefer the
+connection user's Entra object ID; resolving a UPN additionally requires
+permission to read that user. The command adds only a normal member, never an
+owner. It first checks existing members, making repeated registration
+idempotent. A tenant mismatch, Graph denial, or malformed response prevents the
+destination from being configured.
+
+The identity must be the same account bound to the Power Automate Teams
+connection. Adding a Flow co-owner does not change the connector execution
+identity. Standard-channel access follows Team membership. Private and shared
+channels can require explicit channel membership, and Flow bot delivery to a
+private channel remains unsupported.
+
 Registration accepts current `teams.cloud.microsoft` channel links and legacy
 `teams.microsoft.com` links. The router stores the original link plus derived
 tenant ID, Team ID, channel ID, and channel name in separate columns. Delivery

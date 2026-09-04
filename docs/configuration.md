@@ -110,6 +110,9 @@ EXAMPLE_ASSET_BASE_URL="<direct HTTPS base URL for committed example images>"
 TEAMS_ASSET_BASE_URL="<legacy fallback; leave blank for new configuration>"
 TEAMS_TEST_USER_ID="<test member Microsoft Entra object ID or UPN>"
 TEAMS_TEST_USER_NAME="<test member display name>"
+TEAMS_CONNECTION_USER="<dedicated Teams connection user object ID or UPN>"
+TEAMS_TENANT_ID="<expected Microsoft Entra tenant GUID>"
+MICROSOFT_GRAPH_ACCESS_TOKEN="<short-lived registration token>"
 NOTIFICATION_ROUTER_URL="<central router HTTPS base URL>"
 NOTIFICATION_ROUTER_TOKEN="<producer-specific router bearer token>"
 ```
@@ -131,6 +134,12 @@ The two `NOTIFICATION_ROUTER_*` values are optional. Configure them only when a
 producer submits canonical JSON through the
 [central notification router](central-notification-router.md). Every producer
 must use a distinct token.
+
+The three Graph membership values are optional and are read only when
+`add-destination --ensure-team-membership` is selected. The token requires
+`TeamMember.ReadWriteNonOwnerRole.All`; use the connection user's object ID to
+avoid an additional UPN lookup permission. Never persist the Graph token in
+SQLite.
 
 Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`, and copy an
 exact allowlisted Teams channel link into `TEAMS_WORKFLOW_CHANNEL_LINK`. The

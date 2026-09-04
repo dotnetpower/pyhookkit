@@ -82,6 +82,12 @@ def test_successful_delivery_returns_redacted_result() -> None:
     assert result.error is None
 
 
+def test_webhook_url_repr_is_redacted() -> None:
+    raw_url = "https://hooks.slack.com/services/example"
+
+    assert raw_url not in repr(SlackWebhookUrl(raw_url))
+
+
 def test_rate_limit_prioritizes_retry_after() -> None:
     delays: list[float] = []
     transport = StubTransport(

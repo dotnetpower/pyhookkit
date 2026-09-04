@@ -5,6 +5,10 @@ repository, deploys the staging overlay to AKS, and submits canonical deployment
 results to a GitLab trigger pipeline. GitLab renders and delivers the result;
 Argo CD does not contain a provider-specific Teams payload.
 
+An optional pair of templates sends the same canonical JSON directly to the
+central router. The default triggers continue to use GitLab so migration is
+explicit and does not duplicate notifications.
+
 ## Bootstrap
 
 1. Install the pinned Argo CD chart with the minimal single-node values:
@@ -52,6 +56,13 @@ pipeline endpoint.
 The custom triggers fire once per reconciled revision. The template submits
 canonical JSON through the `CANONICAL_NOTIFICATION` pipeline variable. GitLab
 validates it and sends it through the configured provider adapter.
+
+For direct router submission, replace the synthetic HTTPS router URL, add
+`--from-literal=notification-router-token="$NOTIFICATION_ROUTER_TOKEN"` when
+creating the Secret, and change the trigger `send` values to
+`bookinfo-router-sync-failed` and `bookinfo-router-sync-succeeded`. Use a token
+dedicated to Argo CD. Do not enable both GitLab and router templates for the
+same trigger.
 
 `context.teamsDelivery` selects `workflow` (default) or `logic-app` for
 deployment-result notifications. Configure the corresponding protected GitLab

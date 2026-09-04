@@ -12,6 +12,10 @@ Only GitLab stores `TEAMS_WORKFLOW_URL` and the selected
 `TEAMS_WORKFLOW_CHANNEL_LINK`. Upstream systems receive separate, revocable
 pipeline trigger tokens and never receive the Teams credential.
 
+When the `notification-path` pipeline input is `router`, GitLab instead submits
+canonical JSON to the central router. In that mode GitLab stores only its
+router producer token; provider credentials remain in the router runtime.
+
 ## Project model
 
 Import this repository into a dedicated synthetic GitLab project and keep the
@@ -35,6 +39,8 @@ Configure these masked and protected values in GitLab:
 | `TEAMS_LOGIC_APP_URL` | Azure Logic App HTTP trigger callback URL |
 | `TEAMS_LOGIC_APP_TEAM_ID` | Explicit Teams destination |
 | `TEAMS_LOGIC_APP_CHANNEL_ID` | Explicit Teams channel destination |
+| `NOTIFICATION_ROUTER_URL` | HTTPS central router base URL |
+| `NOTIFICATION_ROUTER_TOKEN` | GitLab-specific central router bearer token |
 
 Configure provider identity variables only when a canonical notification
 contains a native user mention. Group mentions remain visible as an explicit
@@ -81,6 +87,12 @@ GitLab remains the operational ownership system of record.
 The `teams-delivery` pipeline input accepts `workflow` (default) or
 `logic-app`. The Logic App option requires all three `TEAMS_LOGIC_APP_*`
 variables.
+
+The `notification-path` input accepts `direct` (default) or `router`. Direct
+preserves the existing Teams delivery path. Router sends the canonical input
+before provider rendering and requires the two `NOTIFICATION_ROUTER_*`
+variables. Keep the paths mutually exclusive for an event to prevent duplicate
+messages.
 
 The configuration is deliberately a demonstration control plane, not a
 production event bus. If event volume or delivery guarantees grow beyond these

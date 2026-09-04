@@ -7,8 +7,9 @@ the provider-neutral contract:
 - [`container/`](container/README.md) defines container secret injection;
 - [`azure/`](azure/README.md) defines managed-identity composition.
 
-No runtime deployment implementation is committed in these directories yet.
-The live Bookinfo scenario uses the explicit assets under
+The local runtime documents the optional SQLite central router. No container or
+Azure router deployment is committed yet. The live Bookinfo scenario uses the
+explicit assets under
 [`../azure/bicep/`](../azure/bicep/README.md) and
 [`../gitops/bookinfo/`](../gitops/bookinfo/README.md).
 

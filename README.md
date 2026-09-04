@@ -63,6 +63,17 @@ The [integrated Bookinfo scenario](docs/integrated-bookinfo-scenario.md)
 includes the live approval, GitOps promotion, Argo CD reconciliation, incident,
 maintenance, and Teams delivery evidence.
 
+### Optional central router
+
+GitLab and Argo CD can submit the same canonical contract to a small
+SQLite-backed central router. It provides producer authentication,
+route-to-many-destination fan-out, per-target status, and idempotent acceptance
+while reusing the existing Slack and Teams adapters. Direct delivery remains an
+explicit migration and fallback path.
+
+See the [central notification router guide](docs/central-notification-router.md)
+for route configuration, local execution, and producer integration.
+
 ### Example coverage
 
 | Example | Slack | Microsoft Teams |

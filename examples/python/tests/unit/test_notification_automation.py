@@ -143,6 +143,20 @@ def test_cli_accepts_canonical_input_file_with_provider_flag(
     )
 
 
+def test_cli_can_emit_canonical_scenario_for_router_submission(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    entrypoint.run_notification_automation(
+        arguments=[*_deployment_args("teams"), "--canonical"]
+    )
+
+    payload = json.loads(capsys.readouterr().out)
+
+    assert payload["eventId"] == "scenario-deployment-result-001"
+    assert payload["route"] == "release-notifications"
+    assert "attachments" not in payload
+
+
 def test_cli_renders_teams_input_without_synthetic_hero_by_default(
     capsys: pytest.CaptureFixture[str],
 ) -> None:

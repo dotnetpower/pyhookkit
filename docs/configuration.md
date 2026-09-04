@@ -110,6 +110,8 @@ EXAMPLE_ASSET_BASE_URL="<direct HTTPS base URL for committed example images>"
 TEAMS_ASSET_BASE_URL="<legacy fallback; leave blank for new configuration>"
 TEAMS_TEST_USER_ID="<test member Microsoft Entra object ID or UPN>"
 TEAMS_TEST_USER_NAME="<test member display name>"
+NOTIFICATION_ROUTER_URL="<central router HTTPS base URL>"
+NOTIFICATION_ROUTER_TOKEN="<producer-specific router bearer token>"
 ```
 
 You need:
@@ -124,6 +126,11 @@ You need:
 5. A Dataverse application user for service-principal ownership in shared or
   production environments, plus at least two named operational co-owners.
 6. The HTTP POST callback URL generated after the Workflow is saved.
+
+The two `NOTIFICATION_ROUTER_*` values are optional. Configure them only when a
+producer submits canonical JSON through the
+[central notification router](central-notification-router.md). Every producer
+must use a distinct token.
 
 Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`, and copy an
 exact allowlisted Teams channel link into `TEAMS_WORKFLOW_CHANNEL_LINK`. The

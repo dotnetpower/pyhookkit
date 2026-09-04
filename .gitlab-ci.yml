@@ -25,6 +25,12 @@ spec:
       options:
         - workflow
         - logic-app
+    notification-path:
+      description: Direct provider delivery or central router submission
+      default: direct
+      options:
+        - direct
+        - router
 ---
 stages:
   - validate
@@ -39,6 +45,7 @@ variables:
   REVIEWS_VERSION: $[[ inputs.reviews-version ]]
   SOURCE_URL: $[[ inputs.source-url ]]
   TEAMS_DELIVERY: $[[ inputs.teams-delivery ]]
+  NOTIFICATION_PATH: $[[ inputs.notification-path ]]
 
 validate-gitops:
   stage: validate
@@ -77,61 +84,108 @@ promote-bookinfo:
   rules:
     - if: $PIPELINE_ACTION == "promote"
 
-.teams-notification:
+.notification:
   image: python:3.12-slim
   before_script:
     - python -m pip install ./examples/python
     - |
-      case "$TEAMS_DELIVERY" in
-        workflow)
-          test -n "$TEAMS_WORKFLOW_URL"
+      case "$NOTIFICATION_PATH" in
+        router)
+          test -n "$NOTIFICATION_ROUTER_URL"
+          test -n "$NOTIFICATION_ROUTER_TOKEN"
           ;;
-        logic-app)
-          test -n "$TEAMS_LOGIC_APP_URL"
-          test -n "$TEAMS_LOGIC_APP_TEAM_ID"
-          test -n "$TEAMS_LOGIC_APP_CHANNEL_ID"
+        direct)
+          case "$TEAMS_DELIVERY" in
+            workflow)
+              test -n "$TEAMS_WORKFLOW_URL"
+              test -n "$TEAMS_WORKFLOW_CHANNEL_LINK"
+              ;;
+            logic-app)
+              test -n "$TEAMS_LOGIC_APP_URL"
+              test -n "$TEAMS_LOGIC_APP_TEAM_ID"
+              test -n "$TEAMS_LOGIC_APP_CHANNEL_ID"
+              ;;
+            *)
+              echo "unsupported Teams delivery adapter: $TEAMS_DELIVERY" >&2
+              exit 1
+              ;;
+          esac
           ;;
         *)
-          echo "unsupported Teams delivery adapter: $TEAMS_DELIVERY" >&2
+          echo "unsupported notification path: $NOTIFICATION_PATH" >&2
           exit 1
           ;;
       esac
 
 notify-canonical-webhook:
-  extends: .teams-notification
+  extends: .notification
   stage: notify
   script:
     - test -n "$CANONICAL_NOTIFICATION"
     - printf '%s' "$CANONICAL_NOTIFICATION" > canonical-notification.json
-    - python -m pyhookkit.entrypoints.scenario_cli --input canonical-notification.json --provider teams --teams-delivery "$TEAMS_DELIVERY" --teams-compact --teams-hide-group-mention-notice --send
+    - |
+      if [ "$NOTIFICATION_PATH" = "router" ]; then
+        python -m pyhookkit.entrypoints.notification_router_client \
+          --input canonical-notification.json \
+          --producer gitlab
+      else
+        python -m pyhookkit.entrypoints.scenario_cli \
+          --input canonical-notification.json \
+          --provider teams \
+          --teams-delivery "$TEAMS_DELIVERY" \
+          --teams-compact \
+          --teams-hide-group-mention-notice \
+          --send
+      fi
   rules:
     - if: $PIPELINE_ACTION == "validate" && $CANONICAL_NOTIFICATION
 
 notify-maintenance:
-  extends: .teams-notification
+  extends: .notification
   stage: notify
   script:
     - announced_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     - window_start="$(date -u -d '+1 hour' '+%Y-%m-%dT%H:%M:%SZ')"
     - window_end="$(date -u -d '+2 hours' '+%Y-%m-%dT%H:%M:%SZ')"
     - |
-      python -m pyhookkit.entrypoints.scenario_cli \
-        maintenance-notice \
-        teams \
-        --event-id "gitlab-${CI_PIPELINE_ID}-maintenance" \
-        --correlation-id "gitlab-pipeline-${CI_PIPELINE_ID}" \
-        --window-start "$window_start" \
-        --window-end "$window_end" \
-        --announced-at "$announced_at" \
-        --affected-service productpage \
-        --affected-service reviews \
-        --expected-impact "Brief request retries during the staging exercise" \
-        --owner-alias example-operations \
-        --status-page-url "$CI_PIPELINE_URL" \
-        --source gitlab-ci \
-        --teams-delivery "$TEAMS_DELIVERY" \
-        --teams-compact \
-        --teams-hide-group-mention-notice \
-        --send
+      if [ "$NOTIFICATION_PATH" = "router" ]; then
+        python -m pyhookkit.entrypoints.scenario_cli \
+          maintenance-notice \
+          teams \
+          --event-id "gitlab-${CI_PIPELINE_ID}-maintenance" \
+          --correlation-id "gitlab-pipeline-${CI_PIPELINE_ID}" \
+          --window-start "$window_start" \
+          --window-end "$window_end" \
+          --announced-at "$announced_at" \
+          --affected-service productpage \
+          --affected-service reviews \
+          --expected-impact "Brief request retries during the staging exercise" \
+          --owner-alias example-operations \
+          --status-page-url "$CI_PIPELINE_URL" \
+          --source gitlab-ci \
+          --canonical > canonical-notification.json
+        python -m pyhookkit.entrypoints.notification_router_client \
+          --input canonical-notification.json \
+          --producer gitlab
+      else
+        python -m pyhookkit.entrypoints.scenario_cli \
+          maintenance-notice \
+          teams \
+          --event-id "gitlab-${CI_PIPELINE_ID}-maintenance" \
+          --correlation-id "gitlab-pipeline-${CI_PIPELINE_ID}" \
+          --window-start "$window_start" \
+          --window-end "$window_end" \
+          --announced-at "$announced_at" \
+          --affected-service productpage \
+          --affected-service reviews \
+          --expected-impact "Brief request retries during the staging exercise" \
+          --owner-alias example-operations \
+          --status-page-url "$CI_PIPELINE_URL" \
+          --source gitlab-ci \
+          --teams-delivery "$TEAMS_DELIVERY" \
+          --teams-compact \
+          --teams-hide-group-mention-notice \
+          --send
+      fi
   rules:
     - if: $PIPELINE_ACTION == "maintenance-notice"

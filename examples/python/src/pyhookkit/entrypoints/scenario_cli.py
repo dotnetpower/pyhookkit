@@ -1,6 +1,7 @@
 """Automation CLI for dynamic paired scenario notifications."""
 
 import argparse
+import json
 import os
 from collections.abc import Mapping, Sequence
 from datetime import datetime
@@ -8,6 +9,9 @@ from pathlib import Path
 
 from pyhookkit.adapters.inbound.canonical_notification_json import (
     load_canonical_notification,
+)
+from pyhookkit.adapters.outbound.canonical_notification_json import (
+    canonical_notification_to_json,
 )
 from pyhookkit.adapters.outbound.slack.identity import (
     SlackIdentity,
@@ -80,6 +84,9 @@ def run_notification_automation(
         scenario,
         provider,
     )
+    if parsed.canonical:
+        print(json.dumps(canonical_notification_to_json(notification), indent=2))
+        return
     active_environment = os.environ if environment is None else environment
     runner_arguments = _delivery_arguments(
         send=parsed.send,
@@ -119,6 +126,7 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--provider", choices=_PROVIDERS, dest="provider_option")
     parser.add_argument("--input", type=Path)
     parser.add_argument("--send", action="store_true")
+    parser.add_argument("--canonical", action="store_true")
     parser.add_argument(
         "--teams-delivery",
         choices=_TEAMS_DELIVERY_OPTIONS,
@@ -201,6 +209,8 @@ def _resolve_mode(
         parser.error("scenario is required unless --input is provided")
     if provider != "teams" and parsed.teams_delivery != "workflow":
         parser.error("--teams-delivery logic-app requires the teams provider")
+    if parsed.canonical and parsed.send:
+        parser.error("--canonical cannot be combined with --send")
     return parsed.scenario, provider
 
 

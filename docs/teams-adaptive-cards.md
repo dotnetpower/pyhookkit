@@ -1,5 +1,7 @@
 # Teams Adaptive Card design
 
+[한국어](teams-adaptive-cards.ko.md)
+
 PyHookKit targets Adaptive Card 1.4 for Teams Workflow delivery. Teams currently
 supports newer schema versions, but the conservative baseline reduces
 differences across web, desktop, mobile, and embedded surfaces.

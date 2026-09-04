@@ -1,5 +1,7 @@
 # Power Automate Teams Workflow
 
+[한국어](power-automate-teams-workflow.ko.md)
+
 This guide creates the Power Automate delivery adapter used by PyHookKit Teams
 examples and the integrated Bookinfo scenario. One flow accepts an Adaptive
 Card carrying validated Team and Channel identifiers, then posts the card to

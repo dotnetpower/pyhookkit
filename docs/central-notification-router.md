@@ -1,5 +1,7 @@
 # Central notification router
 
+[한국어](central-notification-router.ko.md)
+
 The central router is an optional SQLite-backed example for sending the same
 canonical notification from GitLab, Argo CD, or another producer through one
 routing boundary. Existing direct Slack and Teams commands remain available for

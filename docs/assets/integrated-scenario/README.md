@@ -1,5 +1,7 @@
 # Integrated scenario captures
 
+[한국어](README.ko.md)
+
 These files are real client and control-plane captures from the disposable
 Bookinfo staging scenario.
 

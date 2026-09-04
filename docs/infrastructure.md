@@ -1,5 +1,7 @@
 # Infrastructure
 
+[한국어](infrastructure.ko.md)
+
 Infrastructure assets are independent of implementation language. Declarative
 configuration belongs under `infra`; OAuth consent, generated credentials, and
 other imperative steps belong in explicit bootstrap runbooks.

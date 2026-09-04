@@ -1,5 +1,7 @@
 # Documentation
 
+[한국어](README.ko.md)
+
 This directory contains user-facing architecture, setup, operation, and
 migration guidance. Provider or infrastructure implementation details remain
 beside the assets they configure under `infra/`.
@@ -22,6 +24,14 @@ beside the assets they configure under `infra/`.
 | Explore Slack capabilities | [Slack examples](slack-examples.md) |
 | Review credential boundaries | [Security](security.md) |
 | Plan provider migration | [Migration](migration.md) |
+
+## Documentation assets
+
+- [Documentation assets](assets/README.md)
+- [Client capture gallery](assets/card-previews/README.md)
+- [Integrated scenario captures](assets/integrated-scenario/README.md)
+- [Azure Logic App Teams delivery captures](assets/logic-app-teams-delivery/README.md)
+- [Power Automate Teams Workflow captures](assets/power-automate-teams-workflow/README.md)
 
 ## Documentation boundaries
 

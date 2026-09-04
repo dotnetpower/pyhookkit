@@ -1,5 +1,7 @@
 # Teams delivery options
 
+[한국어](teams-delivery-options.ko.md)
+
 Teams Workflows is the initial parity target. Logic Apps, Microsoft Graph with
 resource-specific consent, or a Teams bot are advanced adapters for behavior
 that a Workflow webhook cannot provide.

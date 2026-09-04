@@ -1,5 +1,7 @@
 # Power Automate Teams Workflow captures
 
+[한국어](README.ko.md)
+
 These redacted captures accompany the
 [Power Automate Teams Workflow guide](../../power-automate-teams-workflow.md).
 

@@ -1,5 +1,7 @@
 # Getting started
 
+[한국어](getting-started.ko.md)
+
 ## Local provider configuration
 
 Create the ignored local configuration file:

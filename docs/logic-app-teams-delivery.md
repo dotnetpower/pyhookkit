@@ -1,5 +1,7 @@
 # Azure Logic App Teams delivery
 
+[한국어](logic-app-teams-delivery.ko.md)
+
 This guide deploys and operates the direct-ID Logic App adapter. Use it when a
 caller already owns the target Team and Channel IDs or when Teams delivery must
 be managed as Azure infrastructure.

@@ -1,5 +1,7 @@
 # Azure Logic App Teams delivery captures
 
+[한국어](README.ko.md)
+
 These redacted captures accompany the
 [Azure Logic App Teams delivery guide](../../logic-app-teams-delivery.md).
 

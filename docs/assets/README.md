@@ -1,5 +1,7 @@
 # Documentation assets
 
+[한국어](README.ko.md)
+
 Documentation images are organized by the user-facing guide that owns them:
 
 - [`card-previews/`](card-previews/README.md): Slack and Teams client captures

@@ -1,5 +1,7 @@
 # Security
 
+[한국어](security.ko.md)
+
 Only synthetic payloads, aliases, identifiers, routes, and URLs may be
 committed. Webhook URLs and tokens are credentials.
 

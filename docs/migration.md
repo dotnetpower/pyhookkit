@@ -1,5 +1,7 @@
 # Migration
 
+[한국어](migration.ko.md)
+
 Migration starts only after contract, provider parity, infrastructure, secret
 handling, and rollback paths are validated.
 

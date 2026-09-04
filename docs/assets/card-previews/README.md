@@ -1,5 +1,7 @@
 # Client capture gallery
 
+[한국어](README.ko.md)
+
 This directory accepts actual Slack and Microsoft Teams client captures only.
 
 ## F01: Hello World

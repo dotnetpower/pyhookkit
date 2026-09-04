@@ -1,5 +1,7 @@
 # Notification parity
 
+[한국어](notification-parity.ko.md)
+
 Parity means preserving the event, outcome, required facts, mentions, links,
 and core user action. Provider payloads are not expected to have identical JSON
 or visual layout.

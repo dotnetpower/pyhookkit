@@ -1,5 +1,7 @@
 # Integrated Bookinfo notification scenario
 
+[한국어](integrated-bookinfo-scenario.ko.md)
+
 This runbook demonstrates approval, deployment, incident, and maintenance
 notifications across GitHub, GitLab, Argo CD, AKS, Power Automate, and Microsoft
 Teams.

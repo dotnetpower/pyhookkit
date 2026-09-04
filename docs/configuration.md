@@ -1,5 +1,7 @@
 # Provider configuration
 
+[한국어](configuration.ko.md)
+
 The repository uses one local environment file for provider destination
 credentials:
 

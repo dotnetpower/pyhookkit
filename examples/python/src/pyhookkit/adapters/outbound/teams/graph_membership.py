@@ -55,7 +55,7 @@ class TeamMembershipResult:
 
 
 class TeamsGraphMembershipProvisioner:
-    """Ensure the Teams connector identity belongs to a target Team."""
+    """Ensure the Teams connector identity belongs to a Team's backing group."""
 
     def __init__(
         self,
@@ -82,19 +82,18 @@ class TeamsGraphMembershipProvisioner:
 
         response = self._send(
             "POST",
-            f"{_GRAPH_ORIGIN}/v1.0/teams/{team_id}/members",
+            f"{_GRAPH_ORIGIN}/v1.0/groups/{team_id}/members/$ref",
             payload={
-                "@odata.type": "#microsoft.graph.aadUserConversationMember",
-                "roles": [],
-                "user@odata.bind": (f"{_GRAPH_ORIGIN}/v1.0/users('{user_id}')"),
+                "@odata.id": f"{_GRAPH_ORIGIN}/v1.0/directoryObjects/{user_id}",
             },
         )
-        if response.status_code == 201:
+        if response.status_code == 204:
             return TeamMembershipResult(user_id, added=True)
-        if response.status_code == 409 and self._is_member(team_id, user_id):
+        if response.status_code in {400, 409} and self._is_member(team_id, user_id):
             return TeamMembershipResult(user_id, added=False)
         raise TeamsGraphMembershipError(
-            f"Microsoft Graph member creation failed with HTTP {response.status_code}"
+            f"Microsoft Graph group member creation failed with HTTP "
+            f"{response.status_code}"
         )
 
     def _resolve_user_id(self, user: str) -> UUID:
@@ -129,33 +128,33 @@ class TeamsGraphMembershipProvisioner:
 
     def _is_member(self, team_id: UUID, user_id: UUID) -> bool:
         next_url: str | None = (
-            f"{_GRAPH_ORIGIN}/v1.0/teams/{team_id}/members?$select=id,userId,roles"
+            f"{_GRAPH_ORIGIN}/v1.0/groups/{team_id}/members?$select=id"
         )
         while next_url is not None:
             _validate_graph_url(next_url)
             response = self._send("GET", next_url)
             if response.status_code != 200:
                 raise TeamsGraphMembershipError(
-                    f"Microsoft Graph member lookup failed with HTTP "
+                    f"Microsoft Graph group member lookup failed with HTTP "
                     f"{response.status_code}"
                 )
-            payload = _response_object(response, "member lookup")
+            payload = _response_object(response, "group member lookup")
             raw_members = payload.get("value")
             if not isinstance(raw_members, list):
                 raise TeamsGraphMembershipError(
-                    "Microsoft Graph member lookup response is malformed"
+                    "Microsoft Graph group member lookup response is malformed"
                 )
             for member in cast(list[JsonValue], raw_members):
                 if not isinstance(member, dict):
                     raise TeamsGraphMembershipError(
-                        "Microsoft Graph member lookup response is malformed"
+                        "Microsoft Graph group member lookup response is malformed"
                     )
-                if member.get("userId") == str(user_id):
+                if member.get("id") == str(user_id):
                     return True
             raw_next_link = payload.get("@odata.nextLink")
             if raw_next_link is not None and not isinstance(raw_next_link, str):
                 raise TeamsGraphMembershipError(
-                    "Microsoft Graph member next link is malformed"
+                    "Microsoft Graph group member next link is malformed"
                 )
             next_url = raw_next_link
         return False
@@ -212,5 +211,5 @@ def _validate_graph_url(url: str) -> None:
         or not parsed.path.startswith("/v1.0/")
     ):
         raise TeamsGraphMembershipError(
-            "Microsoft Graph member next link has an unexpected origin"
+            "Microsoft Graph group member next link has an unexpected origin"
         )

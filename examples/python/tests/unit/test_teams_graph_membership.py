@@ -42,7 +42,7 @@ def _response(status: int, payload: object = None) -> httpx.Response:
 
 
 def test_existing_member_is_idempotent_and_token_is_redacted() -> None:
-    request = StubRequest([_response(200, {"value": [{"userId": str(_USER_ID)}]})])
+    request = StubRequest([_response(200, {"value": [{"id": str(_USER_ID)}]})])
     token = MicrosoftGraphAccessToken(_TOKEN)
 
     result = TeamsGraphMembershipProvisioner(
@@ -58,14 +58,14 @@ def test_existing_member_is_idempotent_and_token_is_redacted() -> None:
 
 def test_resolves_user_and_adds_non_owner_member_across_pages() -> None:
     next_link = (
-        f"https://graph.microsoft.com/v1.0/teams/{_TEAM_ID}/members?$skiptoken=next"
+        f"https://graph.microsoft.com/v1.0/groups/{_TEAM_ID}/members?$skiptoken=next"
     )
     request = StubRequest(
         [
             _response(200, {"id": str(_USER_ID)}),
             _response(200, {"value": [], "@odata.nextLink": next_link}),
             _response(200, {"value": []}),
-            _response(201, {"id": "membership-id"}),
+            _response(204),
         ]
     )
 
@@ -79,11 +79,10 @@ def test_resolves_user_and_adds_non_owner_member_across_pages() -> None:
     assert "svc-teams-notification%40example.com" in request.calls[0][1]
     method, url, payload = request.calls[-1]
     assert method == "POST"
-    assert url.endswith(f"/teams/{_TEAM_ID}/members")
+    assert url.endswith(f"/groups/{_TEAM_ID}/members/$ref")
     assert payload is not None
-    assert payload["roles"] == []
-    assert payload["user@odata.bind"] == (
-        f"https://graph.microsoft.com/v1.0/users('{_USER_ID}')"
+    assert payload["@odata.id"] == (
+        f"https://graph.microsoft.com/v1.0/directoryObjects/{_USER_ID}"
     )
 
 
@@ -91,8 +90,8 @@ def test_conflict_is_success_only_when_member_now_exists() -> None:
     request = StubRequest(
         [
             _response(200, {"value": []}),
-            _response(409),
-            _response(200, {"value": [{"userId": str(_USER_ID)}]}),
+            _response(400),
+            _response(200, {"value": [{"id": str(_USER_ID)}]}),
         ]
     )
 

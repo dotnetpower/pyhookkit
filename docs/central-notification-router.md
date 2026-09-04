@@ -90,13 +90,14 @@ uv run python -m pyhookkit.entrypoints.notification_router \
   --ensure-team-membership
 ```
 
-The Graph principal requires
-`TeamMember.ReadWriteNonOwnerRole.All` with administrator consent. Prefer the
-connection user's Entra object ID; resolving a UPN additionally requires
-permission to read that user. The command adds only a normal member, never an
-owner. It first checks existing members, making repeated registration
-idempotent. A tenant mismatch, Graph denial, or malformed response prevents the
-destination from being configured.
+The Graph principal requires `GroupMember.ReadWrite.All` or the broader
+`Group.ReadWrite.All` with administrator consent. The channel link's `groupId`
+identifies the Team's backing Microsoft 365 Group. Prefer the connection user's
+Entra object ID; resolving a UPN additionally requires permission to read that
+user. The command adds only a normal member, never an owner. It first checks
+existing members, making repeated registration idempotent. A tenant mismatch,
+Graph denial, or malformed response prevents the destination from being
+configured.
 
 The identity must be the same account bound to the Power Automate Teams
 connection. Adding a Flow co-owner does not change the connector execution

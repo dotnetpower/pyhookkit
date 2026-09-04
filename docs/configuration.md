@@ -137,9 +137,9 @@ must use a distinct token.
 
 The three Graph membership values are optional and are read only when
 `add-destination --ensure-team-membership` is selected. The token requires
-`TeamMember.ReadWriteNonOwnerRole.All`; use the connection user's object ID to
-avoid an additional UPN lookup permission. Never persist the Graph token in
-SQLite.
+`GroupMember.ReadWrite.All` or `Group.ReadWrite.All`; use the connection user's
+object ID to avoid an additional UPN lookup permission. Never persist the Graph
+token in SQLite.
 
 Copy the complete generated callback URL into `TEAMS_WORKFLOW_URL`, and copy an
 exact allowlisted Teams channel link into `TEAMS_WORKFLOW_CHANNEL_LINK`. The

@@ -1,5 +1,7 @@
 # TeamsNotifyApp bootstrap
 
+[한국어](teams-notify-app-bootstrap.ko.md)
+
 `TeamsNotifyApp` is the visible, single-tenant Entra application used only to
 ensure that the dedicated Power Automate Teams connection user belongs to Teams
 registered in the central router.
@@ -213,4 +215,4 @@ verified.
 - Before deleting TeamsNotifyApp, disable membership-enabled channel
   registration and verify no bootstrap or recovery process depends on it.
 - Delete the App Registration to remove its Service Principal and credentials,
-  then remove the four generated `TEAMS_NOTIFY_*` values from `.env`.
+  then remove the four generated app and connection-user values from `.env`.

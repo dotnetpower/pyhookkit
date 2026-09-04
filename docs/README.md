@@ -11,7 +11,7 @@ beside the assets they configure under `infra/`.
 | Run the first paired example | [Getting started](getting-started.md) |
 | Configure local provider values | [Provider configuration](configuration.md) |
 | Run the SQLite central router | [Central notification router](central-notification-router.md) |
-| Bootstrap the visible Graph app | [TeamsNotifyApp bootstrap](teams-notify-app-bootstrap.md) |
+| Bootstrap the visible Graph app | [TeamsNotifyApp bootstrap](teams-notify-app-bootstrap.md) · [한국어](teams-notify-app-bootstrap.ko.md) |
 | Understand semantic equivalence | [Notification parity](notification-parity.md) |
 | Configure Teams identities and create the delivery flow | [Power Automate Teams Workflow](power-automate-teams-workflow.md) |
 | Deploy routed Teams delivery | [Azure Logic App Teams delivery](logic-app-teams-delivery.md) |

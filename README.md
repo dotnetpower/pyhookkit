@@ -29,7 +29,8 @@ channel with **Post card in a chat or channel**.
 
 This is the recommended default for channel notifications. The central router
 stores approved channel links and their derived metadata, then sends an
-Adaptive Card with `teamId` and `channelId` through one shared Flow callback.
+Adaptive Card message envelope with `teamId` and `channelId` through one shared
+Flow callback.
 Live testing confirmed rich cards and native user mentions without the owner attribution and
 **Get template** footer added by gallery-template Workflows. A gallery template
 remains useful for a quick proof of concept, while Azure Logic Apps are better

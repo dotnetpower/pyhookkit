@@ -85,10 +85,9 @@ def test_workflow_request_adds_target_to_adaptive_card() -> None:
 
     assert request["teamId"] == "11111111-1111-4111-8111-111111111111"
     assert request["channelId"] == "19:example-channel@thread.tacv2"
-    assert request["type"] == "AdaptiveCard"
-    assert request["version"] == "1.4"
-    assert request["body"] == []
-    assert "attachments" not in request
+    assert request["type"] == "message"
+    assert request["attachments"] is envelope["attachments"]
+    assert "channelLink" not in request
 
 
 @pytest.mark.parametrize(

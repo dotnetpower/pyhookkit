@@ -254,7 +254,8 @@ rendering:
 3. Confirm the callback URL is available only to the router or another approved
    delivery caller.
 4. Confirm the action uses `triggerBody()?['teamId']` and
-   `triggerBody()?['channelId']` and passes `triggerBody()` as the Adaptive Card.
+   `triggerBody()?['channelId']` and passes
+   `first(triggerBody()?['attachments'])?['content']` as the Adaptive Card.
 5. Retrieve a fresh callback URL after deployment instead of copying one from a
    different environment.
 6. Send a synthetic card containing a title, `FactSet`, and `Action.OpenUrl`.

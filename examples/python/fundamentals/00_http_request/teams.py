@@ -63,7 +63,7 @@ def build_logic_app_payload(
 def build_workflow_payload(channel_link: str) -> dict[str, object]:
     team_id, channel_id = _channel_target(channel_link)
     return {
-        **build_card(),
+        **build_payload(),
         "teamId": team_id,
         "channelId": channel_id,
     }

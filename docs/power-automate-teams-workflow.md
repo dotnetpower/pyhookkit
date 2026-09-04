@@ -138,10 +138,10 @@ expressions below to read its top-level routing properties.
 
 The stricter producer-side contract remains
 [`routed-request.schema.json`](../infra/teams-workflows/routed-request.schema.json).
-Its body is an Adaptive Card with additional top-level `teamId` and `channelId`
-properties. The central router retains the channel link and separately stores
-its tenant, Team, channel, and display-name metadata; the signed Workflow URL
-is never stored in SQLite.
+Its body is a Teams `message` envelope with top-level `teamId` and `channelId`
+properties and one Adaptive Card attachment. The central router retains the
+channel link and separately stores its tenant, Team, channel, and display-name
+metadata; the signed Workflow URL is never stored in SQLite.
 
 ![Power Automate flow with Teams webhook trigger and post-card action](assets/power-automate-teams-workflow/power-automate-flow-designer.png)
 
@@ -170,14 +170,15 @@ Set the action fields as follows:
 | **Post in** | `Channel` |
 | **Team** | `triggerBody()?['teamId']` |
 | **Channel** | `triggerBody()?['channelId']` |
-| **Adaptive Card** | `triggerBody()` |
+| **Adaptive Card** | `first(triggerBody()?['attachments'])?['content']` |
 
 ![Power Automate Teams post-card action settings](assets/power-automate-teams-workflow/power-automate-teams-action.png)
 
-The request itself is the Adaptive Card, with `teamId` and `channelId` added as
-routing properties. Power Automate reads those properties for destination
-selection and passes the same body to the Adaptive Card field. Private-channel
-posting remains subject to the Teams connector's current limitations.
+The Teams webhook trigger requires the message envelope. Power Automate reads
+its routing properties for destination selection, but the Teams action must
+receive only the first attachment's `content` object as the Adaptive Card.
+Passing `triggerBody()` sends the envelope instead of a card and the action
+does not post the notification.
 
 ## Save and store the callback
 
@@ -281,9 +282,9 @@ license.
 
 ### Power Automate rejects the request
 
-Check that the caller sends an Adaptive Card body with top-level `teamId` and
-`channelId`. A Logic App request wraps the card under `card` and cannot be sent
-by replacing only the endpoint URL.
+Check that the caller sends a Teams `message` envelope with top-level `teamId`
+and `channelId` and one Adaptive Card attachment. A Logic App request wraps the
+card under `card` and cannot be sent by replacing only the endpoint URL.
 
 ### Images do not render
 

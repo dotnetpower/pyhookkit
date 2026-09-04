@@ -16,7 +16,7 @@ def build_teams_workflow_request(
     team_id: UUID,
     channel_id: str,
 ) -> JsonObject:
-    """Build the routed Adaptive Card body consumed by Power Automate."""
+    """Add validated routing IDs to a Teams webhook message envelope."""
     if envelope.get("type") != "message":
         raise TeamsWorkflowRequestError("Teams envelope type must be message")
     attachments = envelope.get("attachments")
@@ -42,12 +42,12 @@ def build_teams_workflow_request(
         raise TeamsWorkflowRequestError("Teams attachment content must be AdaptiveCard")
     if fullmatch(r"19:[A-Za-z0-9_-]+@thread\.(?:tacv2|skype)", channel_id) is None:
         raise TeamsWorkflowRequestError("Teams channel ID is invalid")
-    if "teamId" in content or "channelId" in content:
+    if "teamId" in envelope or "channelId" in envelope:
         raise TeamsWorkflowRequestError(
-            "Adaptive Card content cannot contain routing identifiers"
+            "Teams envelope cannot contain routing identifiers"
         )
     return {
-        **content,
+        **envelope,
         "teamId": str(team_id),
         "channelId": channel_id,
     }

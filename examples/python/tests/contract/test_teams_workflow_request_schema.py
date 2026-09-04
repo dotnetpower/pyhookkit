@@ -84,10 +84,9 @@ def test_routed_workflow_schema_requires_card_and_target() -> None:
 
     assert schema["required"] == [
         "type",
-        "version",
-        "body",
         "teamId",
         "channelId",
+        "attachments",
     ]
 
 

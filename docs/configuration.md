@@ -119,8 +119,8 @@ You need:
 1. A Microsoft 365 account that can create Workflows in Teams.
 2. A synthetic test team and channel.
 3. One Power Automate flow created from blank with the Teams webhook trigger
-   and a dynamic post action that reads `teamId`, `channelId`, and the Adaptive
-   Card from the request body.
+   and a dynamic post action that reads `teamId`, `channelId`, and the first
+   attachment's Adaptive Card content from the request body.
 4. An authorized Teams connection owned by a dedicated licensed Microsoft 365
   user that is a member of the destination Team.
 5. A Dataverse application user for service-principal ownership in shared or

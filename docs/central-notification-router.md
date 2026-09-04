@@ -74,8 +74,8 @@ uv run python -m pyhookkit.entrypoints.notification_router \
 Registration accepts current `teams.cloud.microsoft` channel links and legacy
 `teams.microsoft.com` links. The router stores the original link plus derived
 tenant ID, Team ID, channel ID, and channel name in separate columns. Delivery
-sends an Adaptive Card with top-level `teamId` and `channelId`; it does not send
-the channel link or callback URL in the payload.
+sends a Teams `message` envelope with top-level `teamId` and `channelId` plus
+one Adaptive Card attachment; it does not send the channel link or callback URL.
 
 Repeat `add-destination` with another unique target ID to fan out one route.
 Inspect non-secret configuration with:

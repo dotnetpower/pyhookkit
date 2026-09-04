@@ -112,7 +112,6 @@ def test_send_posts_json_with_a_bounded_timeout(
         (_VECTOR_DIRECTORY / f"{provider}.expected.json").read_text()
     )
     if provider == "teams":
-        expected_payload = expected_payload["attachments"][0]["content"]
         expected_payload["teamId"] = "11111111-1111-4111-8111-111111111111"
         expected_payload["channelId"] = "19:example-channel@thread.tacv2"
     assert posted_payload == expected_payload
@@ -174,8 +173,9 @@ def test_raw_teams_workflow_payload_adds_target_to_card(
 
     assert payload["teamId"] == "11111111-1111-4111-8111-111111111111"
     assert payload["channelId"] == "19:example-channel@thread.tacv2"
-    assert payload["type"] == "AdaptiveCard"
-    assert "attachments" not in payload
+    assert payload["type"] == "message"
+    assert payload["attachments"]
+    assert "channelLink" not in payload
 
 
 def test_raw_teams_workflow_payload_rejects_non_channel_link(

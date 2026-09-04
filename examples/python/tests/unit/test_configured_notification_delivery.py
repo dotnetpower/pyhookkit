@@ -92,8 +92,9 @@ def test_configured_delivery_sends_slack_and_teams_payloads(tmp_path: Path) -> N
     assert CapturingDestination.payloads[1]["channelId"] == (
         "19:example-channel@thread.tacv2"
     )
-    assert CapturingDestination.payloads[1]["type"] == "AdaptiveCard"
-    assert "attachments" not in CapturingDestination.payloads[1]
+    assert CapturingDestination.payloads[1]["type"] == "message"
+    assert CapturingDestination.payloads[1]["attachments"]
+    assert "channelLink" not in CapturingDestination.payloads[1]
 
 
 def test_configured_delivery_redacts_configuration_failures(tmp_path: Path) -> None:

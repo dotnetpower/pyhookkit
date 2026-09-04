@@ -86,9 +86,10 @@ class StubDestination:
         assert url.value == _URL
 
     def send(self, payload: JsonObject) -> DeliveryResult:
-        assert payload["type"] == "AdaptiveCard"
+        assert payload["type"] == "message"
         assert payload["teamId"] == "11111111-1111-4111-8111-111111111111"
         assert payload["channelId"] == "19:example-channel@thread.tacv2"
+        assert payload["attachments"]
         return self.result
 
 

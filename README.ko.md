@@ -194,22 +194,66 @@ Git에서 제외된 `.env`에는 로컬 자격 증명이 저장됩니다. 이 �
 
 ### 3단계: Power Automate 흐름 생성 및 구성
 
-**실행 주체:** 흐름 작성자. 7번의 Teams 연결 로그인과 MFA는
+**실행 주체:** 흐름 작성자. 8번의 Teams 연결 로그인과 MFA는
 `svc-teams-notification` 자격으로 수행합니다. 두 계정이 동일할 필요는
 없습니다.
 
 1. [Power Automate](https://make.powerautomate.com)를 열고 대상 환경을
   선택합니다.
 2. **만들기**를 선택하고 빈 상태에서 자동화된 클라우드 흐름을 생성합니다.
-3. `PyHookKit Routed Teams Flow`처럼 환경 중립적인 이름을 사용합니다.
-4. **When a Teams webhook request is received** 트리거를 추가합니다.
-5. 서명된 콜백 모델을 사용하려면 **Who can trigger the flow?**를
-  **Anyone**으로 설정합니다.
-6. 트리거 바로 다음에 **Post card in a chat or channel**을 추가합니다.
-7. **Change connection**에서 `svc-teams-notification`으로 로그인합니다.
+
+   ![Power Automate에서 지정된 이벤트로 시작하는 Automated cloud flow 선택 타일.](docs/assets/power-automate-teams-workflow/automated-cloud-flow.png)
+
+3. **Build an automated cloud flow** 대화 상자에서 트리거를 선택하지 않고
+   **Skip**을 선택합니다.
+
+   ![Power Automate의 Build an automated cloud flow 대화 상자에서 Skip 단추를 선택하는 화면.](docs/assets/power-automate-teams-workflow/automated-cloud-flow-skip.png)
+
+4. 디자이너 상단에서 **Back** 오른쪽의 흐름 이름을 선택하고
+  `PyHookKit Routed Teams Flow`처럼 환경 중립적인 이름을 입력합니다. 그런
+  다음 **Add a trigger**를 선택합니다.
+
+  ![Power Automate 디자이너에서 흐름 이름을 지정하고 Add a trigger 단추를 선택하는 화면.](docs/assets/power-automate-teams-workflow/flow-name-add-trigger.png)
+
+5. **Add a trigger** 창에서 다음과 같이 Teams Webhook 트리거를 추가합니다.
+
+  1. **Built-in tools**에서 **Microsoft Teams Webhook**을 선택합니다.
+  2. **When a Teams webhook request is received**를 선택합니다.
+
+  ![Power Automate에서 Microsoft Teams Webhook 커넥터와 When a Teams webhook request is received 트리거를 차례로 선택하는 화면.](docs/assets/power-automate-teams-workflow/microsoft-teams-webhook-trigger.png)
+
+6. 트리거의 **Parameters** 탭에서 **Who can trigger the flow?**를
+   **Anyone**으로 설정합니다.
+
+   **HTTP URL**은 직접 입력하지 않습니다. 흐름을 저장하면 Power Automate가
+   서명된 HTTP URL을 자동으로 생성합니다. 저장 전에는 **URL will be
+   generated after save**가 표시되는 것이 정상입니다.
+
+   ![Power Automate Teams Webhook 트리거에서 Who can trigger the flow 값을 Anyone으로 설정하고 저장 후 생성될 HTTP URL을 확인하는 화면.](docs/assets/power-automate-teams-workflow/teams-webhook-trigger-anyone.png)
+
+7. 트리거 바로 아래에서 더하기 단추(**+**)를 선택하고 다음과 같이 Teams
+  카드 게시 작업을 추가합니다.
+
+  1. **Add an action** 창의 **By connector**에서 **Microsoft Teams**를
+    선택합니다.
+  2. **Post card in a chat or channel**을 선택합니다.
+
+  ![Power Automate에서 Teams Webhook 트리거 아래의 더하기 단추를 선택하고 Microsoft Teams의 Post card in a chat or channel 작업을 추가하는 화면.](docs/assets/power-automate-teams-workflow/add-post-card-action.png)
+
+8. **Change connection**에서 `svc-teams-notification`으로 로그인합니다.
   작업은 **Connected to**에 표시되는 계정의 Team 접근 권한으로
   실행됩니다.
-8. 작업을 다음과 같이 설정합니다.
+9. 작업을 다음과 같이 설정합니다.
+
+  1. **Post as**에서 `Flow bot`을 선택합니다.
+  2. **Post in**에서 `Channel`을 선택합니다.
+  3. **Team** 목록에서 **Enter custom value**를 선택합니다.
+  4. **Team** 입력란을 선택하고 `/`를 눌러 동적 값 또는 식 메뉴를 연 다음
+    `triggerBody()?['teamId']`를 입력합니다.
+  5. 같은 방법으로 **Channel**에는 `triggerBody()?['channelId']`를
+    입력합니다.
+  6. **Adaptive Card**에는
+    `first(triggerBody()?['attachments'])?['content']`를 입력합니다.
 
    | 필드 | 값 |
    |---|---|
@@ -219,10 +263,18 @@ Git에서 제외된 `.env`에는 로컬 자격 증명이 저장됩니다. 이 �
    | **Channel** | 사용자 지정 식 `triggerBody()?['channelId']` |
    | **Adaptive Card** | 식 `first(triggerBody()?['attachments'])?['content']` |
 
-9. 흐름을 저장합니다.
-10. 트리거를 다시 열고 모든 쿼리 매개 변수와 서명을 포함한 **HTTP
+  ![Power Automate의 Post card in a chat or channel 작업에서 Flow bot과 Channel을 선택하고 Team 사용자 지정 값에 triggerBody teamId 식을 입력하는 화면.](docs/assets/power-automate-teams-workflow/configure-teams-action-expression.png)
+
+10. **Team**, **Channel** 및 **Adaptive Card**에 식이 입력되어 있는지
+    확인합니다. 작업 하단의 **Connected to**가
+    `svc-teams-notification`인지 확인한 다음 흐름을 저장합니다. 다른 계정이
+    표시되면 **Change connection**을 선택하여 연결 사용자를 변경합니다.
+
+    ![Power Automate Teams 카드 게시 작업에 모든 식이 입력되어 있고 Connected to가 합성 Teams 연결 서비스 계정으로 설정된 화면.](docs/assets/power-automate-teams-workflow/teams-action-complete.png)
+
+11. 트리거를 다시 열고 모든 쿼리 매개 변수와 서명을 포함한 **HTTP
   URL** 전체를 복사합니다.
-11. 복구를 위해 이름이 명시된 흐름 공동 소유자를 최소 두 명 추가합니다.
+12. 복구를 위해 이름이 명시된 흐름 공동 소유자를 최소 두 명 추가합니다.
   공동 소유권은 Teams 연결 실행 ID를 변경하지 않습니다.
 
 Adaptive Card 값으로 `triggerBody()`를 사용하지 마세요. 트리거 본문은
@@ -241,13 +293,23 @@ TEAMS_WORKFLOW_URL="<서명된 Power Automate HTTP URL 전체>"
 이 URL은 자격 증명으로 취급합니다. 중앙 라우터 SQLite 데이터베이스에는
 콜백 값이 아니라 환경 변수 이름만 저장합니다.
 
-### 5단계: Azure Portal에 TeamsNotifyApp 등록
+### 5단계: TeamsNotifyApp 생성 방법 선택
 
 **실행 주체:** 부트스트랩 앱 생성자와 동의 승인자입니다. 여기서 Azure
 Portal은 Entra 관리 UI로만 사용하며 Azure 구독 역할은 사용하지 않습니다.
 
-다음 단계의 자동 부트스트랩으로 앱을 생성할 수도 있습니다. 포털에서
-소유권과 권한을 명시적으로 검토하려면 먼저 다음과 같이 생성하세요.
+다음 방법 중 하나를 선택하세요.
+
+- **방법 A — 포털에서 직접 생성:** 앱 등록, 권한 및 소유자를 화면에서
+  검토하려는 경우에 사용합니다. 완료한 후 6단계의 명령으로 자격 증명,
+  Team 멤버십 및 최초 경로를 구성합니다.
+- **방법 B — 명령으로 한 번에 생성:** 앱 등록부터 최초 경로 구성까지
+  자동화하려는 경우에 사용합니다. 완료한 후 6단계를 건너뛰고 7단계에서
+  결과를 확인합니다.
+
+#### 방법 A: Azure Portal에서 직접 생성
+
+포털에서 소유권과 권한을 명시적으로 검토하려면 다음과 같이 생성하세요.
 
 1. **Microsoft Entra ID** > **App registrations** > **New registration**을
   엽니다.
@@ -267,10 +329,57 @@ Portal은 Entra 관리 UI로만 사용하며 Azure 구독 역할은 사용하지
 수동으로 생성하지 마세요. 부트스트랩 명령은 로컬 예제 자격 증명을 생성하고
 검증한 후 보호합니다.
 
-### 6단계: 앱과 최초 경로 부트스트랩
+#### 방법 B: 명령으로 한 번에 생성
+
+이 방법을 사용하려면 다음 조건을 충족해야 합니다.
+
+- 4단계에서 서명된 `TEAMS_WORKFLOW_URL`을 저장소 루트 `.env`에 저장했습니다.
+- 최초 Teams 채널 링크와 `svc-teams-notification` 사용자 이름을 알고
+  있습니다.
+- 로그인하는 ID에 앱 등록 권한과 활성화된 **Privileged Role
+  Administrator** 역할이 모두 있습니다.
+
+저장소 루트에서 다음 명령을 실행합니다. Azure 구독은 필요하지 않습니다.
+
+```shell
+az login \
+  --tenant "<채널 링크의 테넌트 ID>" \
+  --use-device-code \
+  --allow-no-subscriptions
+
+cd examples/python
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  bootstrap-teams-app \
+  --channel-link "<최초 Teams 채널 링크>" \
+  --connection-user "svc-teams-notification@example.com" \
+  --route release-notifications
+cd ../..
+```
+
+이 명령은 `TeamsNotifyApp`과 서비스 주체를 생성하고,
+`GroupMember.ReadWrite.All` 애플리케이션 권한을 구성하며, 관리자 동의를
+저장합니다. 또한 클라이언트 자격 증명을 생성 및 검증하고, 연결 사용자를
+Team에 추가하며, 최초 대상 경로를 SQLite에 등록합니다. 생성된 비밀 값은
+출력하지 않고 권한 `0600`의 `.env`에 기록합니다.
+
+명령이 `.env`에 기록하는 값은 `TEAMS_NOTIFY_TENANT_ID`,
+`TEAMS_NOTIFY_CLIENT_ID`, `TEAMS_NOTIFY_CLIENT_SECRET` 및
+`TEAMS_CONNECTION_USER_ID`입니다.
+
+> [!IMPORTANT]
+> 이 명령은 Power Automate의 사용자 Teams 연결에 대한 대화형 OAuth 또는
+> MFA를 대신하지 않으며 운영 공동 소유자를 추가하지 않습니다. Teams 연결은
+> 3단계에서 승인하고, 이름이 명시된 운영 소유자 두 명 이상은 7단계에서
+> 추가하거나 확인하세요.
+
+### 6단계: 방법 A의 앱과 최초 경로 부트스트랩
 
 **실행 주체:** 앱 생성자와 동의 승인자 권한을 모두 가진 부트스트랩
 ID입니다. Azure 구독은 필요하지 않습니다.
+
+5단계에서 **방법 A**를 사용한 경우에만 이 단계를 실행합니다. **방법 B**를
+사용한 경우에는 이미 같은 작업이 완료되었으므로 7단계로 이동하세요.
 
 ```shell
 az login \
@@ -315,7 +424,8 @@ TEAMS_CONNECTION_USER_ID="<연결 사용자 object GUID>"
 - **API permissions**에 Microsoft Graph `GroupMember.ReadWrite.All`이
   **Application** 권한으로 존재합니다.
 - 상태가 **Granted for \<tenant\>**입니다.
-- 예상한 소유자와 자격 증명만 존재합니다.
+- 예상한 소유자와 자격 증명만 존재합니다. 이름이 명시된 운영 소유자가 두
+  명보다 적으면 이 단계에서 추가합니다.
 
 **Enterprise applications** > `TeamsNotifyApp`에서 다음을 확인합니다.
 

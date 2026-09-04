@@ -1,0 +1,12 @@
+{
+  "markdown.editor.filePaste.enabled": "always",
+  "markdown.editor.filePaste.copyIntoWorkspace": "mediaFiles",
+  "markdown.copyFiles.destination": {
+    "/README.ko.md": "docs/assets/power-automate-teams-workflow/",
+    "/docs/power-automate-teams-workflow.ko.md": "assets/power-automate-teams-workflow/",
+    "/docs/power-automate-teams-workflow.md": "assets/power-automate-teams-workflow/"
+  },
+  "markdown.copyFiles.overwriteBehavior": "nameIncrementally",
+  "markdown.updateLinksOnFileMove.enabled": "always",
+  "markdown.validate.enabled": true
+}

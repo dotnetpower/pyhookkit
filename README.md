@@ -236,13 +236,23 @@ TEAMS_WORKFLOW_URL="<complete signed Power Automate HTTP URL>"
 Treat this URL as a credential. The central router SQLite database stores only
 the environment variable name, never the callback value.
 
-### Step 5: Register TeamsNotifyApp in Azure Portal
+### Step 5: Choose how to create TeamsNotifyApp
 
 **Actors:** bootstrap app creator and consent approver. Azure Portal is used
 only as an Entra administration UI; no Azure subscription role is involved.
 
-The automated bootstrap in the next step can create the app. For explicit
-Portal review and ownership, create it first:
+Choose one of these paths:
+
+- **Path A — create it directly in the portal:** Use this path to review the
+  app registration, permission, and owners in the UI. Then run the command in
+  step 6 to configure the credential, Team membership, and first route.
+- **Path B — create everything with one command:** Use this path to automate
+  the app registration through first-route configuration. Then skip step 6 and
+  verify the result in step 7.
+
+#### Path A: Create it directly in Azure Portal
+
+For explicit portal review and ownership, create the app as follows:
 
 1. Open **Microsoft Entra ID** > **App registrations** > **New registration**.
 2. Set the name to `TeamsNotifyApp`.
@@ -261,10 +271,55 @@ permission. Do not manually create a client secret unless an external secret
 manager owns it. The bootstrap command creates, validates, and protects the
 local example credential.
 
-### Step 6: Bootstrap the app and first route
+#### Path B: Create everything with one command
+
+This path requires all of the following:
+
+- the signed `TEAMS_WORKFLOW_URL` from step 4 in the repository-root `.env`;
+- the initial Teams channel link and the `svc-teams-notification` user name;
+- a signed-in identity with app-registration permission and an active
+  **Privileged Role Administrator** role.
+
+Run from the repository root. An Azure subscription is not required:
+
+```shell
+az login \
+  --tenant "<tenant ID from the channel link>" \
+  --use-device-code \
+  --allow-no-subscriptions
+
+cd examples/python
+uv run python -m pyhookkit.entrypoints.notification_router \
+  --database .local/router.sqlite3 \
+  bootstrap-teams-app \
+  --channel-link "<initial Teams channel link>" \
+  --connection-user "svc-teams-notification@example.com" \
+  --route release-notifications
+cd ../..
+```
+
+The command creates `TeamsNotifyApp` and its Service Principal, configures the
+`GroupMember.ReadWrite.All` application permission, and persists admin consent.
+It also creates and validates the client credential, adds the connection user
+to the Team, and registers the first destination route in SQLite. It never
+prints the generated secret and writes it to `.env` with mode `0600`.
+
+The command writes `TEAMS_NOTIFY_TENANT_ID`, `TEAMS_NOTIFY_CLIENT_ID`,
+`TEAMS_NOTIFY_CLIENT_SECRET`, and `TEAMS_CONNECTION_USER_ID` to `.env`.
+
+> [!IMPORTANT]
+> This command does not replace interactive OAuth or MFA for the user-owned
+> Power Automate Teams connection, and it does not add operational co-owners.
+> Authorize the Teams connection in step 3 and add or verify at least two named
+> operational owners in step 7.
+
+### Step 6: Bootstrap the Path A app and first route
 
 **Actor:** bootstrap identity holding both the app-creator and consent-approver
 permissions. An Azure subscription is not required:
+
+Run this step only if you selected **Path A** in step 5. If you selected
+**Path B**, the same work is already complete; continue to step 7.
 
 ```shell
 az login \
@@ -309,7 +364,8 @@ In **App registrations** > `TeamsNotifyApp`:
 - confirm **API permissions** contains Microsoft Graph
   `GroupMember.ReadWrite.All` as an **Application** permission;
 - confirm its status is **Granted for \<tenant\>**;
-- confirm expected owners and only expected credentials.
+- confirm only expected credentials and owners exist; add named operational
+  owners in this step when fewer than two are present.
 
 In **Enterprise applications** > `TeamsNotifyApp`:
 

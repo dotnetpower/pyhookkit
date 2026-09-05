@@ -1,5 +1,17 @@
 # Third-party notices
 
+## AstroWind website template
+
+The files under `site/` are derived from the
+[AstroWind](https://github.com/arthelokyo/astrowind) template under the MIT
+License.
+
+Copyright (c) 2023 onWidget.
+
+The complete MIT license text is preserved in `site/LICENSE.md`. PyHookKit
+replaces the template content and branding while retaining the upstream
+copyright and permission notice.
+
 ## Microsoft Adaptive Cards sample images
 
 The following files are redistributed from the

@@ -1,0 +1,388 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import Hero from '~/components/widgets/Hero.astro';
+import Note from '~/components/widgets/Note.astro';
+import Features2 from '~/components/widgets/Features2.astro';
+import Features from '~/components/widgets/Features.astro';
+import Content from '~/components/widgets/Content.astro';
+import Steps2 from '~/components/widgets/Steps2.astro';
+import CallToAction from '~/components/widgets/CallToAction.astro';
+import TeamsSetupShowcase from './TeamsSetupShowcase.astro';
+import DeliveryArchitecture from './DeliveryArchitecture.astro';
+import { getPermalink } from '~/utils/permalinks';
+
+interface Props {
+  locale?: 'en' | 'ko';
+}
+
+const { locale = 'en' } = Astro.props;
+const isKorean = locale === 'ko';
+const prefix = isKorean ? '/ko' : '';
+const docsHref = getPermalink(`${prefix}/docs/`);
+const quickStartHref = getPermalink(`${prefix}/docs/teams-webhook-quickstart/`);
+const flowGuideHref = getPermalink(`${prefix}/docs/power-automate-teams-workflow/`);
+const appGuideHref = getPermalink(`${prefix}/docs/teams-notify-app-bootstrap/`);
+const routerGuideHref = getPermalink(`${prefix}/docs/central-notification-router/`);
+const alternateHref = getPermalink(isKorean ? '/' : '/ko/');
+
+const copy = isKorean
+  ? {
+      metadataTitle: '10분 안에 Microsoft Teams Webhook 알림 보내기',
+      metadataDescription:
+        'Slack Incoming Webhook처럼 공통 Power Automate 흐름 하나로 Microsoft Teams 표준 채널에 Adaptive Card 알림을 보내세요.',
+      tagline: 'Slack Webhook처럼 간단한 Teams 알림',
+      title:
+        'Slack에서 하던 Webhook 알림,<br /><span class="text-accent dark:text-indigo-300">Teams에서도 10분이면 시작합니다.</span>',
+      subtitle:
+        'Microsoft 365 관리 센터에서 서비스 계정을 만들고 공통 Power Automate 흐름 하나를 구성하세요. 채널 링크와 콜백 URL로 첫 Adaptive Card를 보낼 수 있습니다.',
+      start: '10분 빠른 시작',
+      docs: '문서 홈 보기',
+      noteTitle: '첫 알림에 필요한 것',
+      noteDescription:
+        '서비스 계정을 만들 관리자 권한, 할당할 Teams 라이선스, 표준 채널, 공통 Power Automate 흐름 하나가 필요합니다. Graph 앱과 PyHookKit 서버는 선택 사항입니다.',
+      setupTagline: '10분 직접 전송 경로',
+      setupTitle: '세 단계로 첫 Teams 알림 보내기',
+      setupSubtitle:
+        '사용자 생성과 흐름 입력 작업은 약 10분입니다. 새 계정과 라이선스의 Teams 활성화에는 별도 전파 시간이 걸릴 수 있습니다.',
+      roleTagline: '왜 이 구성이 필요한가요?',
+      roleTitle: 'Power Automate가 Slack Incoming Webhook과 Teams 채널 사이의 간단한 다리가 됩니다.',
+      roleContent:
+        '<h3 class="mb-3 text-2xl font-bold tracking-tight dark:text-white sm:text-3xl">Teams 커넥터는 사용자 권한으로 게시합니다.</h3><p>그래서 대상 Team에 접근할 수 있는 게시 계정이 필요합니다. Power Automate 흐름은 서명된 HTTP URL을 제공하고, 요청의 Team·채널·Adaptive Card를 게시 계정의 Teams 연결로 전달합니다.</p>',
+      roleAction: '필요한 이유 자세히 보기',
+      sendTagline: '첫 전송',
+      sendTitle: '콜백 URL과 채널 링크만 설정하세요.',
+      sendSubtitle: '표준 라이브러리 예제가 채널 링크에서 ID를 추출하고 최소 Adaptive Card를 직접 전송합니다.',
+      sendAction: '전체 테스트 명령 보기',
+      benefitsTagline: '간단하지만 확장 가능',
+      benefitsTitle: '처음에는 수동으로, 필요할 때만 자동화',
+      benefitsSubtitle: '첫 메시지에 불필요한 서버와 Graph 애플리케이션 권한을 추가하지 않습니다.',
+      optionalTagline: '선택적 도구',
+      optionalTitle: '대상이 많거나 Slack 마이그레이션이 필요할 때 확장하세요.',
+      optionalSubtitle: 'TeamsNotifyApp과 PyHookKit은 직접 Webhook 전송이 부족해지는 시점에만 사용합니다.',
+      ctaTitle: '첫 번째 Teams 알림을 보내보세요.',
+      ctaSubtitle: '게시 계정 준비, 공통 흐름 생성, Hello World 전송을 한 페이지에서 완료하세요.',
+      ctaPrimary: '10분 가이드 시작',
+      flowDetails: 'Power Automate 상세 가이드',
+      alternate: 'English site',
+    }
+  : {
+      metadataTitle: 'Send a Microsoft Teams Webhook notification in 10 minutes',
+      metadataDescription:
+        'Send an Adaptive Card to a standard Microsoft Teams channel through one shared Power Automate flow, much like a Slack Incoming Webhook.',
+      tagline: 'Teams notifications as simple as Slack Webhooks',
+      title:
+        'The Webhook workflow you know from Slack,<br /><span class="text-accent dark:text-indigo-300">ready for Teams in 10 minutes.</span>',
+      subtitle:
+        'Create a service account in the Microsoft 365 admin center and configure one shared Power Automate flow. A channel link and callback URL are enough for the first Adaptive Card.',
+      start: 'Start the 10-minute guide',
+      docs: 'Open documentation',
+      noteTitle: 'All the first delivery needs',
+      noteDescription:
+        'Administrator access to create the service account, an available Teams license, a standard channel, and one shared flow. The Graph app and PyHookKit server are optional.',
+      setupTagline: '10-minute direct path',
+      setupTitle: 'Send the first Teams notification in three steps',
+      setupSubtitle:
+        'User creation and flow input take about 10 minutes. Teams activation for a new account and license can require additional propagation time.',
+      roleTagline: 'Why is this needed?',
+      roleTitle: 'Power Automate is the small bridge between a Slack-like Webhook and a Teams channel.',
+      roleContent:
+        '<h3 class="mb-3 text-2xl font-bold tracking-tight dark:text-white sm:text-3xl">The Teams connector posts with a user identity.</h3><p>That is why a posting identity with access to the target Team is required. The Power Automate flow provides the signed HTTP URL and forwards each request’s Team, channel, and Adaptive Card through that Teams connection.</p>',
+      roleAction: 'Read why each part exists',
+      sendTagline: 'First delivery',
+      sendTitle: 'Set only the callback URL and channel link.',
+      sendSubtitle: 'A standard-library example extracts IDs from the link and sends a minimal Adaptive Card directly.',
+      sendAction: 'View the complete test command',
+      benefitsTagline: 'Simple, then scalable',
+      benefitsTitle: 'Start manually and automate only when needed',
+      benefitsSubtitle: 'Do not add a server or Graph application permission to the first message.',
+      optionalTagline: 'Optional tooling',
+      optionalTitle: 'Extend only when many destinations or Slack migration demand it.',
+      optionalSubtitle:
+        'TeamsNotifyApp and PyHookKit enter the path only after direct Webhook delivery is no longer enough.',
+      ctaTitle: 'Send your first Teams notification.',
+      ctaSubtitle: 'Prepare the posting identity, create the shared flow, and deliver Hello World from one page.',
+      ctaPrimary: 'Start the 10-minute guide',
+      flowDetails: 'Power Automate detailed guide',
+      alternate: '한국어 사이트',
+    };
+
+const setupItems = isKorean
+  ? [
+      {
+        title: '1. Microsoft 365 서비스 계정 생성',
+        description:
+          'Microsoft 365 관리 센터에서 전용 일반 사용자를 만들고 Teams 라이선스를 할당한 다음 대상 Team의 멤버로 추가합니다.',
+        icon: 'tabler:user-shield',
+        callToAction: { text: '서비스 계정 생성 방법', href: quickStartHref, icon: 'tabler:arrow-right' },
+      },
+      {
+        title: '2. 공통 Power Automate 흐름',
+        description:
+          'Webhook 요청의 Team, Channel 및 Adaptive Card 값을 읽어 게시하는 흐름 하나를 만듭니다. 채널마다 복제하지 않습니다.',
+        icon: 'tabler:route-square-2',
+        callToAction: { text: '스크린샷으로 흐름 만들기', href: flowGuideHref, icon: 'tabler:arrow-right' },
+      },
+      {
+        title: '3. Hello World 직접 전송',
+        description:
+          'Power Automate 콜백 URL과 Teams 채널 링크를 설정하고 Python 표준 라이브러리 예제로 첫 Adaptive Card를 보냅니다.',
+        icon: 'tabler:send',
+        callToAction: { text: '2분 테스트 명령 보기', href: quickStartHref, icon: 'tabler:arrow-right' },
+      },
+    ]
+  : [
+      {
+        title: '1. Create the Microsoft 365 service account',
+        description:
+          'Create a dedicated ordinary user in the Microsoft 365 admin center, assign a Teams license, and add it to the target Team.',
+        icon: 'tabler:user-shield',
+        callToAction: { text: 'Create the service account', href: quickStartHref, icon: 'tabler:arrow-right' },
+      },
+      {
+        title: '2. Create one shared Power Automate flow',
+        description:
+          'Read Team, Channel, and Adaptive Card values from every request. Do not duplicate the flow per channel.',
+        icon: 'tabler:route-square-2',
+        callToAction: { text: 'Create it with screenshots', href: flowGuideHref, icon: 'tabler:arrow-right' },
+      },
+      {
+        title: '3. Send Hello World directly',
+        description:
+          'Set the callback URL and Teams channel link, then send the first card with a Python standard-library example.',
+        icon: 'tabler:send',
+        callToAction: { text: 'View the 2-minute test', href: quickStartHref, icon: 'tabler:arrow-right' },
+      },
+    ];
+
+const sendItems = isKorean
+  ? [
+      {
+        title: '1. 콜백 URL 보관',
+        description: 'Power Automate 트리거가 생성한 서명 포함 HTTP URL 전체를 환경 변수로 설정합니다.',
+        icon: 'tabler:key',
+      },
+      {
+        title: '2. 채널 링크 복사',
+        description: 'Teams에서 알림을 받을 표준 채널의 전체 링크를 환경 변수로 설정합니다.',
+        icon: 'tabler:link',
+      },
+      {
+        title: '3. F00 예제 실행',
+        description: '<code>python3 teams.py --send</code>로 패키지나 라우터 없이 직접 전송합니다.',
+        icon: 'tabler:terminal-2',
+      },
+      {
+        title: '4. 전송 결과 확인',
+        description: 'Power Automate 실행 성공과 Teams 채널의 Hello World 카드를 확인합니다.',
+        icon: 'tabler:circle-check',
+      },
+    ]
+  : [
+      {
+        title: '1. Store the callback URL',
+        description: 'Set the complete signed HTTP URL generated by the Power Automate trigger.',
+        icon: 'tabler:key',
+      },
+      {
+        title: '2. Copy the channel link',
+        description: 'Set the complete link for the standard Teams channel.',
+        icon: 'tabler:link',
+      },
+      {
+        title: '3. Run the F00 example',
+        description: 'Use <code>python3 teams.py --send</code> to deliver without the package or router.',
+        icon: 'tabler:terminal-2',
+      },
+      {
+        title: '4. Verify delivery',
+        description: 'Confirm a successful Power Automate run and the Hello World card in Teams.',
+        icon: 'tabler:circle-check',
+      },
+    ];
+
+const benefitItems = isKorean
+  ? [
+      {
+        title: '채널별 흐름 불필요',
+        description: '하나의 서명된 콜백과 동적 Team·Channel 식을 모든 표준 채널에서 재사용합니다.',
+        icon: 'tabler:git-merge',
+      },
+      {
+        title: '별도 서버 불필요',
+        description: '첫 전송은 Python 표준 라이브러리 예제가 Power Automate 콜백을 직접 호출합니다.',
+        icon: 'tabler:server-off',
+      },
+      {
+        title: 'Graph 권한 없이 시작',
+        description: 'Team 소유자가 게시 계정을 수동으로 추가하면 첫 메시지에 Graph 앱이 필요하지 않습니다.',
+        icon: 'tabler:user-check',
+      },
+      {
+        title: '채널 링크로 목적지 지정',
+        description: '예제가 링크에서 Team 및 채널 ID를 추출하므로 GUID를 수동으로 찾지 않습니다.',
+        icon: 'tabler:link',
+      },
+      {
+        title: '서명된 콜백 URL',
+        description: 'HTTP URL 자체를 비밀로 보관하면 별도 호출자 OAuth 없이 빠르게 시작할 수 있습니다.',
+        icon: 'tabler:shield-lock',
+      },
+      {
+        title: '필요할 때 확장',
+        description: '대상이 많아진 후에만 Graph 멤버십 자동화 또는 팬아웃 라우터를 추가합니다.',
+        icon: 'tabler:arrows-maximize',
+      },
+    ]
+  : [
+      {
+        title: 'No per-channel flows',
+        description: 'Reuse one signed callback and dynamic Team and Channel expressions for all standard channels.',
+        icon: 'tabler:git-merge',
+      },
+      {
+        title: 'No separate server',
+        description: 'The first delivery uses Python standard library code to call Power Automate directly.',
+        icon: 'tabler:server-off',
+      },
+      {
+        title: 'Start without Graph permission',
+        description: 'A Team owner can manually add the posting identity, so the first message needs no Graph app.',
+        icon: 'tabler:user-check',
+      },
+      {
+        title: 'Target with a channel link',
+        description: 'The example extracts Team and channel IDs from the link; users do not locate GUIDs manually.',
+        icon: 'tabler:link',
+      },
+      {
+        title: 'Signed callback URL',
+        description: 'Keep the complete HTTP URL secret and begin without adding caller OAuth.',
+        icon: 'tabler:shield-lock',
+      },
+      {
+        title: 'Extend only when needed',
+        description: 'Add Graph membership automation or a fan-out router only after destinations multiply.',
+        icon: 'tabler:arrows-maximize',
+      },
+    ];
+
+const optionalItems = isKorean
+  ? [
+      {
+        title: 'TeamsNotifyApp — 멤버십 자동화',
+        description:
+          '여러 Team에 게시 계정을 반복해서 추가해야 할 때만 사용합니다. Graph의 <code>GroupMember.ReadWrite.All</code>로 Team 기반 Microsoft 365 그룹 멤버십을 관리하며 메시지는 게시하지 않습니다.',
+        icon: 'tabler:users-plus',
+        callToAction: { text: '선택적 Graph 설정 보기', href: appGuideHref, icon: 'tabler:arrow-right' },
+      },
+      {
+        title: 'PyHookKit — 선택적 라우팅 계층',
+        description:
+          '기존 Slack 알림 생산자를 통제된 경로로 전환하거나 Slack과 여러 Teams 대상으로 팬아웃할 때 사용합니다. 직접 Teams Webhook 전송에는 필요하지 않습니다.',
+        icon: 'tabler:route',
+        callToAction: { text: '선택적 라우터 보기', href: routerGuideHref, icon: 'tabler:arrow-right' },
+      },
+    ]
+  : [
+      {
+        title: 'TeamsNotifyApp — membership automation',
+        description:
+          'Use it only when repeatedly adding the posting identity to many Teams. It manages backing Microsoft 365 Group membership with <code>GroupMember.ReadWrite.All</code>; it does not post messages.',
+        icon: 'tabler:users-plus',
+        callToAction: { text: 'View optional Graph setup', href: appGuideHref, icon: 'tabler:arrow-right' },
+      },
+      {
+        title: 'PyHookKit — optional routing layer',
+        description:
+          'Use it to move existing Slack notification producers behind a controlled route or fan out to Slack and multiple Teams destinations. Direct delivery does not require it.',
+        icon: 'tabler:route',
+        callToAction: { text: 'View the optional router', href: routerGuideHref, icon: 'tabler:arrow-right' },
+      },
+    ];
+---
+
+<Layout
+  locale={locale}
+  metadata={{ title: copy.metadataTitle, ignoreTitleTemplate: true, description: copy.metadataDescription }}
+>
+  <Hero
+    tagline={copy.tagline}
+    actions={[
+      { variant: 'primary', text: copy.start, href: quickStartHref, icon: 'tabler:rocket' },
+      { text: copy.docs, href: docsHref, icon: 'tabler:book-2' },
+    ]}
+  >
+    <Fragment slot="title" set:html={copy.title} />
+    <Fragment slot="subtitle">{copy.subtitle}</Fragment>
+    <Fragment slot="image"><TeamsSetupShowcase locale={locale} /></Fragment>
+    <Fragment slot="bg">
+      <div
+        class="absolute inset-0 bg-[radial-gradient(circle_at_50%_15%,rgba(99,102,241,0.14),transparent_44%)] dark:bg-[radial-gradient(circle_at_50%_15%,rgba(99,102,241,0.20),transparent_44%)]"
+      >
+      </div>
+    </Fragment>
+  </Hero>
+
+  <Note title={copy.noteTitle} description={copy.noteDescription} />
+
+  <Features2
+    id="setup"
+    tagline={copy.setupTagline}
+    title={copy.setupTitle}
+    subtitle={copy.setupSubtitle}
+    items={setupItems}
+    columns={3}
+  />
+
+  <Content
+    id="roles"
+    isReversed
+    tagline={copy.roleTagline}
+    title={copy.roleTitle}
+    items={[]}
+    callToAction={{ text: copy.roleAction, href: quickStartHref, icon: 'tabler:arrow-right' }}
+  >
+    <Fragment slot="content" set:html={copy.roleContent} />
+    <Fragment slot="image"><DeliveryArchitecture locale={locale} /></Fragment>
+    <Fragment slot="bg"><div class="absolute inset-0 bg-indigo-50/60 dark:bg-transparent"></div></Fragment>
+  </Content>
+
+  <Steps2
+    id="send"
+    tagline={copy.sendTagline}
+    title={copy.sendTitle}
+    subtitle={copy.sendSubtitle}
+    items={sendItems}
+    callToAction={{ text: copy.sendAction, href: quickStartHref, icon: 'tabler:arrow-right' }}
+  />
+
+  <Features
+    id="benefits"
+    tagline={copy.benefitsTagline}
+    title={copy.benefitsTitle}
+    subtitle={copy.benefitsSubtitle}
+    items={benefitItems}
+    columns={3}
+  />
+
+  <Features2
+    id="optional"
+    tagline={copy.optionalTagline}
+    title={copy.optionalTitle}
+    subtitle={copy.optionalSubtitle}
+    items={optionalItems}
+    columns={2}
+  >
+    <Fragment slot="bg"><div class="absolute inset-0 bg-indigo-50/60 dark:bg-transparent"></div></Fragment>
+  </Features2>
+
+  <CallToAction
+    title={copy.ctaTitle}
+    subtitle={copy.ctaSubtitle}
+    actions={[
+      { variant: 'primary', text: copy.ctaPrimary, href: quickStartHref, icon: 'tabler:rocket' },
+      { text: copy.flowDetails, href: flowGuideHref, icon: 'tabler:route-square-2' },
+      { text: copy.alternate, href: alternateHref, icon: 'tabler:language' },
+    ]}
+  />
+</Layout>

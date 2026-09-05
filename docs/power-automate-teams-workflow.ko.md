@@ -2,15 +2,17 @@
 
 [English](power-automate-teams-workflow.md)
 
-이 가이드에서는 PyHookKit Teams 예제 및 통합 Bookinfo 시나리오에서 사용하는
-Power Automate 전송 어댑터를 만듭니다. 하나의 흐름이 검증된 Team 및
-Channel 식별자를 포함하는 Adaptive Card를 수락한 다음 해당 대상에 카드를
-게시합니다.
+이 가이드에서는 Slack Incoming Webhook처럼 HTTP 요청으로 Teams 표준 채널에
+알림을 보내는 공통 Power Automate 흐름을 만듭니다. 하나의 흐름이 요청의
+Team 및 Channel 식별자와 Adaptive Card를 받아 게시 계정의 Microsoft Teams
+연결로 해당 대상에 카드를 게시합니다.
 
-GitHub, GitLab, Argo CD 및 AKS 순서는 [통합 Bookinfo
-시나리오](integrated-bookinfo-scenario.ko.md)를 참조하세요. 표시되는 Entra
-애플리케이션, 최소 부트스트랩 역할 및 자동 Team 멤버십 설정은
-[TeamsNotifyApp 부트스트랩](teams-notify-app-bootstrap.ko.md)을 참조하세요.
+가장 적은 단계로 첫 알림을 보내려면 먼저 [10분 Teams Webhook 빠른
+시작](teams-webhook-quickstart.ko.md)을 사용하세요. 이 문서는 모든 UI 선택,
+권한 경계 및 운영 고려 사항이 필요할 때 참조하는 상세 가이드입니다.
+
+여러 Team에 게시 계정을 자동으로 추가해야 할 때만 [TeamsNotifyApp
+부트스트랩](teams-notify-app-bootstrap.ko.md)을 참조하세요.
 Azure 관리형 워크플로에서 직접 Team 및 Channel ID 라우팅을 사용하려면
 [Azure Logic App Teams 전송 가이드](logic-app-teams-delivery.ko.md)를
 사용하세요.
@@ -31,11 +33,10 @@ Azure 관리형 워크플로에서 직접 Team 및 Channel ID 라우팅을 사�
 
 - Power Automate 클라우드 흐름을 만들 권한
 - 대상 Team에 권한이 부여된 Microsoft Teams 연결
-- 공유 또는 프로덕션 환경을 위한 Microsoft 365 라이선스가 있는 전용 연결
-  사용자
-- 연결 사용자가 액세스할 수 있는 하나 이상의 전용 합성 테스트 Teams 채널
-- 보호된 GitLab CI/CD 변수를 만들 권한
-- 스모크 테스트를 위한 Python 3.12 및 `uv`
+- 빠른 테스트를 위한 Teams 라이선스가 있는 기존 사용자 또는 공유·운영
+   환경을 위한 전용 게시 계정
+- 게시 계정이 멤버로 속한 하나 이상의 표준 Teams 채널
+- 직접 스모크 테스트를 위한 Python 3
 
 실제 Team 이름, 채널 이름, ID 또는 콜백 URL을 커밋된 파일이나 스크린샷에
 넣지 마세요.

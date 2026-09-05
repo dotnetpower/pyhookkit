@@ -2,9 +2,26 @@
 
 [English](README.md)
 
-Slack과 Microsoft Teams에 의미적으로 동등한 알림을 타입 안전하게
-전달하고, 공급자 간 마이그레이션을 통제된 방식으로 진행하기 위한
-프로젝트입니다.
+Slack Incoming Webhook처럼 간단한 HTTP 요청으로 Microsoft Teams 표준
+채널에 Adaptive Card 알림을 보내는 방법을 설명하고 검증하는 저장소입니다.
+
+첫 Teams 알림에는 PyHookKit 서버나 Microsoft Graph 앱이 필요하지 않습니다.
+[10분 Teams Webhook 빠른 시작](docs/teams-webhook-quickstart.ko.md)에 따라
+게시 계정을 Team에 추가하고 공통 Power Automate 흐름 하나를 만든 다음,
+Python 표준 라이브러리 예제로 직접 전송하세요.
+
+## PyHookKit을 선택적으로 사용하는 경우
+
+PyHookKit은 직접 Teams Webhook 전송 이후에 추가할 수 있는 선택적 라우팅 및
+마이그레이션 도구입니다. 다음 요구사항이 없으면 사용하지 않아도 됩니다.
+
+- 기존 Slack 알림 생산자를 통제된 라우팅 경로로 전환
+- 하나의 알림을 Slack과 Teams 또는 여러 Teams 채널로 팬아웃
+- 대상별 전송 상태, 멱등적 접수 및 재시도 분류
+- 공급자 중립 계약에서 Slack Block Kit과 Teams Adaptive Card 생성
+
+중앙 라우터는 임의의 Slack Webhook 페이로드를 투명하게 프록시하지
+않습니다. 기존 생산자는 정규 알림 계약에 맞게 입력을 변환해야 합니다.
 
 ## Slack과 Teams 동등성
 
@@ -81,9 +98,13 @@ GitLab과 Argo CD는 같은 정규 계약을 작은 SQLite 기반 중앙 라우�
 [TeamsNotifyApp 한국어 부트스트랩
 가이드](docs/teams-notify-app-bootstrap.ko.md)를 사용하세요.
 
-## Teams 엔드투엔드 설정
+## 선택 사항: PyHookKit 라우터 엔드투엔드 설정
 
-이 절차는 하나의 대상 Microsoft Entra 테넌트에서 시작하여 하나의 정규
+이 절차는 선택적 SQLite 중앙 라우터와 자동 Team 멤버십이 필요한 경우에만
+사용합니다. 첫 Teams 알림은 [10분 Teams Webhook 빠른
+시작](docs/teams-webhook-quickstart.ko.md)을 사용하세요.
+
+다음 절차는 하나의 대상 Microsoft Entra 테넌트에서 시작하여 하나의 정규
 알림이 SQLite 중앙 라우터, Power Automate 및 Microsoft Teams를 거쳐
 전달되는 단계까지 설명합니다. 별도 안내가 없으면 저장소 루트에서 명령을
 실행하세요.
@@ -199,7 +220,7 @@ Git에서 제외된 `.env`에는 로컬 자격 증명이 저장됩니다. 이 �
 없습니다.
 
 1. [Power Automate](https://make.powerautomate.com)를 열고 대상 환경을
-  선택합니다.
+   선택합니다.
 2. **만들기**를 선택하고 빈 상태에서 자동화된 클라우드 흐름을 생성합니다.
 
    ![Power Automate에서 지정된 이벤트로 시작하는 Automated cloud flow 선택 타일.](docs/assets/power-automate-teams-workflow/automated-cloud-flow.png)
@@ -210,19 +231,19 @@ Git에서 제외된 `.env`에는 로컬 자격 증명이 저장됩니다. 이 �
    ![Power Automate의 Build an automated cloud flow 대화 상자에서 Skip 단추를 선택하는 화면.](docs/assets/power-automate-teams-workflow/automated-cloud-flow-skip.png)
 
 4. 디자이너 상단에서 **Back** 오른쪽의 흐름 이름을 선택하고
-  `PyHookKit Routed Teams Flow`처럼 환경 중립적인 이름을 입력합니다. 그런
-  다음 **Add a trigger**를 선택합니다.
+   `PyHookKit Routed Teams Flow`처럼 환경 중립적인 이름을 입력합니다. 그런
+   다음 **Add a trigger**를 선택합니다.
 
-  ![Power Automate 디자이너에서 흐름 이름을 지정하고 Add a trigger 단추를 선택하는 화면.](docs/assets/power-automate-teams-workflow/flow-name-add-trigger.png)
+   ![Power Automate 디자이너에서 흐름 이름을 지정하고 Add a trigger 단추를 선택하는 화면.](docs/assets/power-automate-teams-workflow/flow-name-add-trigger.png)
 
 5. **Add a trigger** 창에서 다음과 같이 Teams Webhook 트리거를 추가합니다.
 
-  1. **Built-in tools**에서 **Microsoft Teams Webhook**을 선택합니다.
-  2. **When a Teams webhook request is received**를 선택합니다.
+   1. **Built-in tools**에서 **Microsoft Teams Webhook**을 선택합니다.
+   2. **When a Teams webhook request is received**를 선택합니다.
 
-  ![Power Automate에서 Microsoft Teams Webhook 커넥터와 When a Teams webhook request is received 트리거를 차례로 선택하는 화면.](docs/assets/power-automate-teams-workflow/microsoft-teams-webhook-trigger.png)
+      ![Power Automate에서 Microsoft Teams Webhook 커넥터와 When a Teams webhook request is received 트리거를 차례로 선택하는 화면.](docs/assets/power-automate-teams-workflow/microsoft-teams-webhook-trigger.png)
 
-6. 트리거의 **Parameters** 탭에서 **Who can trigger the flow?**를
+6. 트리거의 **Parameters** 탭에서 **Who can trigger the flow?** 값을
    **Anyone**으로 설정합니다.
 
    **HTTP URL**은 직접 입력하지 않습니다. 흐름을 저장하면 Power Automate가
@@ -232,28 +253,35 @@ Git에서 제외된 `.env`에는 로컬 자격 증명이 저장됩니다. 이 �
    ![Power Automate Teams Webhook 트리거에서 Who can trigger the flow 값을 Anyone으로 설정하고 저장 후 생성될 HTTP URL을 확인하는 화면.](docs/assets/power-automate-teams-workflow/teams-webhook-trigger-anyone.png)
 
 7. 트리거 바로 아래에서 더하기 단추(**+**)를 선택하고 다음과 같이 Teams
-  카드 게시 작업을 추가합니다.
+   카드 게시 작업을 추가합니다.
 
-  1. **Add an action** 창의 **By connector**에서 **Microsoft Teams**를
-    선택합니다.
-  2. **Post card in a chat or channel**을 선택합니다.
+   1. **Add an action** 창의 **By connector**에서 **Microsoft Teams**를
+      선택합니다.
+   2. **Post card in a chat or channel**을 선택합니다.
 
-  ![Power Automate에서 Teams Webhook 트리거 아래의 더하기 단추를 선택하고 Microsoft Teams의 Post card in a chat or channel 작업을 추가하는 화면.](docs/assets/power-automate-teams-workflow/add-post-card-action.png)
+      ![Power Automate에서 Teams Webhook 트리거 아래의 더하기 단추를 선택하고 Microsoft Teams의 Post card in a chat or channel 작업을 추가하는 화면.](docs/assets/power-automate-teams-workflow/add-post-card-action.png)
 
 8. **Change connection**에서 `svc-teams-notification`으로 로그인합니다.
-  작업은 **Connected to**에 표시되는 계정의 Team 접근 권한으로
-  실행됩니다.
+   작업은 **Connected to**에 표시되는 계정의 Team 접근 권한으로
+   실행됩니다.
+
 9. 작업을 다음과 같이 설정합니다.
 
-  1. **Post as**에서 `Flow bot`을 선택합니다.
-  2. **Post in**에서 `Channel`을 선택합니다.
-  3. **Team** 목록에서 **Enter custom value**를 선택합니다.
-  4. **Team** 입력란을 선택하고 `/`를 눌러 동적 값 또는 식 메뉴를 연 다음
-    `triggerBody()?['teamId']`를 입력합니다.
-  5. 같은 방법으로 **Channel**에는 `triggerBody()?['channelId']`를
-    입력합니다.
-  6. **Adaptive Card**에는
-    `first(triggerBody()?['attachments'])?['content']`를 입력합니다.
+   1. **Post as**에서 `Flow bot`을 선택합니다.
+   2. **Post in**에서 `Channel`을 선택합니다.
+   3. **Team** 목록에서 **Enter custom value**를 선택합니다.
+
+      ![Power Automate의 Team 목록에서 Enter custom value를 선택하는 화면.](docs/assets/power-automate-teams-workflow/select-team-custom-value.png)
+
+   4. **Team** 입력란을 선택하고 `/`를 눌러 동적 값 또는 식 메뉴를 연 다음
+      `triggerBody()?['teamId']`를 입력합니다.
+
+      ![Power Automate의 Team 입력란에 triggerBody teamId 식을 입력하는 화면.](docs/assets/power-automate-teams-workflow/enter-team-expression.png)
+
+   5. 같은 방법으로 **Channel**에는 `triggerBody()?['channelId']`를
+      입력합니다.
+   6. **Adaptive Card**에는
+      `first(triggerBody()?['attachments'])?['content']`를 입력합니다.
 
    | 필드 | 값 |
    |---|---|
@@ -263,8 +291,6 @@ Git에서 제외된 `.env`에는 로컬 자격 증명이 저장됩니다. 이 �
    | **Channel** | 사용자 지정 식 `triggerBody()?['channelId']` |
    | **Adaptive Card** | 식 `first(triggerBody()?['attachments'])?['content']` |
 
-  ![Power Automate의 Post card in a chat or channel 작업에서 Flow bot과 Channel을 선택하고 Team 사용자 지정 값에 triggerBody teamId 식을 입력하는 화면.](docs/assets/power-automate-teams-workflow/configure-teams-action-expression.png)
-
 10. **Team**, **Channel** 및 **Adaptive Card**에 식이 입력되어 있는지
     확인합니다. 작업 하단의 **Connected to**가
     `svc-teams-notification`인지 확인한 다음 흐름을 저장합니다. 다른 계정이
@@ -273,9 +299,9 @@ Git에서 제외된 `.env`에는 로컬 자격 증명이 저장됩니다. 이 �
     ![Power Automate Teams 카드 게시 작업에 모든 식이 입력되어 있고 Connected to가 합성 Teams 연결 서비스 계정으로 설정된 화면.](docs/assets/power-automate-teams-workflow/teams-action-complete.png)
 
 11. 트리거를 다시 열고 모든 쿼리 매개 변수와 서명을 포함한 **HTTP
-  URL** 전체를 복사합니다.
+    URL** 전체를 복사합니다.
 12. 복구를 위해 이름이 명시된 흐름 공동 소유자를 최소 두 명 추가합니다.
-  공동 소유권은 Teams 연결 실행 ID를 변경하지 않습니다.
+    공동 소유권은 Teams 연결 실행 ID를 변경하지 않습니다.
 
 Adaptive Card 값으로 `triggerBody()`를 사용하지 마세요. 트리거 본문은
 Teams 메시지 봉투이며 첫 번째 첨부 파일의 `content`만 카드입니다.
@@ -339,7 +365,10 @@ Portal은 Entra 관리 UI로만 사용하며 Azure 구독 역할은 사용하지
 - 로그인하는 ID에 앱 등록 권한과 활성화된 **Privileged Role
   Administrator** 역할이 모두 있습니다.
 
-저장소 루트에서 다음 명령을 실행합니다. Azure 구독은 필요하지 않습니다.
+Teams 채널 링크의 쿼리 문자열에서 `tenantId=<GUID>` 값을 찾습니다. 이 값이
+`TeamsNotifyApp`을 생성해야 하는 대상 Entra 테넌트 ID입니다. 저장소
+루트에서 대상 테넌트에 로그인한 다음 현재 Azure CLI 계정을 확인합니다.
+Azure 구독은 필요하지 않습니다.
 
 ```shell
 az login \
@@ -347,6 +376,33 @@ az login \
   --use-device-code \
   --allow-no-subscriptions
 
+az account show \
+  --query "{signedInUser:user.name, tenantId:tenantId}" \
+  --output table
+```
+
+`signedInUser`가 앱 생성 및 동의를 수행할 부트스트랩 관리자 계정인지
+확인합니다. 출력된 `tenantId`가 채널 링크의 `tenantId`와 정확히 일치하는지도
+확인합니다. 계정이나 테넌트가 다르면 계속 진행하지 말고 올바른 `--tenant`
+값과 계정으로 다시 로그인하세요.
+
+예상 출력은 다음과 같습니다.
+
+```text
+SignedInUser                         TenantId
+-----------------------------------  ------------------------------------
+bootstrap-admin@example.com          00000000-0000-0000-0000-000000000000
+```
+
+> [!IMPORTANT]
+> `az account show`는 현재 Azure CLI 사용자와 테넌트만 확인합니다. 앱 등록
+> 권한 또는 활성화된 **Privileged Role Administrator** 역할은 확인하지
+> 않습니다. 조직에서 사용하는 일반적인 "Microsoft 365 관리자" 명칭만
+> 신뢰하지 말고, 5단계의 두 권한을 Entra 또는 PIM에서 별도로 확인하세요.
+
+계정과 테넌트가 모두 올바르면 다음 명령을 실행합니다.
+
+```shell
 cd examples/python
 uv run python -m pyhookkit.entrypoints.notification_router \
   --database .local/router.sqlite3 \
@@ -386,7 +442,15 @@ az login \
   --tenant "<채널 링크의 tenant ID>" \
   --use-device-code \
   --allow-no-subscriptions
+
+az account show \
+  --query "{signedInUser:user.name, tenantId:tenantId}" \
+  --output table
 ```
+
+`signedInUser`가 부트스트랩 관리자 계정이고 `tenantId`가 채널 링크의
+`tenantId`와 같은지 확인한 후에만 계속 진행합니다. 이 명령은 Entra 역할의
+할당 또는 PIM 활성화 상태를 확인하지 않습니다.
 
 `examples/python`에서 실행합니다.
 

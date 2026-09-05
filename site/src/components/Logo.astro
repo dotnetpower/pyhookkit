@@ -1,0 +1,12 @@
+---
+import { Icon } from 'astro-icon/components';
+
+const isKorean = Astro.url.pathname.includes('/ko/');
+---
+
+<span class="flex items-center gap-2 text-xl font-extrabold tracking-tight text-gray-950 dark:text-white">
+  <span class="grid h-9 w-9 place-items-center rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-500/20">
+    <Icon name="tabler:webhook" class="h-5 w-5" />
+  </span>
+  <span>{isKorean ? 'Teams Webhook 가이드' : 'Teams Webhook Guide'}</span>
+</span>

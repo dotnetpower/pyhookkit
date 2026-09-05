@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "strict": true,
+    "paths": {
+      "~/*": ["./src/*"]
+    }
+  },
+  "include": [".astro/types.d.ts", "astro.config.ts", "src/**/*", "vendor/**/*.ts"],
+  "exclude": ["dist/", "node_modules/"]
+}

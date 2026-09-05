@@ -2,16 +2,17 @@
 
 [한국어](power-automate-teams-workflow.ko.md)
 
-This guide creates the Power Automate delivery adapter used by PyHookKit Teams
-examples and the integrated Bookinfo scenario. One flow accepts an Adaptive
-Card carrying validated Team and Channel identifiers, then posts the card to
-that destination.
+This guide creates one shared Power Automate flow that sends notifications to
+standard Teams channels through HTTP requests, much like a Slack Incoming
+Webhook. The flow accepts Team and Channel identifiers and an Adaptive Card,
+then posts through the posting identity's Microsoft Teams connection.
 
-For the GitHub, GitLab, Argo CD, and AKS sequence, see the
-[integrated Bookinfo scenario](integrated-bookinfo-scenario.md).
-For the visible Entra application, minimum bootstrap roles, and automatic Team
-membership setup, see
-[TeamsNotifyApp bootstrap](teams-notify-app-bootstrap.md).
+Use the [10-minute Teams Webhook quickstart](teams-webhook-quickstart.md) for the
+shortest first-delivery path. This page is the detailed reference for every UI
+selection, permission boundary, and operational consideration.
+
+Use [TeamsNotifyApp bootstrap](teams-notify-app-bootstrap.md) only when adding
+the posting identity to many Teams must be automated.
 For direct Team and Channel ID routing with an Azure-managed workflow, use the
 [Azure Logic App Teams delivery guide](logic-app-teams-delivery.md).
 
@@ -30,12 +31,10 @@ and avoided that footer in the verified environment.
 
 - permission to create a Power Automate cloud flow;
 - a Microsoft Teams connection authorized for the destination Team;
-- a dedicated licensed Microsoft 365 connection user for shared or production
-   environments;
-- one or more dedicated synthetic test Teams channels that the connection user
-   can access;
-- permission to create protected GitLab CI/CD variables;
-- Python 3.12 and `uv` for the smoke test.
+- an existing Teams-licensed user for a quick test, or a dedicated posting
+  identity for shared and production environments;
+- one or more standard Teams channels whose Team includes the posting identity;
+- Python 3 for the direct smoke test.
 
 Do not place real Team names, channel names, identities, or callback URLs in
 committed files or screenshots.

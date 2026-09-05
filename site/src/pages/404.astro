@@ -1,0 +1,24 @@
+---
+import Layout from '~/layouts/PageLayout.astro';
+import { getPermalink } from '~/utils/permalinks';
+---
+
+<Layout metadata={{ title: 'Page not found — PyHookKit', robots: { index: false, follow: true } }}>
+  <section class="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
+    <p class="mb-4 font-mono text-sm font-bold uppercase tracking-[0.24em] text-indigo-600 dark:text-indigo-300">404</p>
+    <h1 class="mb-5 text-5xl font-extrabold tracking-tight text-gray-950 dark:text-white">Page not found</h1>
+    <p class="mb-8 max-w-xl text-lg text-muted">
+      The requested page is not part of the PyHookKit product site or documentation portal.
+    </p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <a
+        class="rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-700"
+        href={getPermalink('/')}>Product home</a
+      >
+      <a
+        class="rounded-xl border border-gray-300 px-5 py-3 font-semibold text-gray-900 hover:bg-gray-50 dark:border-gray-700 dark:text-white dark:hover:bg-gray-900"
+        href={getPermalink('/docs/')}>Documentation</a
+      >
+    </div>
+  </section>
+</Layout>

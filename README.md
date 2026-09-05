@@ -2,8 +2,30 @@
 
 [한국어](README.ko.md)
 
-Typed Slack and Microsoft Teams notification delivery with semantic parity,
-followed by a controlled migration path.
+This repository documents and verifies how to send Adaptive Card notifications
+to standard Microsoft Teams channels with simple HTTP requests, much like a
+Slack Incoming Webhook.
+
+The first Teams notification requires no PyHookKit server and no Microsoft
+Graph app. Follow the [10-minute Teams Webhook
+quickstart](docs/teams-webhook-quickstart.md) to add a posting identity to the
+Team, create one shared Power Automate flow, and send directly with a Python
+standard-library example.
+
+## When to use PyHookKit optionally
+
+PyHookKit is an optional routing and migration toolkit that can be added after
+direct Teams Webhook delivery. Skip it unless you need to:
+
+- move existing Slack notification producers behind a controlled route;
+- fan out one notification to Slack and Teams or multiple Teams channels;
+- track per-destination status, idempotent intake, and retry classification;
+- render Slack Block Kit and Teams Adaptive Cards from a provider-neutral
+  contract.
+
+The central router is not a transparent proxy for arbitrary Slack Webhook
+payloads. Existing producers must adapt their input to the canonical
+notification contract.
 
 ## Slack and Teams parity
 
@@ -80,9 +102,13 @@ for route configuration, local execution, and producer integration. Use the
 app registration, minimum operator roles, automatic environment setup, and
 membership diagnostics.
 
-## End-to-end Teams setup
+## Optional: end-to-end PyHookKit router setup
 
-This walkthrough starts in one target Microsoft Entra tenant and finishes with
+Use this walkthrough only when the optional SQLite central router and automated
+Team membership are required. Use the [10-minute Teams Webhook
+quickstart](docs/teams-webhook-quickstart.md) for the first direct notification.
+
+The following walkthrough starts in one target Microsoft Entra tenant and finishes with
 one canonical notification delivered through the SQLite central router, Power
 Automate, and Microsoft Teams. Commands run from the repository root unless a
 step says otherwise.
@@ -280,7 +306,10 @@ This path requires all of the following:
 - a signed-in identity with app-registration permission and an active
   **Privileged Role Administrator** role.
 
-Run from the repository root. An Azure subscription is not required:
+Find the `tenantId=<GUID>` value in the Teams channel link query string. This is
+the target Entra tenant in which `TeamsNotifyApp` must be created. From the
+repository root, sign in to that tenant and verify the current Azure CLI
+account. An Azure subscription is not required:
 
 ```shell
 az login \
@@ -288,6 +317,33 @@ az login \
   --use-device-code \
   --allow-no-subscriptions
 
+az account show \
+  --query "{signedInUser:user.name, tenantId:tenantId}" \
+  --output table
+```
+
+Confirm that `signedInUser` is the bootstrap administrator identity that will
+create the app and grant consent. Confirm that the reported `tenantId` exactly
+matches the channel link's `tenantId`. If either value is wrong, stop and sign
+in again with the correct identity and `--tenant` value.
+
+Expected output resembles:
+
+```text
+SignedInUser                         TenantId
+-----------------------------------  ------------------------------------
+bootstrap-admin@example.com          00000000-0000-0000-0000-000000000000
+```
+
+> [!IMPORTANT]
+> `az account show` verifies only the current Azure CLI user and tenant. It does
+> not verify app-registration permission or an active **Privileged Role
+> Administrator** role. Do not rely on a generic "Microsoft 365 administrator"
+> label; verify both step 5 permissions separately in Entra or PIM.
+
+After confirming both values, run:
+
+```shell
 cd examples/python
 uv run python -m pyhookkit.entrypoints.notification_router \
   --database .local/router.sqlite3 \
@@ -326,7 +382,16 @@ az login \
   --tenant "<tenant ID from the channel link>" \
   --use-device-code \
   --allow-no-subscriptions
+
+az account show \
+  --query "{signedInUser:user.name, tenantId:tenantId}" \
+  --output table
 ```
+
+Continue only after confirming that `signedInUser` is the bootstrap
+administrator identity and that `tenantId` matches the channel link's
+`tenantId`. This command does not verify Entra role assignment or PIM
+activation.
 
 Run from `examples/python`:
 

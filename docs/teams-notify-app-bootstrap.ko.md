@@ -2,12 +2,24 @@
 
 [English](teams-notify-app-bootstrap.md)
 
-`TeamsNotifyApp`은 중앙 라우터에 등록된 Team에 Power Automate 전용 Teams
-연결 사용자가 소속돼 있는지 보장하기 위한 단일 테넌트 Entra
-애플리케이션입니다. Azure Portal의 **App registrations**와 **Enterprise
-applications**에서 명시적으로 확인하고 관리할 수 있습니다.
+> [!IMPORTANT]
+> `TeamsNotifyApp`은 첫 Teams Webhook 알림에 필요하지 않습니다. 대상 Team이
+> 적으면 Team 소유자가 게시 계정을 수동으로 추가하고 [10분 Teams Webhook
+> 빠른 시작](teams-webhook-quickstart.ko.md)을 사용하세요.
 
-이 앱은 저장된 Azure CLI 위임 액세스 토큰을 대체합니다. 중앙 라우터는
+`TeamsNotifyApp`은 여러 표준 Team에 Power Automate 게시 계정을 반복해서
+추가하는 작업을 자동화하기 위한 선택적 단일 테넌트 Entra 애플리케이션입니다.
+중앙 라우터에 대상 채널을 등록할 때 게시 계정이 해당 Team의 기반 Microsoft
+365 그룹에 속하는지 확인하고, 없으면 Microsoft Graph로 추가합니다. Azure
+Portal의 **App registrations**와 **Enterprise applications**에서 명시적으로
+확인하고 관리할 수 있습니다.
+
+이 앱은 Teams 메시지를 게시하지 않고 Power Automate의 Microsoft Teams
+연결 또는 MFA를 대체하지 않습니다. 비공개 채널과 공유 채널의 채널별
+멤버십도 부여하지 않습니다.
+
+이 앱을 선택하면 저장된 Azure CLI 위임 액세스 토큰 대신 사용할 수
+있습니다. 중앙 라우터는
 Team 멤버십을 등록할 때마다 클라이언트 자격 증명으로 수명이 짧은 Microsoft
 Graph 앱 전용 토큰을 발급합니다.
 
@@ -87,14 +99,30 @@ Power Automate 연결 승인은 MFA와 조건부 액세스를 요구할 수 있�
 **실행 주체:** 앱 등록 권한과 관리자 동의 권한이 있는 부트스트랩
 사용자입니다.
 
-부트스트랩 및 동의 권한이 있는 ID로 한 번 로그인합니다.
+Teams 채널 링크의 쿼리 문자열에서 `tenantId=<GUID>` 값을 찾습니다. 이 값이
+대상 Entra 테넌트 ID입니다. 부트스트랩 및 동의 권한이 있는 ID로 해당
+테넌트에 로그인한 다음 현재 Azure CLI 계정을 확인합니다.
 
 ```shell
 az login \
   --tenant "<채널 테넌트 GUID>" \
   --use-device-code \
   --allow-no-subscriptions
+
+az account show \
+  --query "{signedInUser:user.name, tenantId:tenantId}" \
+  --output table
 ```
+
+`signedInUser`가 의도한 부트스트랩 관리자 계정인지 확인합니다. 출력된
+`tenantId`가 채널 링크의 `tenantId`와 정확히 일치하는지도 확인합니다. 둘 중
+하나라도 다르면 부트스트랩을 실행하지 말고 올바른 계정과 `--tenant` 값으로
+다시 로그인하세요.
+
+> [!IMPORTANT]
+> `az account show`는 현재 Azure CLI 사용자와 테넌트만 확인합니다. 앱 등록
+> 권한 또는 활성화된 **Privileged Role Administrator** 역할은 확인하지
+> 않으므로 Entra 또는 PIM에서 별도로 확인하세요.
 
 `examples/python`에서 실행합니다.
 

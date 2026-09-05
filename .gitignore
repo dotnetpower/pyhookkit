@@ -168,8 +168,7 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# mkdocs documentation
-/site
+# Website dependencies and generated output are ignored by site/.gitignore.
 
 # mypy
 .mypy_cache/

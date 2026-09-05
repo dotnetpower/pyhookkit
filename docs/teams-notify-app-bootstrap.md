@@ -2,11 +2,22 @@
 
 [한국어](teams-notify-app-bootstrap.ko.md)
 
-`TeamsNotifyApp` is the visible, single-tenant Entra application used only to
-ensure that the dedicated Power Automate Teams connection user belongs to Teams
-registered in the central router.
+> [!IMPORTANT]
+> `TeamsNotifyApp` is not required for the first Teams Webhook notification. For
+> a small number of Teams, have a Team owner add the posting identity manually
+> and use the [10-minute Teams Webhook quickstart](teams-webhook-quickstart.md).
 
-It replaces saved Azure CLI delegated access tokens. The router obtains a
+`TeamsNotifyApp` is an optional, visible single-tenant Entra application for
+automating the repeated addition of the Power Automate posting identity to many
+standard Teams. When a destination is registered in the central router, it
+checks the backing Microsoft 365 Group and adds the posting identity through
+Microsoft Graph when absent.
+
+The app does not post Teams messages, replace the Power Automate Microsoft Teams
+connection or MFA, or grant channel-specific membership to private and shared
+channels.
+
+When selected, it replaces saved Azure CLI delegated access tokens. The router obtains a
 short-lived app-only Microsoft Graph token whenever it performs membership
 registration.
 
@@ -78,14 +89,30 @@ connection into application authentication.
 
 ## Bootstrap
 
-Sign in once with the bootstrap/consent identity:
+Find the `tenantId=<GUID>` value in the Teams channel link query string. This is
+the target Entra tenant ID. Sign in to that tenant with the bootstrap/consent
+identity, then verify the current Azure CLI account:
 
 ```shell
 az login \
   --tenant "<channel tenant GUID>" \
   --use-device-code \
   --allow-no-subscriptions
+
+az account show \
+  --query "{signedInUser:user.name, tenantId:tenantId}" \
+  --output table
 ```
+
+Confirm that `signedInUser` is the intended bootstrap administrator identity
+and that the reported `tenantId` exactly matches the channel link's `tenantId`.
+If either value differs, do not run the bootstrap; sign in again with the
+correct identity and `--tenant` value.
+
+> [!IMPORTANT]
+> `az account show` verifies only the current Azure CLI user and tenant. It does
+> not verify app-registration permission or an active **Privileged Role
+> Administrator** role; verify those separately in Entra or PIM.
 
 From `examples/python`, run:
 

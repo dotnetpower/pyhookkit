@@ -1,0 +1,279 @@
+---
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+  locale?: 'en' | 'ko';
+}
+
+const { locale = 'en' } = Astro.props;
+const isKorean = locale === 'ko';
+const steps = isKorean
+  ? [
+      {
+        number: '01',
+        title: '서비스 계정 생성',
+        detail: 'Microsoft 365 관리 센터',
+        icon: 'tabler:user-plus',
+        color: 'account',
+      },
+      { number: '02', title: '공통 흐름', detail: 'Power Automate', icon: 'tabler:route-square-2', color: 'flow' },
+      { number: '03', title: '첫 테스트', detail: '채널 링크로 직접 전송', icon: 'tabler:send', color: 'app' },
+    ]
+  : [
+      {
+        number: '01',
+        title: 'Create service account',
+        detail: 'Microsoft 365 admin center',
+        icon: 'tabler:user-plus',
+        color: 'account',
+      },
+      { number: '02', title: 'Shared flow', detail: 'Power Automate', icon: 'tabler:route-square-2', color: 'flow' },
+      { number: '03', title: 'First test', detail: 'Direct with channel link', icon: 'tabler:send', color: 'app' },
+    ];
+---
+
+<div
+  class="setup-stage"
+  aria-label={isKorean ? 'Teams 알림을 준비하는 세 단계' : 'Three steps to prepare Teams notifications'}
+>
+  <div class="stage-grid"></div>
+  <div class="steps">
+    {
+      steps.map((step, index) => (
+        <Fragment>
+          <article class={`step ${step.color}`}>
+            <span class="number">{step.number}</span>
+            <span class="icon">
+              <Icon name={step.icon} />
+            </span>
+            <strong>{step.title}</strong>
+            <small>{step.detail}</small>
+            <span class="check">
+              <Icon name="tabler:check" />
+            </span>
+          </article>
+          {index < steps.length - 1 && (
+            <span class="connector">
+              <Icon name="tabler:chevron-right" />
+            </span>
+          )}
+        </Fragment>
+      ))
+    }
+  </div>
+  <div class="result">
+    <span class="teams-icon"><Icon name="tabler:brand-microsoft-teams" /></span>
+    <span>
+      <small>{isKorean ? '설정 완료' : 'Ready to deliver'}</small>
+      <strong>{isKorean ? 'Teams 채널에 Hello World 표시' : 'Hello World appears in the Teams channel'}</strong>
+    </span>
+    <span class="live"><i></i>{isKorean ? '준비됨' : 'Ready'}</span>
+  </div>
+</div>
+
+<style>
+  .setup-stage {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    border: 1px solid rgb(99 102 241 / 22%);
+    border-radius: 1.75rem;
+    background: linear-gradient(145deg, rgb(248 250 255 / 98%), rgb(238 242 255 / 94%));
+    box-shadow: 0 35px 100px rgb(48 46 129 / 18%);
+  }
+
+  :global(.dark) .setup-stage {
+    border-color: rgb(165 180 252 / 20%);
+    background: linear-gradient(145deg, rgb(17 19 31 / 98%), rgb(31 35 64 / 96%));
+  }
+
+  .stage-grid {
+    position: absolute;
+    inset: 0;
+    opacity: 0.18;
+    background-image:
+      linear-gradient(rgb(99 102 241 / 18%) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(99 102 241 / 18%) 1px, transparent 1px);
+    background-size: 30px 30px;
+    mask-image: radial-gradient(circle at center, black, transparent 80%);
+  }
+
+  .steps {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .step {
+    position: relative;
+    display: flex;
+    min-height: 10.2rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.15rem 0.65rem;
+    border: 1px solid rgb(148 163 184 / 22%);
+    border-radius: 1rem;
+    background: rgb(255 255 255 / 90%);
+    box-shadow: 0 16px 36px rgb(30 41 59 / 8%);
+  }
+
+  :global(.dark) .step {
+    background: rgb(30 34 56 / 92%);
+  }
+
+  .number {
+    position: absolute;
+    top: 0.7rem;
+    left: 0.8rem;
+    color: #94a3b8;
+    font:
+      700 0.6rem ui-monospace,
+      monospace;
+  }
+
+  .icon {
+    display: grid;
+    width: 2.8rem;
+    height: 2.8rem;
+    margin-bottom: 0.65rem;
+    place-items: center;
+    border-radius: 0.8rem;
+    color: white;
+  }
+
+  .account .icon {
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+  }
+  .flow .icon {
+    background: linear-gradient(135deg, #7c3aed, #c026d3);
+  }
+  .app .icon {
+    background: linear-gradient(135deg, #0891b2, #2563eb);
+  }
+  .icon :global(svg) {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .step strong {
+    color: #172033;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    text-align: center;
+  }
+  :global(.dark) .step strong {
+    color: #f8fafc;
+  }
+  .step small {
+    margin-top: 0.2rem;
+    color: #64748b;
+    font-size: 0.62rem;
+    line-height: 1.45;
+    text-align: center;
+  }
+
+  .check {
+    position: absolute;
+    right: 0.65rem;
+    bottom: 0.65rem;
+    display: grid;
+    width: 1.15rem;
+    height: 1.15rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #dcfce7;
+    color: #15803d;
+  }
+  .check :global(svg) {
+    width: 0.75rem;
+  }
+
+  .connector {
+    color: #818cf8;
+  }
+  .connector :global(svg) {
+    width: 1.1rem;
+  }
+
+  .result {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-top: 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgb(99 102 241 / 25%);
+    border-radius: 1rem;
+    background: rgb(255 255 255 / 82%);
+    text-align: left;
+  }
+
+  :global(.dark) .result {
+    background: rgb(23 27 48 / 88%);
+  }
+  .teams-icon {
+    display: grid;
+    width: 2.4rem;
+    height: 2.4rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border-radius: 0.7rem;
+    background: #6264a7;
+    color: white;
+  }
+  .teams-icon :global(svg) {
+    width: 1.3rem;
+  }
+  .result > span:nth-child(2) {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+  }
+  .result small {
+    color: #64748b;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .result strong {
+    color: #172033;
+    font-size: 0.76rem;
+    line-height: 1.4;
+  }
+  :global(.dark) .result strong {
+    color: #f8fafc;
+  }
+  .live {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+    color: #15803d;
+    font-size: 0.62rem;
+    font-weight: 750;
+    white-space: nowrap;
+  }
+  .live i {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgb(34 197 94 / 12%);
+  }
+
+  @media (max-width: 720px) {
+    .steps {
+      grid-template-columns: 1fr;
+    }
+    .connector {
+      transform: rotate(90deg);
+      justify-self: center;
+    }
+    .step {
+      min-height: 8rem;
+    }
+  }
+</style>

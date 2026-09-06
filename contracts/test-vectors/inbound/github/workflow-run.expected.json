@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "github-11111111-1111-4111-8111-111111111111",
+  "route": "release-notifications",
+  "title": "GitHub workflow success",
+  "body": "GitHub workflow Build and test for example/service completed with success.",
+  "severity": "success",
+  "facts": [
+    {"key": "Repository", "value": "example/service"},
+    {"key": "Workflow", "value": "Build and test"},
+    {"key": "Conclusion", "value": "success"}
+  ],
+  "links": [
+    {"label": "Open in GitHub", "url": "https://github.example/example/service/actions/runs/1001"}
+  ],
+  "metadata": {
+    "source": "github-webhook",
+    "correlationId": "11111111-1111-4111-8111-111111111111"
+  }
+}

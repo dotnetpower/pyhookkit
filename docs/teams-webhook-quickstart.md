@@ -83,7 +83,7 @@ Azure subscription role.
 > Private and shared channels do not grant access through Team membership alone.
 > Use a standard channel for this 10-minute path.
 
-## Step 2: Create the shared Power Automate flow—about 6 minutes
+## Step 2: Create the shared Power Automate flow—about 5 minutes
 
 **Actor:** flow author. Authorize the Microsoft Teams connection as the service
 account created in step 1.
@@ -107,6 +107,8 @@ account created in step 1.
 
 8. Save the flow and copy the trigger's complete **HTTP URL**.
 
+![Shared Power Automate flow with the Teams Webhook request trigger connected to the channel card action.](assets/power-automate-teams-workflow/shared-flow-overview.png)
+
 For every UI selection with screenshots, use the [Power Automate Teams Workflow
 detailed guide](power-automate-teams-workflow.md).
 
@@ -121,23 +123,172 @@ let every standard channel reuse this flow.
 invocation signature. Treat it like a password; never commit or log it or place
 it in screenshots and issues.
 
-## Step 3: Send the first notification—about 2 minutes
+## Step 3: Send the first notification—about 3 minutes
 
 The F00 script uses only the Python standard library. It does not import the
 `pyhookkit` package or run a router. It extracts Team and channel identifiers
 from the Teams channel link and sends a minimal Adaptive Card envelope to the
 shared flow.
 
-Run from the repository root:
+Before running the command, a Team owner opens the target Team's **Members** tab
+and confirms that `svc-teams-notification` is a member. If the account is absent
+from **Members and guests**, select **Add member**, find the account, and add it
+as a member. Standard channels inherit Team membership, so do not add the
+account separately to every standard channel.
+
+![The Teams Members tab shows zero Members and guests before the service account is added.](assets/power-automate-teams-workflow/team-member.png)
+
+After adding the account, expand **Members and guests** and confirm that
+`svc-teams-notification` appears with **Team role** set to **Member**. This state
+allows the service account's Teams connection to post to standard channels in
+that Team.
+
+![The Teams Members and guests list shows the service account with the Member role.](assets/power-automate-teams-workflow/team-member2.png)
+
+If the posting identity is not a member of the target Team, the Webhook trigger
+can accept the request while **Post card in a chat or channel** fails to publish
+to the channel. For a private or shared channel, also add the posting identity
+to that channel explicitly.
+
+Next, store the link for the channel that will receive the notification.
+
+1. In Teams, locate the target channel under **Teams and channels**, then select
+  **...** on the right side of the channel.
+2. Select **Copy link**.
+
+  ![Select Copy link from the more-options menu on the right side of the target Teams channel.](assets/power-automate-teams-workflow/channel-copy-link.png)
+
+3. Open the Git-ignored `.env` at the repository root, paste the complete copied
+  link into the following variable, and save the file:
+
+  ```dotenv
+  TEAMS_WORKFLOW_CHANNEL_LINK="<complete copied Teams channel link>"
+  ```
+
+  Never place the real value in `.env.example`. If `.env` does not exist at the
+  repository root, first copy `.env.example` to `.env` and set its file mode to
+  `0600`.
+
+The F00 script resolves the Team ID from the copied link's `groupId` query
+parameter and the channel ID from its `/l/channel/` path. It validates the URL
+shape before adding explicit `teamId` and `channelId` fields to the Power
+Automate request. You do not need to copy either identifier separately.
+
+Choose one of the following tabs to send the first notification. Run each option
+from the repository root.
+
+<!-- starlight-tabs:start -->
+
+### Run the script
 
 ```shell
+set -a
+. ./.env
+set +a
+
 cd examples/python/fundamentals/00_http_request
-
-export TEAMS_WORKFLOW_URL="<complete Power Automate HTTP URL>"
-export TEAMS_WORKFLOW_CHANNEL_LINK="<complete Teams channel link>"
-
 python3 teams.py --send
 ```
+
+### Python
+
+The following standalone Python source extracts both identifiers from the
+channel link and posts directly to the Workflow. Load `.env` into the environment
+before running it.
+
+```shell
+set -a
+. ./.env
+set +a
+```
+
+```python
+import json
+import os
+import urllib.request
+from urllib.parse import parse_qs, unquote, urlsplit
+
+channel_link = urlsplit(os.environ["TEAMS_WORKFLOW_CHANNEL_LINK"])
+team_id = parse_qs(channel_link.query)["groupId"][0]
+channel_id = unquote(channel_link.path.split("/")[3])
+
+payload = {
+    "type": "message",
+    "teamId": team_id,
+    "channelId": channel_id,
+    "attachments": [
+        {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "contentUrl": None,
+            "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "type": "AdaptiveCard",
+                "version": "1.4",
+                "body": [{"type": "TextBlock", "text": "Hello, world!", "wrap": True}],
+            },
+        }
+    ],
+}
+
+request = urllib.request.Request(
+    os.environ["TEAMS_WORKFLOW_URL"],
+    data=json.dumps(payload).encode(),
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+
+with urllib.request.urlopen(request, timeout=10.0) as response:
+    print(json.dumps({"state": "succeeded", "statusCode": response.status}, indent=2))
+```
+
+### curl
+
+The following shell script extracts the Team and channel IDs from the channel
+link and sends the same request with `curl`. It does not run Python.
+
+```shell
+set -a
+. ./.env
+set +a
+
+# To set the environment variables directly, uncomment and edit these two lines.
+# TEAMS_WORKFLOW_URL="<complete Power Automate HTTP URL>"
+# TEAMS_WORKFLOW_CHANNEL_LINK="<complete channel link copied from Teams>"
+
+team_id="${TEAMS_WORKFLOW_CHANNEL_LINK#*groupId=}"
+team_id="${team_id%%&*}"
+encoded_channel_id="${TEAMS_WORKFLOW_CHANNEL_LINK#*/l/channel/}"
+encoded_channel_id="${encoded_channel_id%%/*}"
+printf -v channel_id '%b' "${encoded_channel_id//%/\\x}"
+
+payload="$(cat <<JSON
+{
+  "type": "message",
+  "teamId": "$team_id",
+  "channelId": "$channel_id",
+  "attachments": [{
+    "contentType": "application/vnd.microsoft.card.adaptive",
+    "contentUrl": null,
+    "content": {
+      "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+      "type": "AdaptiveCard",
+      "version": "1.4",
+      "body": [{"type": "TextBlock", "text": "Hello, world!", "wrap": true}]
+    }
+  }]
+}
+JSON
+)"
+
+curl --fail-with-body --silent --show-error \
+  --header "Content-Type: application/json" \
+  --data "$payload" \
+  --output /dev/null \
+  --write-out '{"state":"succeeded","statusCode":%{http_code}}\n' \
+  "$TEAMS_WORKFLOW_URL"
+```
+
+<!-- starlight-tabs:end -->
 
 A successful result resembles:
 
@@ -152,26 +303,29 @@ Confirm a successful Power Automate run and a **Hello, World!** card in the
 target Teams channel. The successful `2xx` status can differ by tenant policy or
 connector version.
 
+![Successful delivery showing the Hello, world! Adaptive Card posted by Workflows in the Teams channel.](assets/power-automate-teams-workflow/hello-world.png)
+
 ## Optional: Automate membership with TeamsNotifyApp
 
 The first notification does not require a Microsoft Graph app. A Team owner can
 add the posting identity manually.
 
-When many Teams or CI/CD-driven destination registrations make manual membership
-repetitive, register `TeamsNotifyApp` once. Its purpose is to add the posting
-identity to each Team's backing Microsoft 365 Group through Microsoft Graph.
+Register each notification destination separately using its channel link.
+Standard channels inherit Team membership, so add `svc-teams-notification` once
+per Team rather than once per channel. During channel registration,
+`TeamsNotifyApp` checks membership in that Team and uses Microsoft Graph to add
+the account only when it is absent.
 
-`TeamsNotifyApp` does not:
-
-- post Teams messages;
-- replace the Power Automate Teams connection or MFA;
-- grant private or shared channel membership.
+`TeamsNotifyApp` does not post messages, replace the Power Automate connection
+or MFA. For a private channel, it automates both Team and channel membership.
+Shared channels are not supported.
 
 Automation requires the admin-consented Graph application permission
-`GroupMember.ReadWrite.All`. This permission is broad, so retain manual
-membership for a small number of destinations. Use the [TeamsNotifyApp bootstrap
-guide](teams-notify-app-bootstrap.md) only when membership automation is worth
-that permission.
+`Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and
+`TeamMember.ReadWriteNonOwnerRole.All`. Because these permissions are broad, use
+the
+[TeamsNotifyApp bootstrap guide](teams-notify-app-bootstrap.md) only when you
+need to automate membership across several Teams.
 
 ## Optional: Use the PyHookKit routing layer
 

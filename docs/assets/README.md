@@ -12,6 +12,10 @@ Documentation images are organized by the user-facing guide that owns them:
   redacted Power Automate setup and run-history captures;
 - [`logic-app-teams-delivery/`](logic-app-teams-delivery/README.md): redacted
   Logic Apps workflow, security, Teams action, and run-history captures.
+- [`central-notification-router/`](central-notification-router/README.md):
+  synthetic administration dashboard captures for the optional SQLite router.
+- [`producer-integrations/`](producer-integrations/README.md): sanitized
+  provider Webhook configuration captures using synthetic values.
 
 Only real client or control-plane captures belong here. Crop images to the
 smallest useful region, remove account and environment identities, strip image

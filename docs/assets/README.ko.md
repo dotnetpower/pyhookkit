@@ -12,6 +12,10 @@
   민감 정보가 제거된 Power Automate 설정 및 실행 기록 캡처
 - [`logic-app-teams-delivery/`](logic-app-teams-delivery/README.ko.md): 민감
   정보가 제거된 Logic Apps 워크플로, 보안, Teams 동작 및 실행 기록 캡처
+- [`central-notification-router/`](central-notification-router/README.ko.md):
+  선택적 SQLite 라우터의 합성 관리 대시보드 캡처
+- [`producer-integrations/`](producer-integrations/README.ko.md): 합성 값을
+  사용하고 민감 정보를 제거한 공급자 Webhook 설정 캡처
 
 실제 클라이언트 또는 제어 플레인 캡처만 여기에 둘 수 있습니다. 이미지를
 유용한 최소 영역으로 자르고, 계정 및 환경 ID를 제거하고, 이미지 메타데이터를

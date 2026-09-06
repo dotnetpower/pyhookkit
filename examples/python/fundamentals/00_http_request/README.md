@@ -21,13 +21,15 @@ To send deliberately, load the repository `.env` and select a provider:
 ```shell
 python fundamentals/00_http_request/slack.py --send
 python fundamentals/00_http_request/teams.py --send
-python fundamentals/00_http_request/teams.py --send-logic-app
 ```
 
 Slack requires `SLACK_WEBHOOK_URL` for an Incoming Webhook. Teams requires
 `TEAMS_WORKFLOW_URL` for the shared Workflow HTTP POST callback and
-`TEAMS_WORKFLOW_CHANNEL_LINK` for its exact allowlisted destination. Logic App delivery uses
-`TEAMS_LOGIC_APP_URL`, `TEAMS_LOGIC_APP_TEAM_ID`, and
-`TEAMS_LOGIC_APP_CHANNEL_ID`. All destinations must be HTTPS URLs. The scripts
-report only the HTTP status and never print the destination URL or provider
-response body.
+`TEAMS_WORKFLOW_CHANNEL_LINK` for its exact allowlisted destination. All
+destinations must be HTTPS URLs. The scripts report only the HTTP status and
+never print the destination URL or provider response body.
+
+For Workflow delivery, `teams.py` resolves the Team ID from the copied link's
+`groupId` query parameter and the channel ID from its `/l/channel/` path. It
+does not send the channel link itself to the Workflow. The resulting request
+contains explicit `teamId` and `channelId` fields.

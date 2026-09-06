@@ -98,6 +98,8 @@ explicit migration and fallback path.
 
 See the [central notification router guide](docs/central-notification-router.md)
 for route configuration, local execution, and producer integration. Use the
+[producer integrations guide](docs/producer-integrations.md) for GitHub,
+GitLab, Argo CD, and Azure DevOps CI/CD and native Webhook setup. Use the
 [TeamsNotifyApp bootstrap guide](docs/teams-notify-app-bootstrap.md) for visible
 app registration, minimum operator roles, automatic environment setup, and
 membership diagnostics.
@@ -166,8 +168,8 @@ member of the destination Team.
 | Teams connection user | Ordinary user in the same Entra tenant, such as `svc-teams-notification` | Microsoft 365/Teams and Power Automate entitlements, membership in every destination Team, and ability to complete interactive OAuth/MFA; no Entra administrator role | 2, 3, 7 |
 | Flow operational co-owner | Named person with access to the target Power Platform environment | Co-owner access to the Flow; cannot manage another user's Teams connection credential | 3, 7 |
 | Bootstrap app creator | Person signed in to the target Entra tenant | No directory role if user app registration is allowed; otherwise **Application Developer**; owner of the created `TeamsNotifyApp` | 5, 6 |
-| Consent approver | Administrator in the target Entra tenant | **Privileged Role Administrator** to grant admin consent for Microsoft Graph application permission `GroupMember.ReadWrite.All`; activate temporarily through PIM when available | 5, 6 |
-| `TeamsNotifyApp` | Non-human app registration and Service Principal in the target tenant | Admin-consented Graph application permission `GroupMember.ReadWrite.All`; no Microsoft 365 license, Azure RBAC, or Power Platform role | 6, 8, 9 |
+| Consent approver | Administrator in the target Entra tenant | **Privileged Role Administrator** to grant admin consent for Microsoft Graph application permissions `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and `TeamMember.ReadWriteNonOwnerRole.All`; activate temporarily through PIM when available | 5, 6 |
+| `TeamsNotifyApp` | Non-human app registration and Service Principal in the target tenant | Admin-consented Graph application permissions `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and `TeamMember.ReadWriteNonOwnerRole.All`; no Microsoft 365 license, Azure RBAC, or Power Platform role | 6, 8, 9 |
 | Notification producer and central router | Local process or CI/CD workload | Producer uses a router bearer token; router uses the signed Workflow callback secret; neither must be a Microsoft 365 user or Entra administrator | 8-10 |
 
 To create the app registration and grant admin consent in one
@@ -286,7 +288,9 @@ For explicit portal review and ownership, create the app as follows:
 4. Leave the redirect URI empty and select **Register**.
 5. Open **API permissions** > **Add a permission** > **Microsoft Graph** >
    **Application permissions**.
-6. Search for and select `GroupMember.ReadWrite.All`.
+6. Search for and select `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`,
+   `TeamMember.Read.All`, and
+  `TeamMember.ReadWriteNonOwnerRole.All`.
 7. Select **Add permissions**.
 8. A user with **Privileged Role Administrator** selects **Grant admin consent
    for \<tenant\>** and confirms.
@@ -355,7 +359,9 @@ cd ../..
 ```
 
 The command creates `TeamsNotifyApp` and its Service Principal, configures the
-`GroupMember.ReadWrite.All` application permission, and persists admin consent.
+`Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and
+`TeamMember.ReadWriteNonOwnerRole.All` application permissions, and persists
+admin consent.
 It also creates and validates the client credential, adds the connection user
 to the Team, and registers the first destination route in SQLite. It never
 prints the generated secret and writes it to `.env` with mode `0600`.
@@ -427,7 +433,8 @@ different people.
 In **App registrations** > `TeamsNotifyApp`:
 
 - confirm **API permissions** contains Microsoft Graph
-  `GroupMember.ReadWrite.All` as an **Application** permission;
+  `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and
+  `TeamMember.ReadWriteNonOwnerRole.All` as **Application** permissions;
 - confirm its status is **Granted for \<tenant\>**;
 - confirm only expected credentials and owners exist; add named operational
   owners in this step when fewer than two are present.

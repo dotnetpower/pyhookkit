@@ -10,7 +10,12 @@ from uuid import UUID
 from pyhookkit.json_types import JsonObject, JsonValue
 
 _GRAPH_APP_ID = UUID("00000003-0000-0000-c000-000000000000")
-_MEMBERSHIP_ROLE = "GroupMember.ReadWrite.All"
+_MEMBERSHIP_ROLES = (
+    "Channel.ReadBasic.All",
+    "ChannelMember.ReadWrite.All",
+    "TeamMember.Read.All",
+    "TeamMember.ReadWriteNonOwnerRole.All",
+)
 _APP_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._-]{0,63}$")
 
 
@@ -102,24 +107,25 @@ class AzureCliTeamsNotifyAppBootstrapper:
         application_object_id = _uuid_field(application, "id", "application")
         client_id = _uuid_field(application, "appId", "application")
         service_principal_id = self._ensure_service_principal(client_id)
-        role_id = self._graph_membership_role_id()
-        if not _application_has_role(application, role_id):
-            self._run(
-                (
-                    "ad",
-                    "app",
-                    "permission",
-                    "add",
-                    "--id",
-                    str(client_id),
-                    "--api",
-                    str(_GRAPH_APP_ID),
-                    "--api-permissions",
-                    f"{role_id}=Role",
-                    "--only-show-errors",
+        role_ids = self._graph_membership_role_ids()
+        for role_id in role_ids:
+            if not _application_has_role(application, role_id):
+                self._run(
+                    (
+                        "ad",
+                        "app",
+                        "permission",
+                        "add",
+                        "--id",
+                        str(client_id),
+                        "--api",
+                        str(_GRAPH_APP_ID),
+                        "--api-permissions",
+                        f"{role_id}=Role",
+                        "--only-show-errors",
+                    )
                 )
-            )
-        self._ensure_admin_consent(service_principal_id, role_id)
+            self._ensure_admin_consent(service_principal_id, role_id)
         connection_user_id = _uuid_output(
             self._run(
                 (
@@ -300,7 +306,7 @@ class AzureCliTeamsNotifyAppBootstrapper:
         )
         return _uuid_field(created, "id", "TeamsNotifyApp service principal")
 
-    def _graph_membership_role_id(self) -> UUID:
+    def _graph_membership_role_ids(self) -> tuple[UUID, ...]:
         graph = _json_object(
             self._run(
                 (
@@ -321,24 +327,25 @@ class AzureCliTeamsNotifyAppBootstrapper:
             raise TeamsNotifyAppBootstrapError(
                 "Microsoft Graph application roles are unavailable"
             )
-        matches: list[UUID] = []
+        matches: dict[str, list[UUID]] = {role: [] for role in _MEMBERSHIP_ROLES}
         for raw_role in cast(list[JsonValue], raw_roles):
             if not isinstance(raw_role, dict):
                 continue
             allowed = raw_role.get("allowedMemberTypes")
             if (
-                raw_role.get("value") == _MEMBERSHIP_ROLE
+                raw_role.get("value") in _MEMBERSHIP_ROLES
                 and isinstance(allowed, list)
                 and "Application" in allowed
             ):
                 raw_id = raw_role.get("id")
-                if isinstance(raw_id, str):
-                    matches.append(_uuid_output(raw_id, _MEMBERSHIP_ROLE))
-        if len(matches) != 1:
+                raw_value = raw_role.get("value")
+                if isinstance(raw_id, str) and isinstance(raw_value, str):
+                    matches[raw_value].append(_uuid_output(raw_id, raw_value))
+        if any(len(matches[role]) != 1 for role in _MEMBERSHIP_ROLES):
             raise TeamsNotifyAppBootstrapError(
                 "Microsoft Graph membership application role is ambiguous"
             )
-        return matches[0]
+        return tuple(matches[role][0] for role in _MEMBERSHIP_ROLES)
 
     def _credential_ids(self, client_id: UUID) -> set[UUID]:
         values = _json_array(

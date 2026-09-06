@@ -1,0 +1,10 @@
+{
+  "workflow_run": {
+    "name": "Build and test",
+    "conclusion": "success",
+    "html_url": "https://github.example/example/service/actions/runs/1001"
+  },
+  "repository": {
+    "full_name": "example/service"
+  }
+}

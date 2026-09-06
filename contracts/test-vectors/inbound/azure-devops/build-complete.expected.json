@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "azure-devops-33333333-3333-4333-8333-333333333333",
+  "route": "release-notifications",
+  "title": "Azure Pipelines build succeeded",
+  "body": "Azure Pipelines build 20260906.1 completed with succeeded and status completed.",
+  "severity": "success",
+  "facts": [
+    {"key": "Build", "value": "20260906.1"},
+    {"key": "Result", "value": "succeeded"},
+    {"key": "Status", "value": "completed"}
+  ],
+  "links": [
+    {"label": "Open in Azure DevOps", "url": "https://dev.azure.com/example/project/_build/results?buildId=1001"}
+  ],
+  "metadata": {
+    "source": "azure-devops",
+    "correlationId": "33333333-3333-4333-8333-333333333333"
+  }
+}

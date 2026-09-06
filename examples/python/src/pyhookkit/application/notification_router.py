@@ -49,6 +49,18 @@ class NotificationRouter:
         _validate_producer(producer)
         return self._store.submit(producer, notification)
 
+    def submit_to_target(
+        self,
+        producer: str,
+        target_id: str,
+        notification: CanonicalNotification,
+    ) -> SubmissionReceipt:
+        """Durably enqueue a notification for one configured target only."""
+        _validate_producer(producer)
+        if not target_id.strip():
+            raise ValueError("target ID must not be blank")
+        return self._store.submit_to_target(producer, target_id, notification)
+
     def status(
         self,
         producer: str,

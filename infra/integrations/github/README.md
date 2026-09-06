@@ -29,3 +29,16 @@ promotion. GitLab alone owns the Teams Workflow callback URL.
 The approval card links to the GitHub Actions run. GitHub's native environment
 review remains the source of truth; the Teams button does not approve a
 deployment by itself.
+
+## Direct router and repository Webhook paths
+
+Set the workflow input `notification_path` to `router` to submit the approval
+notification directly. Configure repository variable `NOTIFICATION_ROUTER_URL`
+and repository secret `NOTIFICATION_ROUTER_TOKEN`; optionally provide
+`router_target_id` for one destination. The promotion job still uses GitLab as
+the GitOps write boundary.
+
+For provider-native delivery, register a GitHub inbound integration and use its
+URL in **Settings** > **Webhooks**. Configure a high-entropy secret and enable
+only supported events. The receiver verifies `X-Hub-Signature-256` before
+parsing the payload. See the [producer integrations guide](../../../docs/producer-integrations.md#github-repository-webhook).

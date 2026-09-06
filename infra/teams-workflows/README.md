@@ -28,9 +28,9 @@ the connector authorization flow, and monitor license, sign-in, and connection
 health separately from flow ownership.
 
 Do not grant the dedicated user a tenant administrator role. Team membership is
-sufficient for a standard destination channel. Private and shared channels are
-visible only when the user is a member, and the Teams connector does not
-currently support posting messages or Adaptive Cards to private channels.
+sufficient for a standard destination channel. Private channels require both
+Team and channel membership; `TeamsNotifyApp` can automate both. Shared channels
+are not supported by this setup.
 
 ### Authorization boundaries
 
@@ -156,7 +156,7 @@ Before the first production deployment, verify each permission independently:
 | Destination access | Dedicated connection user | The approved standard channel is visible to the user and receives a synthetic card |
 | Optional channel inventory | Graph delegated or application principal | `list-team-channels.py` writes the expected access-scoped `0600` report |
 | Runtime invocation | Central router or approved CI/CD identity | It can read the callback secret and validated destination metadata, but has no connection-user credentials |
-| Destination registration | `TeamsNotifyApp` | `GroupMember.ReadWrite.All` application permission to ensure the Teams connection user is a normal member of the Team's backing Microsoft 365 Group |
+| Destination registration | `TeamsNotifyApp` | `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and `TeamMember.ReadWriteNonOwnerRole.All` application permissions to configure standard and private channel membership |
 | Operational recovery | Two named administrators | Both appear as co-owners and can inspect run history without assuming the connection user's account |
 
 `TeamsNotifyApp` is separate from the Dataverse application user that owns the
@@ -168,7 +168,9 @@ Solution-aware Flow. Bootstrap requires:
   **Cloud Application Administrator** only when managing an app owned by
   another identity;
 - **Privileged Role Administrator** to grant tenant-wide consent for the
-  Microsoft Graph `GroupMember.ReadWrite.All` application role.
+  Microsoft Graph `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`,
+  `TeamMember.Read.All`, and
+  `TeamMember.ReadWriteNonOwnerRole.All` application roles.
 
 Use PIM to activate Privileged Role Administrator only for bootstrap when the
 tenant supports it. Do not use Global Administrator as the routine bootstrap

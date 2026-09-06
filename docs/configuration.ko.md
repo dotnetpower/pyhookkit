@@ -117,6 +117,14 @@ TEAMS_NOTIFY_CLIENT_SECRET="<TeamsNotifyApp client secret>"
 TEAMS_CONNECTION_USER_ID="<dedicated Teams connection user object GUID>"
 NOTIFICATION_ROUTER_URL="<central router HTTPS base URL>"
 NOTIFICATION_ROUTER_TOKEN="<producer-specific router bearer token>"
+PYHOOKKIT_ADMIN_TOKEN="<central router administrator bearer token>"
+PYHOOKKIT_GITHUB_ROUTER_TOKEN="<legacy GitHub producer bearer token>"
+PYHOOKKIT_GITLAB_ROUTER_TOKEN="<legacy GitLab producer bearer token>"
+PYHOOKKIT_ARGOCD_ROUTER_TOKEN="<legacy Argo CD producer bearer token>"
+PYHOOKKIT_AZURE_DEVOPS_ROUTER_TOKEN="<legacy Azure DevOps producer bearer token>"
+GITHUB_WEBHOOK_SECRET="<GitHub Webhook HMAC secret>"
+GITLAB_WEBHOOK_SIGNING_TOKEN="<GitLab whsec_ signing token>"
+AZURE_DEVOPS_WEBHOOK_PASSWORD="<Azure DevOps Service Hook Basic password>"
 ```
 
 다음이 필요합니다.
@@ -136,6 +144,9 @@ NOTIFICATION_ROUTER_TOKEN="<producer-specific router bearer token>"
 두 `NOTIFICATION_ROUTER_*` 값은 선택 사항입니다. 생산자가
 [중앙 알림 라우터](central-notification-router.ko.md)를 통해 정규 JSON을
 제출할 때만 구성하세요. 모든 생산자는 서로 다른 토큰을 사용해야 합니다.
+하나의 경로나 대상으로 제한하고 독립적으로 폐기할 수 있는 서버 발급
+`phk_` API 키를 권장합니다. 공급자 Webhook 변수는 `/v1/inbound/*`
+통합에만 필요하며 값은 SQLite에 저장하지 않습니다.
 
 `TEAMS_NOTIFY_*` 및 연결 사용자에 해당하는 네 값은 수동으로 생성하지
 마세요.

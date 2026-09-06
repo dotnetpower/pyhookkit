@@ -1,0 +1,14 @@
+{
+  "id": "33333333-3333-4333-8333-333333333333",
+  "eventType": "build.complete",
+  "resource": {
+    "buildNumber": "20260906.1",
+    "result": "succeeded",
+    "status": "completed",
+    "_links": {
+      "web": {
+        "href": "https://dev.azure.com/example/project/_build/results?buildId=1001"
+      }
+    }
+  }
+}

@@ -47,6 +47,36 @@ def test_client_submits_with_producer_credential() -> None:
     assert result.duplicate is False
 
 
+def test_client_submits_to_one_validated_target() -> None:
+    captured: list[str] = []
+
+    def post(url: str, **_kwargs: object) -> httpx.Response:
+        captured.append(url)
+        return httpx.Response(
+            202,
+            json={
+                "notificationId": "11111111-1111-4111-8111-111111111111",
+                "duplicate": False,
+                "state": "queued",
+            },
+        )
+
+    client = NotificationRouterClient(
+        NotificationRouterUrl("https://router.example.com"),
+        NotificationRouterToken(_TOKEN),
+        "github",
+        post=post,
+    )
+
+    client.submit({"schemaVersion": "1.0"}, target_id="teams-release")
+
+    assert captured == [
+        "https://router.example.com/v1/destinations/teams-release/notifications"
+    ]
+    with pytest.raises(ValueError, match="target ID"):
+        client.submit({"schemaVersion": "1.0"}, target_id="Invalid Target")
+
+
 def test_client_rejects_non_tls_remote_url_and_failed_response() -> None:
     with pytest.raises(ValueError, match="HTTPS"):
         NotificationRouterUrl("http://router.example.com")

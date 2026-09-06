@@ -28,11 +28,30 @@ mode `0600`.
 | Central router provider credentials | Router runtime secret store |
 | TeamsNotifyApp client credential | Router runtime secret store or owner-only local `.env` |
 | Kubernetes administrator credentials | Operator kubeconfig outside Git |
+| GitHub Webhook secret | Router runtime secret store and matching GitHub Webhook |
+| GitLab `whsec_` signing token | Router runtime secret store; copy once from GitLab |
+| Azure DevOps Service Hook password | Router runtime secret store and HTTPS Basic authentication |
 
 Use a distinct revocable token for each producer. GitHub and the AKS incident
 probe must not share the Argo CD project token. Give the Argo token the shortest
 practical expiration and send it in the `PRIVATE-TOKEN` header, never in a URL
 or notification body.
+
+Prefer server-issued `phk_` producer API keys. SQLite stores only their
+SHA-256 digests and redacted use metadata. Restrict each key to one route or
+target, reveal it only once, and revoke it during rotation before removing the
+old producer secret.
+
+Provider-native inbound authentication differs by provider:
+
+- GitHub uses `X-Hub-Signature-256` HMAC-SHA256 over the exact raw body.
+- GitLab Standard Webhooks use HMAC-SHA256 over
+  `{webhook-id}.{webhook-timestamp}.{raw-body}` and require timestamp freshness.
+- Azure DevOps Service Hooks use public HTTPS and Basic authentication. The
+  official Web Hooks documentation does not define an HMAC delivery signature.
+
+Publish `/v1/inbound/*` only through an HTTPS gateway with request-size and rate
+limits. Never publish `/admin` or the SQLite file.
 
 ## Logging and evidence
 

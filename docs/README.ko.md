@@ -31,7 +31,7 @@ Graph 앱이 필요하지 않습니다.
 |---|---|---|
 | Microsoft 365 게시 계정 | Teams 커넥터가 이 사용자의 권한과 Team 접근 권한으로 카드를 게시합니다. | 필수. 빠른 테스트에는 기존 라이선스 사용자를 사용할 수 있습니다. |
 | 공통 Power Automate 흐름 | 서명된 HTTP URL을 만들고 요청의 목적지와 Adaptive Card를 Teams 작업에 연결합니다. | 필수 |
-| `TeamsNotifyApp` Graph 앱 | 게시 계정을 여러 Team의 기반 Microsoft 365 그룹에 자동으로 추가합니다. | 선택 사항. 첫 전송은 Team 소유자가 수동으로 추가할 수 있습니다. |
+| `TeamsNotifyApp` Graph 앱 | 게시 계정을 여러 Team의 일반 멤버로 자동 추가합니다. | 선택 사항. 첫 전송은 Team 소유자가 수동으로 추가할 수 있습니다. |
 | PyHookKit 라우터 | 기존 Slack 알림 생산자를 통제된 경로로 전환하거나 여러 Slack·Teams 대상으로 팬아웃합니다. | 선택 사항 |
 
 `TeamsNotifyApp`은 메시지를 게시하지 않으며 Power Automate의 사용자 연결을
@@ -49,6 +49,9 @@ Graph 앱이 필요하지 않습니다.
 | 콜백과 자격 증명 보호하기 | [보안](security.ko.md) |
 | 여러 Team의 게시 계정 멤버십 자동화하기 | [TeamsNotifyApp 부트스트랩](teams-notify-app-bootstrap.ko.md) |
 | 선택적 팬아웃 라우터 실행하기 | [중앙 알림 라우터](central-notification-router.ko.md) |
+| 웹에서 채널과 최근 알림 관리하기 | [중앙 라우터 관리 대시보드](central-notification-router.ko.md#관리-대시보드-실행) |
+| GitHub, GitLab, Argo CD 및 Azure DevOps 연결하기 | [생산자 통합](producer-integrations.ko.md) |
+| 중앙 라우터의 SQLite 테이블 이해하기 | [SQLite 데이터 모델](central-router-sqlite-data-model.ko.md) |
 | Slack과 Teams 의미 동등성 이해하기 | [알림 동등성](notification-parity.ko.md) |
 
 ## 고급 운영 및 예제

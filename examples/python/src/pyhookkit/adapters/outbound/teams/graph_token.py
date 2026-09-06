@@ -16,8 +16,10 @@ from pyhookkit.json_types import JsonObject
 
 _MEMBERSHIP_ROLES = frozenset(
     {
-        "GroupMember.ReadWrite.All",
-        "Group.ReadWrite.All",
+        "Channel.ReadBasic.All",
+        "ChannelMember.ReadWrite.All",
+        "TeamMember.Read.All",
+        "TeamMember.ReadWriteNonOwnerRole.All",
     }
 )
 
@@ -167,8 +169,6 @@ def _validate_claims(
             "Microsoft Graph app token has invalid application roles"
         )
     roles = frozenset(cast(list[str], role_values))
-    if roles.isdisjoint(_MEMBERSHIP_ROLES):
-        supported = " or ".join(sorted(_MEMBERSHIP_ROLES))
-        raise MicrosoftGraphTokenError(
-            f"Microsoft Graph app token requires {supported}"
-        )
+    if not _MEMBERSHIP_ROLES.issubset(roles):
+        required = " and ".join(sorted(_MEMBERSHIP_ROLES))
+        raise MicrosoftGraphTokenError(f"Microsoft Graph app token requires {required}")

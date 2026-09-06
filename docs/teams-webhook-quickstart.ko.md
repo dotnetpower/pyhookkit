@@ -82,7 +82,7 @@ Power Automate의 Microsoft Teams 연결에 로그인한 사용자의 권한으�
 > 비공개 채널과 공유 채널은 Team 멤버십만으로 접근할 수 없습니다. 이 10분
 > 경로에서는 표준 채널을 사용하세요.
 
-## 2단계: 공통 Power Automate 흐름 만들기—약 6분
+## 2단계: 공통 Power Automate 흐름 만들기—약 5분
 
 **실행 주체:** 흐름 작성자입니다. Microsoft Teams 연결은 1단계에서 만든
 서비스 계정으로 승인합니다.
@@ -106,6 +106,8 @@ Power Automate의 Microsoft Teams 연결에 로그인한 사용자의 권한으�
 
 8. 흐름을 저장한 다음 트리거의 **HTTP URL** 전체를 복사합니다.
 
+![Power Automate에서 Teams Webhook 요청 트리거와 채널 카드 게시 작업을 순서대로 연결한 공통 흐름입니다.](assets/power-automate-teams-workflow/shared-flow-overview.png)
+
 스크린샷을 포함한 전체 UI 절차는 [Power Automate Teams 워크플로 상세
 가이드](power-automate-teams-workflow.ko.md)를 참조하세요.
 
@@ -119,22 +121,170 @@ Teams Webhook 트리거는 서명된 HTTP 진입점을 만들지만 요청을 �
 **Anyone**은 공개 익명 URL을 뜻하지만 URL 자체에 호출 서명이 포함됩니다.
 전체 URL을 암호처럼 취급하고 Git, 로그, 스크린샷 또는 이슈에 남기지 마세요.
 
-## 3단계: 첫 알림 보내기—약 2분
+## 3단계: 첫 알림 보내기—약 3분
 
 저장소의 F00 스크립트는 Python 표준 라이브러리만 사용하며 `pyhookkit`
 패키지나 라우터를 실행하지 않습니다. Teams 채널 링크에서 Team과 채널 ID를
 추출하고 최소 Adaptive Card 봉투를 공통 흐름으로 보냅니다.
 
-저장소 루트에서 다음 명령을 실행합니다.
+명령을 실행하기 전에 Team 소유자가 대상 Team의 **Members** 탭을 열어
+`svc-teams-notification` 계정이 멤버인지 확인합니다. **Members and guests**
+목록에 계정이 없으면 **Add member**를 선택하고 계정을 검색하여 멤버로
+추가합니다. 표준 채널은 Team 멤버십을 상속하므로 채널마다 계정을 별도로
+추가할 필요가 없습니다.
+
+![Teams의 Members 탭에서 서비스 계정을 추가하기 전 Members and guests가 0명인 상태입니다.](assets/power-automate-teams-workflow/team-member.png)
+
+추가가 끝나면 **Members and guests**를 펼쳤을 때
+`svc-teams-notification` 계정이 표시되고 **Team role**이 **Member**인지
+확인합니다. 이 상태이면 서비스 계정의 Teams 연결로 해당 Team의 표준
+채널에 게시할 수 있습니다.
+
+![Teams의 Members and guests 목록에 서비스 계정이 Member 역할로 추가된 상태입니다.](assets/power-automate-teams-workflow/team-member2.png)
+
+게시 계정이 대상 Team의 멤버가 아니면 Webhook 트리거가 요청을 받아도
+**Post card in a chat or channel** 작업에서 채널 게시가 실패합니다. 비공개
+채널이나 공유 채널을 사용한다면 해당 채널에도 게시 계정을 별도로
+추가해야 합니다.
+
+다음으로 알림을 받을 채널의 링크를 저장합니다.
+
+1. Teams의 **Teams and channels**에서 대상 채널 오른쪽의 **...**를
+  선택합니다.
+2. **Copy link**를 선택합니다.
+
+  ![Teams의 대상 채널 오른쪽에 있는 더 보기 메뉴에서 Copy link를 선택하는 화면입니다.](assets/power-automate-teams-workflow/channel-copy-link.png)
+
+3. 저장소 루트의 Git에서 제외된 `.env`를 열고 복사한 링크 전체를 다음
+  변수의 값으로 붙여넣은 후 파일을 저장합니다.
+
+  ```dotenv
+  TEAMS_WORKFLOW_CHANNEL_LINK="<복사한 Teams 채널 링크 전체>"
+  ```
+
+  `.env.example`에는 실제 값을 입력하지 마세요. 저장소 루트에 `.env`가
+  없다면 먼저 `.env.example`을 `.env`로 복사하고 파일 권한을 `0600`으로
+  설정합니다.
+
+F00 스크립트는 복사한 링크의 `groupId` 쿼리 매개 변수에서 Team ID를 찾고
+`/l/channel/` 경로에서 채널 ID를 찾습니다. URL 형식을 검증한 후 Power
+Automate 요청에 `teamId`와 `channelId`를 명시적으로 추가합니다. Team ID와
+채널 ID를 별도로 복사할 필요는 없습니다.
+
+다음 탭 중 하나를 선택해 첫 알림을 보냅니다. 각 명령은 저장소 루트에서
+실행합니다.
+
+<!-- starlight-tabs:start -->
+
+### 스크립트 실행
 
 ```shell
+set -a
+. ./.env
+set +a
+
 cd examples/python/fundamentals/00_http_request
-
-export TEAMS_WORKFLOW_URL="<Power Automate HTTP URL 전체>"
-export TEAMS_WORKFLOW_CHANNEL_LINK="<Teams 채널 링크 전체>"
-
 python3 teams.py --send
 ```
+
+### Python 코드
+
+다음은 채널 링크에서 두 ID를 추출하고 Workflow에 직접 전송하는 독립 실행형
+Python 소스입니다. 실행하기 전에 `.env`를 환경 변수로 로드합니다.
+
+```shell
+set -a
+. ./.env
+set +a
+```
+
+```python
+import json
+import os
+import urllib.request
+from urllib.parse import parse_qs, unquote, urlsplit
+
+channel_link = urlsplit(os.environ["TEAMS_WORKFLOW_CHANNEL_LINK"])
+team_id = parse_qs(channel_link.query)["groupId"][0]
+channel_id = unquote(channel_link.path.split("/")[3])
+
+payload = {
+    "type": "message",
+    "teamId": team_id,
+    "channelId": channel_id,
+    "attachments": [
+        {
+            "contentType": "application/vnd.microsoft.card.adaptive",
+            "contentUrl": None,
+            "content": {
+                "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                "type": "AdaptiveCard",
+                "version": "1.4",
+                "body": [{"type": "TextBlock", "text": "Hello, world!", "wrap": True}],
+            },
+        }
+    ],
+}
+
+request = urllib.request.Request(
+    os.environ["TEAMS_WORKFLOW_URL"],
+    data=json.dumps(payload).encode(),
+    headers={"Content-Type": "application/json"},
+    method="POST",
+)
+
+with urllib.request.urlopen(request, timeout=10.0) as response:
+    print(json.dumps({"state": "succeeded", "statusCode": response.status}, indent=2))
+```
+
+### curl
+
+다음 셸 스크립트는 채널 링크에서 Team ID와 채널 ID를 추출하고 `curl`로
+동일한 요청을 보냅니다. Python은 실행하지 않습니다.
+
+```shell
+set -a
+. ./.env
+set +a
+
+# 환경 변수를 직접 지정하려면 다음 두 줄의 주석을 해제하고 값을 입력합니다.
+# TEAMS_WORKFLOW_URL="<Power Automate HTTP URL 전체>"
+# TEAMS_WORKFLOW_CHANNEL_LINK="<Teams에서 복사한 채널 링크 전체>"
+
+team_id="${TEAMS_WORKFLOW_CHANNEL_LINK#*groupId=}"
+team_id="${team_id%%&*}"
+encoded_channel_id="${TEAMS_WORKFLOW_CHANNEL_LINK#*/l/channel/}"
+encoded_channel_id="${encoded_channel_id%%/*}"
+printf -v channel_id '%b' "${encoded_channel_id//%/\\x}"
+
+payload="$(cat <<JSON
+{
+  "type": "message",
+  "teamId": "$team_id",
+  "channelId": "$channel_id",
+  "attachments": [{
+    "contentType": "application/vnd.microsoft.card.adaptive",
+    "contentUrl": null,
+    "content": {
+      "\$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+      "type": "AdaptiveCard",
+      "version": "1.4",
+      "body": [{"type": "TextBlock", "text": "Hello, world!", "wrap": true}]
+    }
+  }]
+}
+JSON
+)"
+
+curl --fail-with-body --silent --show-error \
+  --header "Content-Type: application/json" \
+  --data "$payload" \
+  --output /dev/null \
+  --write-out '{"state":"succeeded","statusCode":%{http_code}}\n' \
+  "$TEAMS_WORKFLOW_URL"
+```
+
+<!-- starlight-tabs:end -->
 
 정상 결과는 다음과 같습니다.
 
@@ -149,24 +299,26 @@ Power Automate 실행 기록이 성공했고 대상 Teams 채널에 **Hello, Wor
 카드가 표시되는지 확인합니다. 테넌트 정책이나 커넥터 버전에 따라 성공 응답은
 다른 `2xx` 상태일 수 있습니다.
 
+![Teams 채널에 Workflows가 게시한 Hello, world! Adaptive Card가 표시된 전송 성공 화면입니다.](assets/power-automate-teams-workflow/hello-world.png)
+
 ## 선택 사항: TeamsNotifyApp으로 멤버십 자동화하기
 
 첫 알림에는 Microsoft Graph 앱이 필요하지 않습니다. Team 소유자가 게시
 계정을 수동으로 추가하면 됩니다.
 
-대상 Team이 많거나 CI/CD에서 채널 등록을 반복해야 하면 `TeamsNotifyApp`을
-한 번 등록할 수 있습니다. 이 앱의 목적은 Microsoft Graph를 통해 게시
-계정을 Team의 기반 Microsoft 365 그룹에 추가하는 것입니다.
+알림 대상은 채널 링크를 사용하여 채널마다 등록합니다. 표준 채널의 멤버는
+Team 멤버십을 상속하므로 `svc-teams-notification` 계정은 채널마다가 아니라
+Team마다 한 번만 추가합니다. `TeamsNotifyApp`은 채널 등록 시 해당 Team의
+멤버십을 확인하고, 계정이 없을 때만 Microsoft Graph로 추가합니다.
 
-`TeamsNotifyApp`은 다음 작업을 수행하지 않습니다.
-
-- Teams 메시지 게시
-- Power Automate Microsoft Teams 연결 또는 MFA 대체
-- 비공개 채널이나 공유 채널 멤버십 자동 부여
+`TeamsNotifyApp`은 메시지를 게시하거나 Power Automate 연결과 MFA를
+대체하지 않습니다. 비공개 채널이면 Team과 채널 멤버십을 모두 자동화합니다.
+공유 채널은 지원하지 않습니다.
 
 자동화에는 관리자 동의가 부여된 Graph 애플리케이션 권한
-`GroupMember.ReadWrite.All`이 필요합니다. 권한이 넓으므로 대상이 적으면
-수동 멤버 추가를 유지하세요. 여러 Team의 멤버십 자동화가 필요할 때만
+`Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및
+`TeamMember.ReadWriteNonOwnerRole.All`이 필요합니다. 권한 범위가 넓으므로
+여러 Team의 멤버십 자동화가 필요한 경우에만
 [TeamsNotifyApp 부트스트랩 가이드](teams-notify-app-bootstrap.ko.md)를
 따르세요.
 

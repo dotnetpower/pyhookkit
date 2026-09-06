@@ -118,6 +118,14 @@ TEAMS_NOTIFY_CLIENT_SECRET="<TeamsNotifyApp client secret>"
 TEAMS_CONNECTION_USER_ID="<dedicated Teams connection user object GUID>"
 NOTIFICATION_ROUTER_URL="<central router HTTPS base URL>"
 NOTIFICATION_ROUTER_TOKEN="<producer-specific router bearer token>"
+PYHOOKKIT_ADMIN_TOKEN="<central router administrator bearer token>"
+PYHOOKKIT_GITHUB_ROUTER_TOKEN="<legacy GitHub producer bearer token>"
+PYHOOKKIT_GITLAB_ROUTER_TOKEN="<legacy GitLab producer bearer token>"
+PYHOOKKIT_ARGOCD_ROUTER_TOKEN="<legacy Argo CD producer bearer token>"
+PYHOOKKIT_AZURE_DEVOPS_ROUTER_TOKEN="<legacy Azure DevOps producer bearer token>"
+GITHUB_WEBHOOK_SECRET="<GitHub Webhook HMAC secret>"
+GITLAB_WEBHOOK_SIGNING_TOKEN="<GitLab whsec_ signing token>"
+AZURE_DEVOPS_WEBHOOK_PASSWORD="<Azure DevOps Service Hook Basic password>"
 ```
 
 You need:
@@ -136,7 +144,10 @@ You need:
 The two `NOTIFICATION_ROUTER_*` values are optional. Configure them only when a
 producer submits canonical JSON through the
 [central notification router](central-notification-router.md). Every producer
-must use a distinct token.
+must use a distinct token. Server-issued `phk_` API keys are preferred because
+they can be restricted to one route or destination and revoked independently.
+The provider Webhook variables are required only for `/v1/inbound/*`
+integrations and their values are never stored in SQLite.
 
 Do not manually create the four `TEAMS_NOTIFY_*` and connection-user values.
 The central router `bootstrap-teams-app` command creates or reuses the visible

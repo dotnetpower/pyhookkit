@@ -1,5 +1,6 @@
 """Authenticated client for submitting canonical notifications to a router."""
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import cast
@@ -8,6 +9,8 @@ from urllib.parse import urlsplit
 import httpx
 
 from pyhookkit.json_types import JsonObject
+
+_TARGET_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 
 
 @dataclass(frozen=True, slots=True, repr=False)
@@ -33,6 +36,12 @@ class NotificationRouterUrl:
     def submission_url(self) -> str:
         """Return the canonical submission endpoint."""
         return f"{self.value.rstrip('/')}/v1/notifications"
+
+    def target_submission_url(self, target_id: str) -> str:
+        """Return one validated destination-specific submission endpoint."""
+        if _TARGET_ID.fullmatch(target_id) is None:
+            raise ValueError("notification router target ID must use kebab-case")
+        return f"{self.value.rstrip('/')}/v1/destinations/{target_id}/notifications"
 
     def __repr__(self) -> str:
         return "NotificationRouterUrl(value=<redacted>)"
@@ -83,10 +92,19 @@ class NotificationRouterClient:
         self._post = post
         self._timeout_seconds = timeout_seconds
 
-    def submit(self, payload: JsonObject) -> RouterSubmissionResult:
+    def submit(
+        self,
+        payload: JsonObject,
+        *,
+        target_id: str | None = None,
+    ) -> RouterSubmissionResult:
         """Submit a canonical notification without retaining provider output."""
         response = self._post(
-            self._url.submission_url,
+            (
+                self._url.submission_url
+                if target_id is None
+                else self._url.target_submission_url(target_id)
+            ),
             json=payload,
             headers={
                 "Authorization": f"Bearer {self._token.value}",

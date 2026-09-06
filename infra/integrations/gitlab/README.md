@@ -94,6 +94,38 @@ before provider rendering and requires the two `NOTIFICATION_ROUTER_*`
 variables. Keep the paths mutually exclusive for an event to prevent duplicate
 messages.
 
+## Router network placement
+
+GitLab project Webhooks send GitLab-specific payloads and do not match the
+router's canonical contract. Use the existing CI job to transform and submit
+notifications instead of pointing a raw project Webhook at
+`/v1/notifications`.
+
+- For a publicly reachable router, set `NOTIFICATION_ROUTER_URL` to the HTTPS
+	API-gateway address and keep `NOTIFICATION_ROUTER_TOKEN` masked and protected.
+	Expose only the notification API, not the administration dashboard.
+- For a private router, run the notification job on a self-hosted GitLab Runner
+	that can reach the router over the private network. The Runner initiates its
+	GitLab connection outbound, so the router needs no public ingress.
+- If a private Runner is unavailable, place a signature-verifying public edge
+	and durable queue in front of a private worker. A queue adapter is not
+	included in this repository.
+- If only direct Teams delivery is required, use `notification-path=direct` and
+	the existing shared Power Automate flow. Do not create another flow merely to
+	relay traffic to the private router.
+
+See the [central router network guidance](../../../docs/central-notification-router.md#connect-github-and-gitlab-to-the-router)
+for topology and security details.
+
+Set optional `NOTIFICATION_ROUTER_TARGET_ID` when router mode must address one
+destination instead of every target on the canonical route.
+
+For a Project Webhook, use GitLab's **Generate signing token** option and store
+the one-time `whsec_` value in the router secret store. The inbound receiver
+validates Standard Webhooks HMAC-SHA256 headers and timestamp freshness. Do not
+use the legacy plaintext `X-Gitlab-Token` for new integrations. See the
+[producer integrations guide](../../../docs/producer-integrations.md#gitlab-project-webhook).
+
 The configuration is deliberately a demonstration control plane, not a
 production event bus. If event volume or delivery guarantees grow beyond these
 four scenarios, replace pipeline dispatch with a private queue-backed service

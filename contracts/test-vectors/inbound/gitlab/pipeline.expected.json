@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "eventId": "gitlab-22222222-2222-4222-8222-222222222222",
+  "route": "release-notifications",
+  "title": "GitLab pipeline success",
+  "body": "GitLab pipeline for example/service completed with success.",
+  "severity": "success",
+  "facts": [
+    {"key": "Project", "value": "example/service"},
+    {"key": "Status", "value": "success"}
+  ],
+  "links": [
+    {"label": "Open in GitLab", "url": "https://gitlab.example/example/service/-/pipelines/1001"}
+  ],
+  "metadata": {
+    "source": "gitlab-webhook",
+    "correlationId": "22222222-2222-4222-8222-222222222222"
+  }
+}

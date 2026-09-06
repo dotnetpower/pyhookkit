@@ -30,6 +30,7 @@ def run_notification_router_client(
     )
     parser.add_argument("--input", type=Path, required=True)
     parser.add_argument("--producer", required=True)
+    parser.add_argument("--target-id")
     parser.add_argument(
         "--url-env",
         default="NOTIFICATION_ROUTER_URL",
@@ -47,7 +48,10 @@ def run_notification_router_client(
         NotificationRouterUrl(raw_url),
         NotificationRouterToken(raw_token),
         parsed.producer,
-    ).submit(canonical_notification_to_json(notification))
+    ).submit(
+        canonical_notification_to_json(notification),
+        target_id=parsed.target_id,
+    )
     print(
         json.dumps(
             {

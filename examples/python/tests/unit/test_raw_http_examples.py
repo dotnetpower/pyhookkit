@@ -129,38 +129,12 @@ def test_send_rejects_non_https_destinations(
         send("http://provider.example/hooks/test")
 
 
-def test_raw_teams_logic_app_payload_extracts_card(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    namespace = _load_script("teams", monkeypatch)
-    build_payload = cast(
-        Callable[[], dict[str, object]],
-        namespace["build_payload"],
-    )
-    build_logic_app_payload = cast(
-        Callable[[str, str], dict[str, object]],
-        namespace["build_logic_app_payload"],
-    )
-
-    payload = build_logic_app_payload("team-example", "channel-example")
-
-    assert payload["teamId"] == "team-example"
-    assert payload["channelId"] == "channel-example"
-    assert payload["eventId"] == "example-http-001"
-    card = payload["card"]
-    assert isinstance(card, dict)
-    assert card["type"] == "AdaptiveCard"
-    workflow_payload = build_payload()
-    attachments_value = workflow_payload["attachments"]
-    assert isinstance(attachments_value, list)
-    attachments = cast(list[object], attachments_value)
-    attachment_value = attachments[0]
-    assert isinstance(attachment_value, dict)
-    attachment = cast(dict[str, object], attachment_value)
-    assert card == attachment["content"]
-
-
-def test_raw_teams_workflow_payload_adds_target_to_card(
+@pytest.mark.parametrize(
+    "host",
+    ["teams.microsoft.com", "teams.cloud.microsoft"],
+)
+def test_raw_teams_workflow_payload_adds_resolved_target_to_card(
+    host: str,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     namespace = _load_script("teams", monkeypatch)
@@ -169,7 +143,8 @@ def test_raw_teams_workflow_payload_adds_target_to_card(
         namespace["build_workflow_payload"],
     )
 
-    payload = build_workflow_payload(_TEAMS_CHANNEL_LINK)
+    channel_link = _TEAMS_CHANNEL_LINK.replace("teams.microsoft.com", host)
+    payload = build_workflow_payload(channel_link)
 
     assert payload["teamId"] == "11111111-1111-4111-8111-111111111111"
     assert payload["channelId"] == "19:example-channel@thread.tacv2"
@@ -187,5 +162,30 @@ def test_raw_teams_workflow_payload_rejects_non_channel_link(
         namespace["build_workflow_payload"],
     )
 
-    with pytest.raises(ValueError, match="invalid Microsoft Teams channel link"):
+    with pytest.raises(ValueError, match="complete Microsoft Teams Copy link"):
         build_workflow_payload("https://example.test/channel")
+
+
+@pytest.mark.parametrize(
+    "channel_link",
+    [
+        _TEAMS_CHANNEL_LINK.replace("groupId=", "missingGroupId="),
+        _TEAMS_CHANNEL_LINK.replace(
+            "11111111-1111-4111-8111-111111111111",
+            "not-a-guid",
+        ),
+        _TEAMS_CHANNEL_LINK.replace("&tenantId=", "&broken&tenantId="),
+    ],
+)
+def test_raw_teams_workflow_payload_rejects_unresolved_target(
+    channel_link: str,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    namespace = _load_script("teams", monkeypatch)
+    build_workflow_payload = cast(
+        Callable[[str], dict[str, object]],
+        namespace["build_workflow_payload"],
+    )
+
+    with pytest.raises(ValueError, match="complete Microsoft Teams Copy link"):
+        build_workflow_payload(channel_link)

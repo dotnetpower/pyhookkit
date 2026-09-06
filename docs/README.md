@@ -30,7 +30,7 @@ complete three tasks:
 |---|---|---|
 | Microsoft 365 posting identity | The Teams connector posts with this user's permissions and Team access. | Yes. An existing licensed user works for a quick test. |
 | Shared Power Automate flow | Creates the signed HTTP URL and maps each request's destination and Adaptive Card to the Teams action. | Yes |
-| `TeamsNotifyApp` Graph app | Adds the posting identity to the backing Microsoft 365 Groups for many Teams. | Optional. A Team owner can add the identity manually for the first delivery. |
+| `TeamsNotifyApp` Graph app | Adds the posting identity as a regular member of many Teams. | Optional. A Team owner can add the identity manually for the first delivery. |
 | PyHookKit router | Moves existing Slack producers behind a controlled route or fans out to Slack and Teams destinations. | Optional |
 
 `TeamsNotifyApp` does not post messages and does not replace the delegated Power
@@ -48,6 +48,9 @@ permission when only a few Teams are involved.
 | Protect callbacks and credentials | [Security](security.md) |
 | Automate posting-identity membership across many Teams | [TeamsNotifyApp bootstrap](teams-notify-app-bootstrap.md) |
 | Run the optional fan-out router | [Central notification router](central-notification-router.md) |
+| Manage channels and recent notifications in a browser | [Router administration dashboard](central-notification-router.md#run-the-administration-dashboard) |
+| Connect GitHub, GitLab, Argo CD, and Azure DevOps | [Producer integrations](producer-integrations.md) |
+| Understand the central router SQLite tables | [SQLite data model](central-router-sqlite-data-model.md) |
 | Understand Slack and Teams semantic parity | [Notification parity](notification-parity.md) |
 
 ## Advanced operations and examples

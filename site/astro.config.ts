@@ -109,7 +109,12 @@ export default defineConfig({
         {
           label: 'Optional automation',
           translations: { ko: '선택적 자동화' },
-          items: ['docs/teams-notify-app-bootstrap', 'docs/central-notification-router'],
+          items: [
+            'docs/teams-notify-app-bootstrap',
+            'docs/central-notification-router',
+            'docs/producer-integrations',
+            'docs/central-router-sqlite-data-model',
+          ],
         },
         {
           label: 'PyHookKit and advanced',

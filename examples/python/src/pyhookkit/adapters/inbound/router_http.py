@@ -13,6 +13,9 @@ from pyhookkit.adapters.inbound.canonical_notification_json import (
     CanonicalNotificationJsonError,
     canonical_notification_from_json,
 )
+from pyhookkit.adapters.inbound.provider_webhook_http import (
+    ProviderWebhookHttpApplication,
+)
 from pyhookkit.adapters.outbound.routing_status_json import (
     routed_notification_status_to_json,
     submission_receipt_to_json,
@@ -23,6 +26,12 @@ from pyhookkit.application.notification_router import (
     RouteNotConfiguredError,
 )
 from pyhookkit.json_types import JsonObject
+from pyhookkit.ports.producer_credentials import (
+    AuthenticatedProducer,
+    ProducerAuthenticationError,
+    ProducerAuthorizationError,
+    ProducerCredentialVerifier,
+)
 
 _PRODUCER = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 _STATUS_PATH = re.compile(
@@ -30,10 +39,9 @@ _STATUS_PATH = re.compile(
     r"(?P<notification_id>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-"
     r"[0-9a-f]{4}-[0-9a-f]{12})$"
 )
-
-
-class RouterAuthenticationError(ValueError):
-    """Router producer credentials are missing or invalid."""
+_TARGET_SUBMISSION_PATH = re.compile(
+    r"^/v1/destinations/(?P<target_id>[a-z0-9]+(?:-[a-z0-9]+)*)/notifications$"
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -62,7 +70,7 @@ class ProducerAuthenticator:
             normalized[producer] = secret
         self._secrets = normalized
 
-    def authenticate(self, headers: Mapping[str, str]) -> str:
+    def authenticate(self, headers: Mapping[str, str]) -> AuthenticatedProducer:
         """Return the producer identity or raise one generic auth error."""
         producer = headers.get("x-pyhookkit-producer", "")
         authorization = headers.get("authorization", "")
@@ -72,8 +80,26 @@ class ProducerAuthenticator:
             authorization[len(prefix) :] if authorization.startswith(prefix) else ""
         )
         if expected is None or not supplied or not compare_digest(expected, supplied):
-            raise RouterAuthenticationError("invalid router credentials")
-        return producer
+            raise ProducerAuthenticationError("invalid router credentials")
+        return AuthenticatedProducer(producer)
+
+
+class CompositeProducerAuthenticator:
+    """Try multiple isolated credential sources without exposing which matched."""
+
+    def __init__(self, verifiers: tuple[ProducerCredentialVerifier, ...]) -> None:
+        if not verifiers:
+            raise ValueError("at least one producer credential source is required")
+        self._verifiers = verifiers
+
+    def authenticate(self, headers: Mapping[str, str]) -> AuthenticatedProducer:
+        """Return the first authenticated identity or one generic error."""
+        for verifier in self._verifiers:
+            try:
+                return verifier.authenticate(headers)
+            except ProducerAuthenticationError:
+                continue
+        raise ProducerAuthenticationError("invalid router credentials")
 
 
 class RouterHttpApplication:
@@ -82,14 +108,16 @@ class RouterHttpApplication:
     def __init__(
         self,
         router: NotificationRouter,
-        authenticator: ProducerAuthenticator,
+        authenticator: ProducerCredentialVerifier,
         *,
+        provider_webhooks: ProviderWebhookHttpApplication | None = None,
         max_body_bytes: int = 64 * 1024,
     ) -> None:
         if max_body_bytes < 1:
             raise ValueError("maximum request body size must be positive")
         self._router = router
         self._authenticator = authenticator
+        self._provider_webhooks = provider_webhooks
         self.max_body_bytes = max_body_bytes
 
     def handle(
@@ -103,19 +131,41 @@ class RouterHttpApplication:
         route_path = urlsplit(path).path
         if method == "GET" and route_path == "/healthz":
             return RouterHttpResponse(200, {"status": "ok"})
+        if self._provider_webhooks is not None and self._provider_webhooks.handles(
+            method, route_path
+        ):
+            webhook_response = self._provider_webhooks.handle(
+                method,
+                route_path,
+                headers,
+                body,
+            )
+            return RouterHttpResponse(
+                webhook_response.status_code,
+                webhook_response.body,
+            )
 
         try:
-            producer = self._authenticator.authenticate(headers)
-        except RouterAuthenticationError:
+            principal = self._authenticator.authenticate(headers)
+        except ProducerAuthenticationError:
             return _error(401, "unauthorized", "invalid router credentials")
 
         if method == "POST" and route_path == "/v1/notifications":
-            return self._submit(producer, headers, body)
+            return self._submit(principal, headers, body, target_id=None)
+        if method == "POST":
+            target_match = _TARGET_SUBMISSION_PATH.fullmatch(route_path)
+            if target_match is not None:
+                return self._submit(
+                    principal,
+                    headers,
+                    body,
+                    target_id=target_match.group("target_id"),
+                )
         if method == "GET":
             match = _STATUS_PATH.fullmatch(route_path)
             if match is not None:
                 status = self._router.status(
-                    producer,
+                    principal.producer,
                     match.group("notification_id"),
                 )
                 if status is None:
@@ -132,9 +182,11 @@ class RouterHttpApplication:
 
     def _submit(
         self,
-        producer: str,
+        principal: AuthenticatedProducer,
         headers: Mapping[str, str],
         body: bytes,
+        *,
+        target_id: str | None,
     ) -> RouterHttpResponse:
         content_type = headers.get("content-type", "").split(";", maxsplit=1)[0]
         if content_type.strip().lower() != "application/json":
@@ -148,16 +200,30 @@ class RouterHttpApplication:
         try:
             value: object = json.loads(body.decode("utf-8"))
             notification = canonical_notification_from_json(value)
-            receipt = self._router.submit(producer, notification)
+            principal.authorize(route=notification.route, target_id=target_id)
+            receipt = (
+                self._router.submit(principal.producer, notification)
+                if target_id is None
+                else self._router.submit_to_target(
+                    principal.producer,
+                    target_id,
+                    notification,
+                )
+            )
         except (UnicodeDecodeError, json.JSONDecodeError):
             return _error(400, "invalid_json", "request body must be valid JSON")
         except CanonicalNotificationJsonError as error:
             return _error(422, "invalid_notification", str(error))
+        except ProducerAuthorizationError as error:
+            return _error(403, "forbidden", str(error))
         except RouteNotConfiguredError as error:
             return _error(422, "route_not_configured", str(error))
         except NotificationConflictError as error:
             return _error(409, "event_conflict", str(error))
-        return RouterHttpResponse(202, submission_receipt_to_json(receipt))
+        response = submission_receipt_to_json(receipt)
+        if target_id is not None:
+            response["targetId"] = target_id
+        return RouterHttpResponse(202, response)
 
 
 class RouterRequestHandler(BaseHTTPRequestHandler):

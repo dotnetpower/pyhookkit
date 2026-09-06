@@ -33,10 +33,14 @@ _CHANNEL_LINK = (
 )
 
 
-def _notification(*, body: str = "Deployment completed") -> CanonicalNotification:
+def _notification(
+    *,
+    body: str = "Deployment completed",
+    event_id: str = "router-event-001",
+) -> CanonicalNotification:
     return CanonicalNotification(
         schema_version="1.0",
-        event_id="router-event-001",
+        event_id=event_id,
         route="release-notifications",
         title="Deployment result",
         body=body,
@@ -120,6 +124,12 @@ def test_router_fans_out_and_records_partial_failure(tmp_path: Path) -> None:
     assert completed.deliveries[1].attempts == 2
     assert completed.deliveries[1].error_kind is DeliveryErrorKind.RATE_LIMITED
     assert completed.deliveries[1].status_code == 429
+    recent = store.recent_notifications()
+    assert len(recent) == 1
+    assert recent[0].notification_id == receipt.notification_id
+    assert recent[0].producer == "gitlab"
+    assert recent[0].state is NotificationState.PARTIAL_FAILED
+    assert len(recent[0].deliveries) == 2
     assert router.deliver_next() is False
     assert database.stat().st_mode & 0o777 == 0o600
 
@@ -141,6 +151,51 @@ def test_duplicate_is_idempotent_and_changed_content_conflicts(
     assert duplicate.state is NotificationState.QUEUED
     with pytest.raises(NotificationConflictError, match="different content"):
         router.submit("argocd", _notification(body="Changed content"))
+
+
+def test_target_submission_queues_only_requested_destination(tmp_path: Path) -> None:
+    store = _store(tmp_path / "router.sqlite3")
+    router = NotificationRouter(store, StubDelivery(), clock=lambda: _NOW)
+
+    receipt = router.submit_to_target(
+        "gitlab",
+        "teams-staging",
+        _notification(),
+    )
+    duplicate = router.submit_to_target(
+        "gitlab",
+        "teams-staging",
+        _notification(),
+    )
+    status = router.status("gitlab", receipt.notification_id)
+
+    assert status is not None
+    assert [delivery.target_id for delivery in status.deliveries] == ["teams-staging"]
+    assert duplicate.duplicate is True
+
+    with pytest.raises(RouteNotConfiguredError, match="not configured"):
+        router.submit_to_target(
+            "gitlab",
+            "missing-target",
+            _notification(event_id="target-missing"),
+        )
+
+    store.configure_destination(
+        StoredDestination(
+            target_id="teams-disabled",
+            route="release-notifications",
+            provider="teams-workflow",
+            endpoint_environment_variable="TEAMS_WORKFLOW_URL",
+            channel_link=_CHANNEL_LINK,
+            enabled=False,
+        )
+    )
+    with pytest.raises(RouteNotConfiguredError, match="not configured"):
+        router.submit_to_target(
+            "gitlab",
+            "teams-disabled",
+            _notification(event_id="target-disabled"),
+        )
 
 
 def test_router_rejects_unknown_route_and_hides_other_producer_status(
@@ -224,6 +279,7 @@ def test_store_lists_and_updates_non_secret_destinations(tmp_path: Path) -> None
     assert teams.team_id == "11111111-1111-4111-8111-111111111111"
     assert teams.channel_id == "19:example-channel@thread.tacv2"
     assert teams.channel_name == "General"
+    assert teams.membership_type is None
 
 
 def test_store_migrates_existing_channel_links_to_metadata(tmp_path: Path) -> None:
@@ -265,6 +321,7 @@ def test_store_migrates_existing_channel_links_to_metadata(tmp_path: Path) -> No
     assert destination.team_id == "11111111-1111-4111-8111-111111111111"
     assert destination.channel_id == "19:example-channel@thread.tacv2"
     assert destination.channel_name == "General"
+    assert destination.membership_type is None
 
 
 def test_store_reports_delivering_and_all_failed_states(tmp_path: Path) -> None:
@@ -348,6 +405,15 @@ def test_store_reports_delivering_and_all_failed_states(tmp_path: Path) -> None:
             "SLACK_WEBHOOK_URL",
             _CHANNEL_LINK,
             True,
+        ),
+        StoredDestination(
+            "teams-staging",
+            "release-notifications",
+            "teams-workflow",
+            "TEAMS_WORKFLOW_URL",
+            _CHANNEL_LINK,
+            True,
+            membership_type="shared",
         ),
     ],
 )

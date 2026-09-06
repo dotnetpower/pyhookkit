@@ -9,9 +9,13 @@ from threading import Thread
 import pytest
 
 from pyhookkit.adapters.inbound.router_http import (
+    CompositeProducerAuthenticator,
     ProducerAuthenticator,
     RouterHttpApplication,
     RouterRequestHandler,
+)
+from pyhookkit.adapters.outbound.sqlite_producer_credentials import (
+    SqliteProducerApiKeyStore,
 )
 from pyhookkit.adapters.outbound.sqlite_route_store import (
     SqliteRouteStore,
@@ -99,6 +103,125 @@ def test_http_accepts_duplicate_and_returns_delivery_status(tmp_path: Path) -> N
         body,
     )
     assert delivered_duplicate.body["state"] == "delivered"
+
+
+def test_http_target_webhook_queues_only_selected_destination(tmp_path: Path) -> None:
+    application, router = _application(tmp_path)
+    body = json.dumps(_PAYLOAD).encode()
+
+    accepted = application.handle(
+        "POST",
+        "/v1/destinations/slack-staging/notifications",
+        _HEADERS,
+        body,
+    )
+
+    assert accepted.status_code == 202
+    assert accepted.body["targetId"] == "slack-staging"
+    notification_id = accepted.body["notificationId"]
+    assert isinstance(notification_id, str)
+    status = router.status("gitlab", notification_id)
+    assert status is not None
+    assert [delivery.target_id for delivery in status.deliveries] == ["slack-staging"]
+
+
+def test_http_target_webhook_enforces_auth_idempotency_and_route(
+    tmp_path: Path,
+) -> None:
+    application, _ = _application(tmp_path)
+    path = "/v1/destinations/slack-staging/notifications"
+    body = json.dumps(_PAYLOAD).encode()
+
+    accepted = application.handle("POST", path, _HEADERS, body)
+    duplicate = application.handle("POST", path, _HEADERS, body)
+    changed_content = application.handle(
+        "POST",
+        path,
+        _HEADERS,
+        json.dumps({**_PAYLOAD, "body": "Changed"}).encode(),
+    )
+    changed_target = application.handle(
+        "POST",
+        "/v1/destinations/teams-staging/notifications",
+        _HEADERS,
+        body,
+    )
+    missing = application.handle(
+        "POST",
+        "/v1/destinations/missing-target/notifications",
+        _HEADERS,
+        json.dumps({**_PAYLOAD, "eventId": "missing-target-001"}).encode(),
+    )
+    route_mismatch = application.handle(
+        "POST",
+        path,
+        _HEADERS,
+        json.dumps(
+            {
+                **_PAYLOAD,
+                "eventId": "route-mismatch-001",
+                "route": "other-route",
+            }
+        ).encode(),
+    )
+    unauthorized = application.handle(
+        "POST",
+        path,
+        {"content-type": "application/json"},
+        body,
+    )
+
+    assert accepted.status_code == 202
+    assert duplicate.status_code == 202
+    assert duplicate.body["duplicate"] is True
+    assert changed_content.status_code == 409
+    assert changed_target.status_code == 409
+    assert missing.status_code == 422
+    assert route_mismatch.status_code == 422
+    assert unauthorized.status_code == 401
+
+
+def test_http_accepts_sqlite_key_and_enforces_target_scope(tmp_path: Path) -> None:
+    database = tmp_path / "router.sqlite3"
+    store = SqliteRouteStore(database)
+    for target_id in ("slack-staging", "teams-staging"):
+        store.configure_destination(
+            StoredDestination(
+                target_id,
+                "release-notifications",
+                "slack",
+                "SLACK_WEBHOOK_URL",
+                None,
+                True,
+            )
+        )
+    keys = SqliteProducerApiKeyStore(database)
+    issued = keys.issue("github", target_id="teams-staging")
+    application = RouterHttpApplication(
+        NotificationRouter(store, SuccessfulDelivery()),
+        CompositeProducerAuthenticator((keys,)),
+    )
+    headers = {
+        "authorization": f"Bearer {issued.value}",
+        "x-pyhookkit-producer": "github",
+        "content-type": "application/json",
+    }
+
+    accepted = application.handle(
+        "POST",
+        "/v1/destinations/teams-staging/notifications",
+        headers,
+        json.dumps(_PAYLOAD).encode(),
+    )
+    forbidden = application.handle(
+        "POST",
+        "/v1/destinations/slack-staging/notifications",
+        headers,
+        json.dumps({**_PAYLOAD, "eventId": "other-target"}).encode(),
+    )
+
+    assert accepted.status_code == 202
+    assert forbidden.status_code == 403
 
 
 def test_http_authentication_and_ownership_are_isolated(tmp_path: Path) -> None:

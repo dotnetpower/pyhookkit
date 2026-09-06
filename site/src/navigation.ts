@@ -45,6 +45,8 @@ const englishFooterData = {
         { text: 'Delivery options', href: getPermalink('/docs/teams-delivery-options/') },
         { text: 'Optional TeamsNotifyApp', href: getPermalink('/docs/teams-notify-app-bootstrap/') },
         { text: 'Optional router', href: getPermalink('/docs/central-notification-router/') },
+        { text: 'Producer integrations', href: getPermalink('/docs/producer-integrations/') },
+        { text: 'SQLite data model', href: getPermalink('/docs/central-router-sqlite-data-model/') },
       ],
     },
     {
@@ -81,6 +83,8 @@ const koreanFooterData = {
         { text: '전송 옵션', href: getPermalink('/ko/docs/teams-delivery-options/') },
         { text: '선택적 TeamsNotifyApp', href: getPermalink('/ko/docs/teams-notify-app-bootstrap/') },
         { text: '선택적 라우터', href: getPermalink('/ko/docs/central-notification-router/') },
+        { text: '생산자 통합', href: getPermalink('/ko/docs/producer-integrations/') },
+        { text: 'SQLite 데이터 모델', href: getPermalink('/ko/docs/central-router-sqlite-data-model/') },
       ],
     },
     {

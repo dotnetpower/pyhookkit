@@ -117,6 +117,34 @@ data:
               "correlationId": "{{.app.status.sync.revision}}"
             }
           }
+  template.bookinfo-router-health-degraded: |
+    webhook:
+      notification-router:
+        method: POST
+        body: |
+          {
+            "schemaVersion": "1.0",
+            "eventId": "argocd-{{.app.metadata.name}}-{{.app.status.sync.revision}}-degraded",
+            "route": "incident-alerts",
+            "title": "Bookinfo application health degraded",
+            "body": "ERROR: Argo CD reports degraded health for {{.app.metadata.name}} at revision {{.app.status.sync.revision}}. Inspect application: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+            "severity": "error",
+            "facts": [
+              {"key": "Application", "value": "{{.app.metadata.name}}"},
+              {"key": "Health", "value": "{{.app.status.health.status}}"},
+              {"key": "Revision", "value": "{{.app.status.sync.revision}}"}
+            ],
+            "links": [
+              {
+                "label": "Inspect application",
+                "url": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}"
+              }
+            ],
+            "metadata": {
+              "source": "argocd",
+              "correlationId": "{{.app.status.sync.revision}}"
+            }
+          }
   trigger.on-bookinfo-sync-failed: |
     - description: Bookinfo sync failed
       oncePer: app.status.operationState.syncResult.revision
@@ -129,3 +157,9 @@ data:
       send:
         - bookinfo-sync-succeeded
       when: app.status.operationState.phase == 'Succeeded' and app.status.health.status == 'Healthy'
+  trigger.on-bookinfo-router-health-degraded: |
+    - description: Bookinfo health is degraded
+      oncePer: app.status.sync.revision
+      send:
+        - bookinfo-router-health-degraded
+      when: app.status.health.status == 'Degraded'

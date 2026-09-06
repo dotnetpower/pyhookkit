@@ -5,6 +5,8 @@ observable notification behavior.
 
 - [`fundamentals/`](fundamentals/README.md) covers one capability at a time.
 - [`scenarios/`](scenarios/README.md) covers complete operational messages.
+- [`inbound/`](inbound/README.md) freezes synthetic provider-native payload to
+	canonical notification transformations.
 
 Each case contains `notification.json` and the expected Slack and Teams
 renderings. A provider-specific file is added only when that provider has an

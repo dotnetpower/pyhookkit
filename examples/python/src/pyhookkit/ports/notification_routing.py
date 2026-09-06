@@ -23,6 +23,15 @@ class NotificationRouteStore(Protocol):
         """Atomically enqueue all configured targets for a notification."""
         ...
 
+    def submit_to_target(
+        self,
+        producer: str,
+        target_id: str,
+        notification: CanonicalNotification,
+    ) -> SubmissionReceipt:
+        """Atomically enqueue one notification for one configured target."""
+        ...
+
     def status(
         self,
         producer: str,

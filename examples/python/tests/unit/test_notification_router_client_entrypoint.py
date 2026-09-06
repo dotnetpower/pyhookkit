@@ -20,9 +20,15 @@ class StubClient:
         assert "synthetic-router-token" not in repr(token)
         assert producer == "gitlab"
 
-    def submit(self, payload: object) -> RouterSubmissionResult:
+    def submit(
+        self,
+        payload: object,
+        *,
+        target_id: str | None = None,
+    ) -> RouterSubmissionResult:
         assert isinstance(payload, dict)
         assert payload["eventId"] == "scenario-deployment-result-001"
+        assert target_id is None
         return RouterSubmissionResult(
             "11111111-1111-4111-8111-111111111111",
             False,

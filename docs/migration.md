@@ -56,6 +56,18 @@ Retire old credentials only after the rollback window closes. Remove obsolete
 provider IDs, webhook URLs, infrastructure, and ownership assignments from the
 approved secret stores.
 
+## 7. Producer authentication migration
+
+Keep an existing environment-backed producer token active while issuing and
+testing a scoped `phk_` API key. Move one CI producer at a time, verify its
+target and status, then revoke the old key or remove the old environment-token
+configuration. Do not rotate every producer in one maintenance window.
+
+For provider-native webhooks, first create the disabled inbound integration,
+inject its provider secret, enable it, and use the provider test-delivery
+feature. Keep the CI/CD canonical path as rollback until duplicate-event and
+failure behavior are verified.
+
 The [integrated Bookinfo scenario](integrated-bookinfo-scenario.md) is a
 disposable rehearsal environment for approval, GitOps promotion, deployment
 result, incident, and maintenance paths.

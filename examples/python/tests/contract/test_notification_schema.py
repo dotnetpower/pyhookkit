@@ -24,6 +24,13 @@ _SCHEMA_PATH = _REPOSITORY_ROOT / "contracts" / "notification.schema.json"
 _DELIVERY_SCHEMA_PATH = _REPOSITORY_ROOT / "contracts" / "delivery-result.schema.json"
 _FUNDAMENTALS_PATH = _REPOSITORY_ROOT / "contracts" / "test-vectors" / "fundamentals"
 _NOTIFICATION_PATHS = tuple(sorted(_FUNDAMENTALS_PATH.glob("*/notification.json")))
+_INBOUND_EXPECTED_PATHS = tuple(
+    sorted(
+        (_REPOSITORY_ROOT / "contracts" / "test-vectors" / "inbound").glob(
+            "*/*.expected.json"
+        )
+    )
+)
 _HELLO_WORLD_PATH = _FUNDAMENTALS_PATH / "hello-world" / "notification.json"
 
 
@@ -73,6 +80,17 @@ def test_delivery_result_schema_and_vectors_are_valid() -> None:
     ids=lambda path: path.parent.name,
 )
 def test_fundamental_matches_notification_schema(
+    notification_path: Path,
+) -> None:
+    _validator(check_formats=True).validate(_load_json(notification_path))
+
+
+@pytest.mark.parametrize(
+    "notification_path",
+    _INBOUND_EXPECTED_PATHS,
+    ids=lambda path: path.parent.name,
+)
+def test_inbound_expected_notification_matches_schema(
     notification_path: Path,
 ) -> None:
     _validator(check_formats=True).validate(_load_json(notification_path))

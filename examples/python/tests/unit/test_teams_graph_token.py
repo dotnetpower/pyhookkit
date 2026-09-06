@@ -30,7 +30,13 @@ def _token(
         {
             "tid": str(tenant_id),
             "appid": str(client_id),
-            "roles": roles or ["GroupMember.ReadWrite.All"],
+            "roles": roles
+            or [
+                "Channel.ReadBasic.All",
+                "ChannelMember.ReadWrite.All",
+                "TeamMember.Read.All",
+                "TeamMember.ReadWriteNonOwnerRole.All",
+            ],
         }
     )
     return f"{header}.{payload}.signature"
@@ -123,7 +129,7 @@ def test_provider_acquires_valid_app_token_and_redacts_secret() -> None:
                 200,
                 json={"access_token": _token(roles=["User.Read.All"])},
             ),
-            "requires Group",
+            "requires Channel.ReadBasic",
         ),
     ],
 )

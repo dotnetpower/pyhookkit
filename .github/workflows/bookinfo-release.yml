@@ -19,6 +19,18 @@ on:
         options:
           - workflow
           - logic-app
+      notification_path:
+        description: Approval notification submission path
+        required: true
+        default: gitlab
+        type: choice
+        options:
+          - gitlab
+          - router
+      router_target_id:
+        description: Optional single router destination ID
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -71,6 +83,7 @@ jobs:
             }' > approval-notification.json
 
       - name: Trigger GitLab notification pipeline
+        if: inputs.notification_path == 'gitlab'
         env:
           GITLAB_TRIGGER_URL: ${{ secrets.GITLAB_TRIGGER_URL }}
         run: |
@@ -85,6 +98,25 @@ jobs:
             --output gitlab-response.json \
             "$GITLAB_TRIGGER_URL"
           jq -e '.id | numbers' gitlab-response.json >/dev/null
+
+      - name: Submit approval directly to notification router
+        if: inputs.notification_path == 'router'
+        env:
+          NOTIFICATION_ROUTER_URL: ${{ vars.NOTIFICATION_ROUTER_URL }}
+          NOTIFICATION_ROUTER_TOKEN: ${{ secrets.NOTIFICATION_ROUTER_TOKEN }}
+          ROUTER_TARGET_ID: ${{ inputs.router_target_id }}
+        run: |
+          test -n "$NOTIFICATION_ROUTER_URL"
+          test -n "$NOTIFICATION_ROUTER_TOKEN"
+          python -m pip install ./examples/python
+          target_args=()
+          if [[ -n "$ROUTER_TARGET_ID" ]]; then
+            target_args+=(--target-id "$ROUTER_TARGET_ID")
+          fi
+          python -m pyhookkit.entrypoints.notification_router_client \
+            --input approval-notification.json \
+            --producer github \
+            "${target_args[@]}"
 
   promote:
     name: Promote through GitLab

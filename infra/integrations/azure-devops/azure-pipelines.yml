@@ -1,0 +1,64 @@
+trigger: none
+
+parameters:
+  - name: routerTargetId
+    displayName: Optional single router destination ID
+    type: string
+    default: ''
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+  - checkout: self
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.12'
+
+  - bash: python -m pip install ./examples/python
+    displayName: Install PyHookKit
+
+  - bash: |
+      set -euo pipefail
+      timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+      jq -n \
+        --arg event_id "azure-devops-$(Build.BuildId)-complete" \
+        --arg build_number "$(Build.BuildNumber)" \
+        --arg build_url "$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)" \
+        --arg timestamp "$timestamp" \
+        '{
+          schemaVersion: "1.0",
+          eventId: $event_id,
+          route: "release-notifications",
+          title: "Azure Pipelines build completed",
+          body: ("Azure Pipelines build " + $build_number + " completed."),
+          severity: "success",
+          facts: [
+            {key: "Build", value: $build_number},
+            {key: "Project", value: env.SYSTEM_TEAMPROJECT}
+          ],
+          links: [{label: "View build", url: $build_url}],
+          sourceTimestamp: $timestamp,
+          metadata: {
+            source: "azure-pipelines",
+            correlationId: ("azure-build-" + env.BUILD_BUILDID)
+          }
+        }' > canonical-notification.json
+    displayName: Build canonical notification
+
+  - bash: |
+      set -euo pipefail
+      target_args=()
+      if [[ -n "$ROUTER_TARGET_ID" ]]; then
+        target_args+=(--target-id "$ROUTER_TARGET_ID")
+      fi
+      python -m pyhookkit.entrypoints.notification_router_client \
+        --input canonical-notification.json \
+        --producer azure-devops \
+        "${target_args[@]}"
+    displayName: Submit notification to router
+    env:
+      NOTIFICATION_ROUTER_URL: $(NOTIFICATION_ROUTER_URL)
+      NOTIFICATION_ROUTER_TOKEN: $(NOTIFICATION_ROUTER_TOKEN)
+      ROUTER_TARGET_ID: ${{ parameters.routerTargetId }}

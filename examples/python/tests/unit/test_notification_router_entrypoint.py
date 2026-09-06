@@ -1,13 +1,19 @@
 """Central notification router composition root tests."""
 
 import json
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import ClassVar
 
 import pytest
 
 import pyhookkit.entrypoints.notification_router as entrypoint
+from pyhookkit.adapters.outbound.runtime_environment_file import (
+    RuntimeEnvironmentFile,
+)
+from pyhookkit.adapters.outbound.teams.channel_metadata import (
+    TeamsChannelMembershipType,
+)
 from pyhookkit.adapters.outbound.teams.graph_membership import TeamMembershipResult
 
 _CHANNEL_LINK = (
@@ -16,6 +22,29 @@ _CHANNEL_LINK = (
     "?groupId=11111111-1111-4111-8111-111111111111"
     "&tenantId=22222222-2222-4222-8222-222222222222"
 )
+
+
+class StubChannelInspector:
+    def __init__(self, token: object) -> None:
+        assert token is not None
+
+    def membership_type(
+        self,
+        team_id: object,
+        channel_id: str,
+    ) -> TeamsChannelMembershipType:
+        assert team_id
+        assert channel_id
+        return TeamsChannelMembershipType.STANDARD
+
+
+@pytest.fixture(autouse=True)
+def stub_channel_inspector(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(
+        entrypoint,
+        "TeamsGraphChannelInspector",
+        StubChannelInspector,
+    )
 
 
 def test_entrypoint_initializes_configures_lists_and_drains(
@@ -66,6 +95,111 @@ def test_entrypoint_initializes_configures_lists_and_drains(
         environment={},
     )
     assert json.loads(capsys.readouterr().out) == {"deliveriesProcessed": 0}
+
+
+def test_entrypoint_manages_api_keys_and_inbound_integrations(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    database = tmp_path / "router.sqlite3"
+    base = ["--database", str(database)]
+    entrypoint.run_notification_router(
+        arguments=[
+            *base,
+            "add-destination",
+            "--target-id",
+            "slack-release",
+            "--route",
+            "release-notifications",
+            "--provider",
+            "slack",
+            "--endpoint-env",
+            "SLACK_WEBHOOK_URL",
+        ]
+    )
+    capsys.readouterr()
+
+    entrypoint.run_notification_router(
+        arguments=[
+            *base,
+            "issue-api-key",
+            "--producer",
+            "github",
+            "--target-id",
+            "slack-release",
+        ]
+    )
+    issued = json.loads(capsys.readouterr().out)
+    assert issued["apiKey"].startswith("phk_")
+
+    entrypoint.run_notification_router(
+        arguments=[
+            *base,
+            "add-integration",
+            "--integration-id",
+            "github-release",
+            "--provider",
+            "github",
+            "--producer",
+            "github",
+            "--secret-env",
+            "GITHUB_WEBHOOK_SECRET",
+            "--route",
+            "release-notifications",
+            "--target-id",
+            "slack-release",
+        ]
+    )
+    assert "github-release" in capsys.readouterr().out
+
+    entrypoint.run_notification_router(arguments=[*base, "list-integrations"])
+    integrations = json.loads(capsys.readouterr().out)
+    assert integrations[0]["provider"] == "github"
+    assert integrations[0]["targetId"] == "slack-release"
+
+    entrypoint.run_notification_router(
+        arguments=[
+            *base,
+            "revoke-api-key",
+            "--key-id",
+            issued["keyId"],
+        ]
+    )
+    assert json.loads(capsys.readouterr().out)["state"] == "revoked"
+
+
+def test_runtime_environment_ignores_blank_process_override(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    env_file = tmp_path / ".env"
+    RuntimeEnvironmentFile(env_file).update(
+        {"TEAMS_NOTIFY_TENANT_ID": "22222222-2222-4222-8222-222222222222"}
+    )
+    monkeypatch.setenv("TEAMS_NOTIFY_TENANT_ID", "")
+    captured: dict[str, str] = {}
+
+    def capture_environment(
+        _store: object,
+        *,
+        database: Path,
+        environment: Mapping[str, str],
+    ) -> None:
+        assert database == tmp_path / "router.sqlite3"
+        captured.update(environment)
+
+    monkeypatch.setattr(entrypoint, "_run_doctor", capture_environment)
+    entrypoint.run_notification_router(
+        arguments=[
+            "--database",
+            str(tmp_path / "router.sqlite3"),
+            "--env-file",
+            str(env_file),
+            "doctor",
+        ]
+    )
+
+    assert captured["TEAMS_NOTIFY_TENANT_ID"] == "22222222-2222-4222-8222-222222222222"
 
 
 class StubMembershipProvisioner:

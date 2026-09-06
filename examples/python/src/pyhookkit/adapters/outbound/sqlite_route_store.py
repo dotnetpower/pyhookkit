@@ -18,6 +18,9 @@ from pyhookkit.adapters.outbound.canonical_notification_json import (
     canonical_notification_to_json,
 )
 from pyhookkit.adapters.outbound.teams.channel_link import TeamsChannelLink
+from pyhookkit.adapters.outbound.teams.channel_metadata import (
+    TeamsChannelMembershipType,
+)
 from pyhookkit.application.notification_router import (
     NotificationConflictError,
     RouteNotConfiguredError,
@@ -53,6 +56,19 @@ class StoredDestination:
     team_id: str | None = None
     channel_id: str | None = None
     channel_name: str | None = None
+    membership_type: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class StoredNotificationSummary:
+    """Redacted recent notification activity for administration views."""
+
+    notification_id: str
+    producer: str
+    event_id: str
+    created_at: str
+    state: NotificationState
+    deliveries: tuple[TargetDeliveryStatus, ...]
 
 
 class SqliteRouteStore:
@@ -80,8 +96,9 @@ class SqliteRouteStore:
                     team_id,
                     channel_id,
                     channel_name,
+                    membership_type,
                     enabled
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(target_id) DO UPDATE SET
                     route = excluded.route,
                     provider = excluded.provider,
@@ -92,6 +109,7 @@ class SqliteRouteStore:
                     team_id = excluded.team_id,
                     channel_id = excluded.channel_id,
                     channel_name = excluded.channel_name,
+                    membership_type = excluded.membership_type,
                     enabled = excluded.enabled
                 """,
                 (
@@ -104,6 +122,7 @@ class SqliteRouteStore:
                     str(channel_link.team_id) if channel_link is not None else None,
                     channel_link.channel_id if channel_link is not None else None,
                     channel_link.channel_name if channel_link is not None else None,
+                    destination.membership_type,
                     int(destination.enabled),
                 ),
             )
@@ -123,6 +142,7 @@ class SqliteRouteStore:
                     team_id,
                     channel_id,
                     channel_name,
+                    membership_type,
                     enabled
                 FROM route_destinations
                 ORDER BY route, target_id
@@ -145,6 +165,7 @@ class SqliteRouteStore:
                     team_id,
                     channel_id,
                     channel_name,
+                    membership_type,
                     enabled
                 FROM route_destinations
                 WHERE target_id = ?
@@ -152,6 +173,120 @@ class SqliteRouteStore:
                 (target_id,),
             ).fetchone()
         return _destination_from_row(row) if row is not None else None
+
+    def recent_notifications(
+        self,
+        *,
+        limit: int = 50,
+    ) -> tuple[StoredNotificationSummary, ...]:
+        """List recent redacted notification activity without payload content."""
+        if limit < 1 or limit > 100:
+            raise ValueError("recent notification limit must be between 1 and 100")
+        with self._connection() as connection:
+            notification_rows = connection.execute(
+                """
+                SELECT notification_id, producer, event_id, created_at
+                FROM routed_notifications
+                ORDER BY created_at DESC
+                LIMIT ?
+                """,
+                (limit,),
+            ).fetchall()
+            summaries: list[StoredNotificationSummary] = []
+            for notification_row in notification_rows:
+                notification_id = cast(str, notification_row["notification_id"])
+                delivery_rows = connection.execute(
+                    """
+                    SELECT target_id, state, attempts, error_kind, status_code
+                    FROM target_deliveries
+                    WHERE notification_id = ?
+                    ORDER BY target_id
+                    """,
+                    (notification_id,),
+                ).fetchall()
+                deliveries = tuple(
+                    _delivery_status_from_row(row) for row in delivery_rows
+                )
+                summaries.append(
+                    StoredNotificationSummary(
+                        notification_id=notification_id,
+                        producer=cast(str, notification_row["producer"]),
+                        event_id=cast(str, notification_row["event_id"]),
+                        created_at=cast(str, notification_row["created_at"]),
+                        state=_aggregate_state(deliveries),
+                        deliveries=deliveries,
+                    )
+                )
+        return tuple(summaries)
+
+    def record_direct_delivery(
+        self,
+        producer: str,
+        notification: CanonicalNotification,
+        target_id: str,
+        result: DeliveryResult,
+        *,
+        completed_at: datetime,
+    ) -> str:
+        """Record one direct administration delivery without route fan-out."""
+        notification_id = str(uuid4())
+        timestamp = _timestamp(completed_at)
+        payload = json.dumps(
+            canonical_notification_to_json(notification),
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        state = (
+            TargetDeliveryState.SUCCEEDED
+            if result.state is DeliveryState.SUCCEEDED
+            else TargetDeliveryState.FAILED
+        )
+        error_kind = result.error.kind.value if result.error is not None else None
+        status_code = result.error.status_code if result.error is not None else None
+        with self._transaction() as connection:
+            exists = connection.execute(
+                "SELECT 1 FROM route_destinations WHERE target_id = ?",
+                (target_id,),
+            ).fetchone()
+            if exists is None:
+                raise ValueError("direct delivery target was not found")
+            connection.execute(
+                """
+                INSERT INTO routed_notifications (
+                    notification_id, producer, event_id, payload_json, created_at
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    notification_id,
+                    producer,
+                    notification.event_id,
+                    payload,
+                    timestamp,
+                ),
+            )
+            connection.execute(
+                """
+                INSERT INTO target_deliveries (
+                    notification_id,
+                    target_id,
+                    state,
+                    attempts,
+                    error_kind,
+                    status_code,
+                    updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    notification_id,
+                    target_id,
+                    state.value,
+                    result.attempts,
+                    error_kind,
+                    status_code,
+                    timestamp,
+                ),
+            )
+        return notification_id
 
     def submit(
         self,
@@ -239,6 +374,94 @@ class SqliteRouteStore:
                     )
                     for row in target_rows
                 ),
+            )
+        return SubmissionReceipt(
+            notification_id=notification_id,
+            duplicate=False,
+            state=NotificationState.QUEUED,
+        )
+
+    def submit_to_target(
+        self,
+        producer: str,
+        target_id: str,
+        notification: CanonicalNotification,
+    ) -> SubmissionReceipt:
+        """Atomically enqueue one configured target without route fan-out."""
+        payload = json.dumps(
+            canonical_notification_to_json(notification),
+            separators=(",", ":"),
+            sort_keys=True,
+        )
+        with self._transaction() as connection:
+            existing = connection.execute(
+                """
+                SELECT notification.notification_id, notification.payload_json
+                FROM routed_notifications AS notification
+                JOIN target_deliveries AS delivery
+                    ON delivery.notification_id = notification.notification_id
+                WHERE notification.producer = ?
+                  AND notification.event_id = ?
+                  AND delivery.target_id = ?
+                """,
+                (producer, notification.event_id, target_id),
+            ).fetchone()
+            if existing is not None:
+                if cast(str, existing["payload_json"]) != payload:
+                    raise NotificationConflictError(
+                        "event ID was already used with different content"
+                    )
+                notification_id = cast(str, existing["notification_id"])
+                return SubmissionReceipt(
+                    notification_id=notification_id,
+                    duplicate=True,
+                    state=self._notification_state(connection, notification_id),
+                )
+            reused_event = connection.execute(
+                """
+                SELECT 1 FROM routed_notifications
+                WHERE producer = ? AND event_id = ?
+                """,
+                (producer, notification.event_id),
+            ).fetchone()
+            if reused_event is not None:
+                raise NotificationConflictError(
+                    "event ID was already used for a different target"
+                )
+            destination = connection.execute(
+                """
+                SELECT route FROM route_destinations
+                WHERE target_id = ? AND enabled = 1
+                """,
+                (target_id,),
+            ).fetchone()
+            if destination is None or destination["route"] != notification.route:
+                raise RouteNotConfiguredError(
+                    f"notification target is not configured for route: {target_id}"
+                )
+            notification_id = str(uuid4())
+            timestamp = _timestamp(datetime.now(UTC))
+            connection.execute(
+                """
+                INSERT INTO routed_notifications (
+                    notification_id, producer, event_id, payload_json, created_at
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    notification_id,
+                    producer,
+                    notification.event_id,
+                    payload,
+                    timestamp,
+                ),
+            )
+            connection.execute(
+                """
+                INSERT INTO target_deliveries (
+                    notification_id, target_id, state, attempts, updated_at
+                ) VALUES (?, ?, 'queued', 0, ?)
+                """,
+                (notification_id, target_id, timestamp),
             )
         return SubmissionReceipt(
             notification_id=notification_id,
@@ -415,6 +638,7 @@ class SqliteRouteStore:
                     team_id TEXT,
                     channel_id TEXT,
                     channel_name TEXT,
+                    membership_type TEXT,
                     enabled INTEGER NOT NULL CHECK (enabled IN (0, 1))
                 );
 
@@ -461,7 +685,13 @@ class SqliteRouteStore:
                 "PRAGMA table_info(route_destinations)"
             ).fetchall()
         }
-        for column_name in ("tenant_id", "team_id", "channel_id", "channel_name"):
+        for column_name in (
+            "tenant_id",
+            "team_id",
+            "channel_id",
+            "channel_name",
+            "membership_type",
+        ):
             if column_name not in existing_columns:
                 connection.execute(
                     f"ALTER TABLE route_destinations ADD COLUMN {column_name} TEXT"
@@ -533,6 +763,15 @@ def _validate_destination(
         raise ValueError("Teams Workflow destination requires a channel link")
     if destination.provider == "slack" and destination.channel_link is not None:
         raise ValueError("Slack destination cannot contain a Teams channel link")
+    if destination.membership_type is not None:
+        try:
+            membership_type = TeamsChannelMembershipType(destination.membership_type)
+        except ValueError as error:
+            raise ValueError("Teams channel membership type is invalid") from error
+        if destination.provider != "teams-workflow":
+            raise ValueError("Slack destination cannot contain Teams channel metadata")
+        if membership_type is TeamsChannelMembershipType.SHARED:
+            raise ValueError("shared Teams channels are not supported")
     if destination.channel_link is not None:
         return TeamsChannelLink(destination.channel_link)
     return None
@@ -553,6 +792,7 @@ def _destination_from_row(row: sqlite3.Row) -> StoredDestination:
         team_id=cast(str | None, row["team_id"]),
         channel_id=cast(str | None, row["channel_id"]),
         channel_name=cast(str | None, row["channel_name"]),
+        membership_type=cast(str | None, row["membership_type"]),
     )
 
 

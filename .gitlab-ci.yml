@@ -125,9 +125,15 @@ notify-canonical-webhook:
     - printf '%s' "$CANONICAL_NOTIFICATION" > canonical-notification.json
     - |
       if [ "$NOTIFICATION_PATH" = "router" ]; then
+        if [ -n "$NOTIFICATION_ROUTER_TARGET_ID" ]; then
+          set -- --target-id "$NOTIFICATION_ROUTER_TARGET_ID"
+        else
+          set --
+        fi
         python -m pyhookkit.entrypoints.notification_router_client \
           --input canonical-notification.json \
-          --producer gitlab
+          --producer gitlab \
+          "$@"
       else
         python -m pyhookkit.entrypoints.scenario_cli \
           --input canonical-notification.json \
@@ -164,9 +170,15 @@ notify-maintenance:
           --status-page-url "$CI_PIPELINE_URL" \
           --source gitlab-ci \
           --canonical > canonical-notification.json
+        if [ -n "$NOTIFICATION_ROUTER_TARGET_ID" ]; then
+          set -- --target-id "$NOTIFICATION_ROUTER_TARGET_ID"
+        else
+          set --
+        fi
         python -m pyhookkit.entrypoints.notification_router_client \
           --input canonical-notification.json \
-          --producer gitlab
+          --producer gitlab \
+          "$@"
       else
         python -m pyhookkit.entrypoints.scenario_cli \
           maintenance-notice \

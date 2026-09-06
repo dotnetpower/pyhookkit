@@ -93,7 +93,10 @@ GitLab과 Argo CD는 같은 정규 계약을 작은 SQLite 기반 중앙 라우�
 경로로 유지합니다.
 
 경로 설정, 로컬 실행 및 생산자 통합은 [중앙 알림 라우터
-가이드](docs/central-notification-router.ko.md)를 참조하세요. 포털에서
+가이드](docs/central-notification-router.ko.md)를 참조하세요.
+GitHub, GitLab, Argo CD 및 Azure DevOps의 CI/CD와 원본 Webhook 설정은
+[생산자 통합 가이드](docs/producer-integrations.ko.md)를 참조하세요.
+포털에서
 확인 가능한 앱 등록, 운영자 최소 권한, 자동 환경 설정 및 멤버십 진단은
 [TeamsNotifyApp 한국어 부트스트랩
 가이드](docs/teams-notify-app-bootstrap.ko.md)를 사용하세요.
@@ -161,8 +164,8 @@ Teams 전송](docs/logic-app-teams-delivery.ko.md)을 배포할 때만 필요합
 | Teams 연결 사용자 | 같은 Entra 테넌트의 일반 사용자 `svc-teams-notification` | Microsoft 365/Teams 및 Power Automate 사용 권한, 모든 대상 Team의 멤버십, 대화형 OAuth 및 MFA 수행 권한. Entra 관리자 역할은 필요하지 않습니다. | 2, 3, 7 |
 | 흐름 운영 공동 소유자 | 대상 Power Platform 환경에 접근하는 이름이 명시된 사용자 | 해당 흐름의 공동 소유자 권한. 다른 사용자의 Teams 연결 자격 증명은 관리할 수 없습니다. | 3, 7 |
 | 부트스트랩 앱 생성자 | 대상 Entra 테넌트에 로그인하는 사용자 | 사용자 앱 등록이 허용되면 디렉터리 역할이 필요하지 않습니다. 허용되지 않으면 **Application Developer**와 생성된 `TeamsNotifyApp`의 소유권이 필요합니다. | 5, 6 |
-| 동의 승인자 | 대상 Entra 테넌트의 관리자 | Microsoft Graph 애플리케이션 권한 `GroupMember.ReadWrite.All`에 관리자 동의를 부여하는 **Privileged Role Administrator**. 가능하면 PIM으로 일시적으로 활성화합니다. | 5, 6 |
-| `TeamsNotifyApp` | 사람이 아닌 대상 테넌트의 앱 등록 및 서비스 주체 | 관리자 동의가 부여된 Graph 애플리케이션 권한 `GroupMember.ReadWrite.All`. Microsoft 365 라이선스, Azure RBAC 및 Power Platform 역할은 필요하지 않습니다. | 6, 8, 9 |
+| 동의 승인자 | 대상 Entra 테넌트의 관리자 | Microsoft Graph 애플리케이션 권한 `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및 `TeamMember.ReadWriteNonOwnerRole.All`에 관리자 동의를 부여하는 **Privileged Role Administrator**. 가능하면 PIM으로 일시적으로 활성화합니다. | 5, 6 |
+| `TeamsNotifyApp` | 사람이 아닌 대상 테넌트의 앱 등록 및 서비스 주체 | 관리자 동의가 부여된 Graph 애플리케이션 권한 `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및 `TeamMember.ReadWriteNonOwnerRole.All`. Microsoft 365 라이선스, Azure RBAC 및 Power Platform 역할은 필요하지 않습니다. | 6, 8, 9 |
 | 알림 생산자와 중앙 라우터 | 로컬 프로세스 또는 CI/CD 워크로드 | 생산자는 라우터 전달자 토큰을 사용하고, 라우터는 서명된 워크플로 콜백 비밀을 사용합니다. Microsoft 365 사용자 또는 Entra 관리자일 필요는 없습니다. | 8~10 |
 
 현재 `bootstrap-teams-app` 단일 명령으로 앱 등록 생성과 관리자 동의까지
@@ -344,7 +347,8 @@ Portal은 Entra 관리 UI로만 사용하며 Azure 구독 역할은 사용하지
 4. Redirect URI는 비워 두고 **Register**를 선택합니다.
 5. **API permissions** > **Add a permission** > **Microsoft Graph** >
   **Application permissions**를 엽니다.
-6. `GroupMember.ReadWrite.All`을 검색하여 선택합니다.
+6. `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및
+  `TeamMember.ReadWriteNonOwnerRole.All`을 검색하여 선택합니다.
 7. **Add permissions**를 선택합니다.
 8. **Privileged Role Administrator** 사용자가 **Grant admin consent for
   \<tenant\>**를 선택하고 승인합니다.
@@ -414,7 +418,9 @@ cd ../..
 ```
 
 이 명령은 `TeamsNotifyApp`과 서비스 주체를 생성하고,
-`GroupMember.ReadWrite.All` 애플리케이션 권한을 구성하며, 관리자 동의를
+`Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및
+`TeamMember.ReadWriteNonOwnerRole.All` 애플리케이션 권한을 구성하며,
+관리자 동의를
 저장합니다. 또한 클라이언트 자격 증명을 생성 및 검증하고, 연결 사용자를
 Team에 추가하며, 최초 대상 경로를 SQLite에 등록합니다. 생성된 비밀 값은
 출력하지 않고 권한 `0600`의 `.env`에 기록합니다.
@@ -485,7 +491,9 @@ TEAMS_CONNECTION_USER_ID="<연결 사용자 object GUID>"
 
 **App registrations** > `TeamsNotifyApp`에서 다음을 확인합니다.
 
-- **API permissions**에 Microsoft Graph `GroupMember.ReadWrite.All`이
+- **API permissions**에 Microsoft Graph `Channel.ReadBasic.All`,
+  `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및
+  `TeamMember.ReadWriteNonOwnerRole.All`이
   **Application** 권한으로 존재합니다.
 - 상태가 **Granted for \<tenant\>**입니다.
 - 예상한 소유자와 자격 증명만 존재합니다. 이름이 명시된 운영 소유자가 두

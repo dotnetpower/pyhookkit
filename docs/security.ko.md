@@ -26,6 +26,9 @@ Workflow URL 및 TeamsNotifyApp 클라이언트 비밀을 자격 증명으로
 | Argo CD GitLab 프로젝트 토큰 | `argocd-notifications-secret` |
 | 중앙 라우터 생산자 토큰 | 생산자별 비밀 저장소 |
 | 중앙 라우터 공급자 자격 증명 | 라우터 런타임 비밀 저장소 |
+| GitHub Webhook secret | 라우터 런타임 비밀 저장소와 일치하는 GitHub Webhook |
+| GitLab `whsec_` signing token | 라우터 런타임 비밀 저장소. GitLab에서 한 번만 복사 |
+| Azure DevOps Service Hook password | 라우터 런타임 비밀 저장소와 HTTPS Basic 인증 |
 | TeamsNotifyApp 클라이언트 자격 증명 | 라우터 런타임 비밀 저장소 또는 소유자만 접근 가능한 로컬 `.env` |
 | Kubernetes 관리자 자격 증명 | Git 외부의 운영자 kubeconfig |
 
@@ -33,6 +36,24 @@ Workflow URL 및 TeamsNotifyApp 클라이언트 비밀을 자격 증명으로
 프로브가 Argo CD 프로젝트 토큰을 공유하면 안 됩니다. Argo 토큰에는 실용적인
 범위에서 가장 짧은 만료 기간을 부여하고 URL이나 알림 본문이 아닌
 `PRIVATE-TOKEN` 헤더로 전송하세요.
+
+서버에서 발급하는 `phk_` 생산자 API 키를 권장합니다. SQLite에는 SHA-256
+다이제스트와 민감 정보가 제거된 사용 메타데이터만 저장합니다. 각 키를 하나의
+경로나 대상으로 제한하고 한 번만 표시하며, 회전할 때 기존 생산자 비밀을
+제거하기 전에 키를 폐기하세요.
+
+공급자 원본 수신 인증 방식은 공급자마다 다릅니다.
+
+- GitHub는 정확한 원문 본문의 `X-Hub-Signature-256` HMAC-SHA256을
+  사용합니다.
+- GitLab Standard Webhooks는
+  `{webhook-id}.{webhook-timestamp}.{원문 본문}`의 HMAC-SHA256을 사용하며
+  타임스탬프가 최신인지 확인해야 합니다.
+- Azure DevOps Service Hooks는 공개 HTTPS와 Basic 인증을 사용합니다.
+  공식 Web Hooks 문서에는 HMAC 전송 서명이 정의되어 있지 않습니다.
+
+요청 크기와 속도 제한을 적용한 HTTPS Gateway를 통해 `/v1/inbound/*`만
+게시하세요. `/admin`이나 SQLite 파일은 게시하지 마세요.
 
 ## 로깅 및 증거 자료
 

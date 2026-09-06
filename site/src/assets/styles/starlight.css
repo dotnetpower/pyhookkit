@@ -35,6 +35,10 @@ header.header {
 }
 
 .sl-markdown-content img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
   border: 1px solid var(--sl-color-gray-5);
   border-radius: 0.85rem;
   box-shadow: 0 18px 50px rgb(20 24 55 / 10%);

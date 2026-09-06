@@ -8,6 +8,13 @@ These redacted captures accompany the
 | File | Evidence |
 |---|---|
 | `create-service-account.png` | Enter the Teams notification service account basics in Microsoft 365 admin center |
+| `shared-flow-overview.png` | Shared flow containing the Teams Webhook request trigger and channel card action |
+| `team-member.png` | Empty target-Team member list before adding the service account |
+| `team-member2.png` | Confirm the service account has the **Member** role after adding it |
+| `channel-copy-link.png` | Select **Copy link** from the target Teams channel's **...** menu |
+| `hello-world.png` | Delivered **Hello, world!** Adaptive Card in the Teams channel |
+| `azure-portal-entra.png` | Search for and select **Microsoft Entra ID** in Azure Portal |
+| `app-registration.png` | Microsoft Graph application permission and admin-consent status for `TeamsNotifyApp` |
 | `automated-cloud-flow.png` | Power Automate **Automated cloud flow** selection tile |
 | `automated-cloud-flow-skip.png` | **Skip** selection in the **Build an automated cloud flow** dialog |
 | `flow-name-add-trigger.png` | Flow naming and **Add a trigger** selection |
@@ -23,6 +30,7 @@ These redacted captures accompany the
 | `power-automate-flow-history.png` | Enabled flow and successful runs |
 
 Team, channel, account, connection, environment, and callback URL values are
-removed or replaced with synthetic values. `create-service-account.png` is the
-attached PNG saved without editing. Do not replace these files with originals
-that contain credentials or real tenant information.
+removed or replaced with synthetic values. `create-service-account.png` and
+`shared-flow-overview.png` are attached PNGs saved without editing. Do not
+replace these files with originals that contain credentials or real tenant
+information.

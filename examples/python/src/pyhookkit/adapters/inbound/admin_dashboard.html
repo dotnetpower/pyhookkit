@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>PyHookKit Router</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --accent: #4f46e5;
+        --accent-dark: #3730a3;
+        --accent-soft: #e7edff;
+        --ink: #171827;
+        --muted: #6b7280;
+        --line: #e4e5eb;
+        --surface: rgba(255, 255, 255, 0.9);
+        --canvas: #f7f7fb;
+        --success: #15803d;
+        --warning: #a16207;
+        --danger: #b91c1c;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 8% 0%, #e0e7ff 0, transparent 30rem),
+          radial-gradient(circle at 100% 12%, #ede9fe 0, transparent 28rem),
+          var(--canvas);
+      }
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      .shell { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding-bottom: 4rem; }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.35rem 0;
+      }
+      .brand { display: flex; align-items: center; gap: 0.8rem; }
+      .mark {
+        display: grid;
+        width: 2.75rem;
+        height: 2.75rem;
+        place-items: center;
+        border-radius: 0.9rem;
+        color: white;
+        background: linear-gradient(145deg, #6366f1, #4338ca);
+        box-shadow: 0 12px 30px rgb(79 70 229 / 28%);
+        font-size: 1.2rem;
+        font-weight: 800;
+      }
+      .brand strong { display: block; font-size: 1.05rem; }
+      .brand span { color: var(--muted); font-size: 0.78rem; }
+      .actions { display: flex; gap: 0.65rem; }
+      .button {
+        border: 1px solid var(--line);
+        border-radius: 0.75rem;
+        padding: 0.72rem 1rem;
+        color: var(--ink);
+        background: var(--surface);
+        font-weight: 700;
+      }
+      .button:hover { border-color: #c7d2fe; background: white; }
+      .button.primary { border-color: var(--accent); color: white; background: var(--accent); }
+      .button.primary:hover { background: var(--accent-dark); }
+      .button:disabled { cursor: wait; opacity: 0.65; }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr;
+        align-items: end;
+        gap: 2rem;
+        padding: 3.2rem 0 2rem;
+      }
+      .eyebrow { color: var(--accent); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+      h1 { max-width: 700px; margin: 0.6rem 0 0.9rem; font-size: clamp(2.1rem, 5vw, 4rem); line-height: 1.02; letter-spacing: -0.055em; }
+      .hero p { max-width: 620px; margin: 0; color: var(--muted); font-size: 1rem; line-height: 1.75; }
+      .connection {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.55rem;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .dot { width: 0.65rem; height: 0.65rem; border-radius: 99px; background: #9ca3af; box-shadow: 0 0 0 5px rgb(156 163 175 / 12%); }
+      .dot.online { background: #22c55e; box-shadow: 0 0 0 5px rgb(34 197 94 / 14%); }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+      .stat, .panel {
+        border: 1px solid rgb(228 229 235 / 90%);
+        background: var(--surface);
+        box-shadow: 0 18px 50px rgb(20 24 55 / 7%);
+        backdrop-filter: blur(16px);
+      }
+      .stat { border-radius: 1rem; padding: 1.15rem 1.25rem; }
+      .stat span { display: block; color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+      .stat strong { display: block; margin-top: 0.35rem; font-size: 1.75rem; }
+      .layout { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(300px, 0.85fr); gap: 1rem; }
+      .management { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1rem; }
+      .panel { overflow: hidden; border-radius: 1.1rem; }
+      .panel-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.2rem 1.3rem; border-bottom: 1px solid var(--line); }
+      .panel-head h2 { margin: 0; font-size: 1rem; }
+      .panel-head span { color: var(--muted); font-size: 0.78rem; }
+      .empty { padding: 3rem 1.5rem; color: var(--muted); text-align: center; }
+      .channel-list { display: grid; gap: 0; }
+      .channel {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.9rem;
+        padding: 1rem 1.3rem;
+        border-bottom: 1px solid var(--line);
+      }
+      .channel:last-child { border-bottom: 0; }
+      .channel-icon { display: grid; width: 2.4rem; height: 2.4rem; place-items: center; border-radius: 0.75rem; color: var(--accent); background: var(--accent-soft); font-weight: 900; }
+      .channel-icon.private { color: #7c2d12; background: #ffedd5; }
+      .channel-icon svg { width: 1.05rem; height: 1.05rem; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+      .channel strong, .channel small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .channel small { margin-top: 0.2rem; color: var(--muted); }
+      .pill { border-radius: 99px; padding: 0.35rem 0.58rem; color: var(--success); background: #dcfce7; font-size: 0.7rem; font-weight: 800; }
+      .channel-actions { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
+      .test-button { border: 1px solid #c7d2fe; border-radius: 0.65rem; padding: 0.45rem 0.65rem; color: var(--accent-dark); background: #eef2ff; font-size: 0.72rem; font-weight: 800; }
+      .test-button:hover { color: white; background: var(--accent); }
+      .test-button:disabled { cursor: not-allowed; color: var(--muted); border-color: var(--line); background: #f3f4f6; }
+      .webhook-button { border: 1px solid #ddd6fe; border-radius: 0.65rem; padding: 0.45rem 0.65rem; color: #6d28d9; background: #f5f3ff; font-size: 0.72rem; font-weight: 800; }
+      .webhook-button:hover { color: white; background: #7c3aed; }
+      .webhook-button:disabled { cursor: not-allowed; color: var(--muted); border-color: var(--line); background: #f3f4f6; }
+      .feed { max-height: 510px; overflow: auto; }
+      .event { padding: 1rem 1.3rem; border-bottom: 1px solid var(--line); }
+      .event:last-child { border-bottom: 0; }
+      .event-top { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+      .event strong { overflow: hidden; font-size: 0.86rem; text-overflow: ellipsis; white-space: nowrap; }
+      .event p { margin: 0.35rem 0 0; color: var(--muted); font-size: 0.75rem; }
+      .management-list { max-height: 320px; overflow: auto; }
+      .management-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.8rem; padding: 0.9rem 1.2rem; border-bottom: 1px solid var(--line); }
+      .management-item:last-child { border-bottom: 0; }
+      .management-item strong, .management-item small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .management-item small { margin-top: 0.2rem; color: var(--muted); }
+      .provider-badge { display: inline-block; margin-right: 0.45rem; border-radius: 99px; padding: 0.25rem 0.5rem; color: var(--accent-dark); background: var(--accent-soft); font-size: 0.68rem; font-weight: 800; }
+      .danger-button { border: 1px solid #fecaca; border-radius: 0.6rem; padding: 0.4rem 0.6rem; color: var(--danger); background: #fff1f2; font-size: 0.7rem; font-weight: 800; }
+      .state { border-radius: 99px; padding: 0.3rem 0.55rem; font-size: 0.68rem; font-weight: 800; }
+      .state.delivered { color: var(--success); background: #dcfce7; }
+      .state.failed, .state.partial_failed { color: var(--danger); background: #fee2e2; }
+      .state.queued, .state.delivering { color: var(--warning); background: #fef3c7; }
+      dialog { width: min(560px, calc(100% - 2rem)); border: 0; border-radius: 1.2rem; padding: 0; color: var(--ink); background: white; box-shadow: 0 35px 90px rgb(15 23 42 / 30%); }
+      dialog::backdrop { background: rgb(15 23 42 / 48%); backdrop-filter: blur(5px); }
+      .dialog-head { padding: 1.4rem 1.5rem 0; }
+      .dialog-head h2 { margin: 0; font-size: 1.25rem; }
+      .dialog-head p { margin: 0.45rem 0 0; color: var(--muted); font-size: 0.86rem; line-height: 1.55; }
+      form { padding: 1.25rem 1.5rem 1.5rem; }
+      label { display: block; margin: 0.9rem 0 0.35rem; font-size: 0.78rem; font-weight: 800; }
+      input { width: 100%; border: 1px solid #d1d5db; border-radius: 0.75rem; padding: 0.8rem 0.9rem; color: var(--ink); background: white; outline: none; }
+      input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(79 70 229 / 12%); }
+      input[readonly] { color: #3730a3; background: #f5f3ff; }
+      .form-actions { display: flex; justify-content: flex-end; gap: 0.65rem; margin-top: 1.3rem; }
+      .login { max-width: 460px; margin: 4rem auto; }
+      .login .panel { padding: 1.5rem; }
+      .login h2 { margin: 0; }
+      .login p { color: var(--muted); line-height: 1.6; }
+      .error { min-height: 1.2rem; margin-top: 0.7rem; color: var(--danger); font-size: 0.78rem; }
+      .field-help { margin-top: 0.4rem; color: var(--muted); font-size: 0.75rem; line-height: 1.5; }
+      .webhook-dialog { width: min(820px, calc(100% - 2rem)); }
+      .webhook-content { padding: 1rem 1.5rem 1.5rem; }
+      .code-label { display: flex; align-items: center; justify-content: space-between; margin-top: 1rem; font-size: 0.78rem; font-weight: 800; }
+      .icon-button { display: inline-grid; width: 2.25rem; height: 2.25rem; flex: 0 0 auto; place-items: center; border: 0; border-radius: 0.55rem; padding: 0; color: var(--accent-dark); background: var(--accent-soft); }
+      .icon-button svg { width: 1rem; height: 1rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      pre { overflow: auto; margin: 0.4rem 0 0; border-radius: 0.75rem; padding: 0.9rem; color: #e0e7ff; background: #172554; font-size: 0.74rem; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+      .secret-note { margin: 0.45rem 0 0; color: var(--muted); font-size: 0.74rem; line-height: 1.55; }
+      .webhook-warning { margin: 1rem 0 0; border-left: 3px solid var(--warning); border-radius: 0.4rem; padding: 0.75rem 0.85rem; color: #92400e; background: #fffbeb; font-size: 0.76rem; line-height: 1.55; }
+      .delivery-flow { margin-top: 1rem; border: 1px solid #c7d2fe; border-radius: 0.75rem; padding: 0.75rem 0.9rem; color: #3730a3; background: #eef2ff; font-size: 0.78rem; font-weight: 800; line-height: 1.55; text-align: center; }
+      .sample-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.1rem; }
+      .sample-toolbar h3 { margin: 0; font-size: 0.9rem; }
+      select { border: 1px solid #d1d5db; border-radius: 0.6rem; padding: 0.45rem 2rem 0.45rem 0.65rem; color: var(--ink); background: white; font-size: 0.75rem; font-weight: 700; }
+      .code-block, .sample-code { position: relative; }
+      .sample-code pre { min-height: 190px; padding: 1.1rem; }
+      .code-block pre, .sample-code pre { padding-right: 3.5rem; }
+      .code-copy { position: absolute; top: 0.7rem; right: 0.7rem; color: #e0e7ff; background: rgb(255 255 255 / 12%); }
+      .code-copy:hover { color: white; background: rgb(255 255 255 / 24%); }
+      .credential-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(190px, 0.5fr); gap: 0.8rem; }
+      .input-action { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; }
+      .endpoint-action { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+      .input-action input { border-radius: 0.75rem 0 0 0.75rem; }
+      .endpoint-action input { border-radius: 0.75rem 0 0 0.75rem; }
+      .input-action .icon-button, .endpoint-action .icon-button { width: 2.7rem; height: auto; border: 1px solid #d1d5db; border-left: 0; border-radius: 0; color: var(--accent-dark); background: #f9fafb; }
+      .input-action .icon-button:last-child, .endpoint-action .icon-button:last-child { border-radius: 0 0.75rem 0.75rem 0; }
+      .input-action .icon-button:hover, .endpoint-action .icon-button:hover { color: white; background: var(--accent); }
+      .visibility-off { display: none; }
+      #toggle-webhook-key[aria-pressed="true"] .visibility-on { display: none; }
+      #toggle-webhook-key[aria-pressed="true"] .visibility-off { display: inline; }
+      .toast { position: fixed; right: 1.25rem; bottom: 1.25rem; max-width: 360px; border-radius: 0.8rem; padding: 0.9rem 1rem; color: white; background: var(--ink); box-shadow: 0 20px 55px rgb(15 23 42 / 25%); }
+      [hidden] { display: none !important; }
+      @media (max-width: 760px) {
+        .hero { grid-template-columns: 1fr; padding-top: 2rem; }
+        .connection { justify-content: flex-start; }
+        .stats { grid-template-columns: 1fr; }
+        .layout { grid-template-columns: 1fr; }
+        .management { grid-template-columns: 1fr; }
+        .credential-grid { grid-template-columns: 1fr; }
+        .actions .button:first-child { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <header>
+        <div class="brand"><div class="mark">P</div><div><strong>PyHookKit</strong><span>Notification router</span></div></div>
+        <div class="actions" id="header-actions" hidden>
+          <button class="button" id="refresh" type="button">새로 고침</button>
+          <button class="button primary" id="open-add" type="button">채널 추가</button>
+        </div>
+      </header>
+
+      <section class="login" id="login">
+        <div class="panel">
+          <span class="eyebrow">관리자 인증</span>
+          <h2>라우터에 연결</h2>
+          <p>관리자 토큰은 브라우저에 저장하지 않으며 현재 탭의 메모리에서만 사용합니다.</p>
+          <form id="login-form">
+            <label for="token">관리자 토큰</label>
+            <input id="token" type="password" autocomplete="off" required placeholder="PYHOOKKIT_ADMIN_TOKEN" />
+            <div class="error" id="login-error"></div>
+            <button class="button primary" type="submit">대시보드 열기</button>
+          </form>
+        </div>
+      </section>
+
+      <main id="dashboard" hidden>
+        <section class="hero">
+          <div><span class="eyebrow">중앙 알림 라우터</span><h1>채널과 알림을<br />한눈에 관리하세요.</h1><p>등록된 Teams 채널과 최근 전송 상태를 확인하고, 복사한 채널 링크로 새 대상을 안전하게 추가합니다.</p></div>
+          <div class="connection"><span class="dot" id="status-dot"></span><span id="status-text">연결 확인 중</span></div>
+        </section>
+        <section class="stats">
+          <article class="stat"><span>활성 채널</span><strong id="channel-count">0</strong></article>
+          <article class="stat"><span>최근 알림</span><strong id="notification-count">0</strong></article>
+          <article class="stat"><span>전송 성공</span><strong id="success-count">0</strong></article>
+        </section>
+        <section class="layout">
+          <article class="panel"><div class="panel-head"><div><h2>Teams 채널</h2><span>채널 링크별 알림 대상</span></div></div><div class="channel-list" id="channels"></div></article>
+          <article class="panel"><div class="panel-head"><div><h2>최근 알림</h2><span>페이로드를 제외한 상태</span></div></div><div class="feed" id="notifications"></div></article>
+        </section>
+        <section class="management">
+          <article class="panel"><div class="panel-head"><div><h2>인바운드 통합</h2><span>GitHub · GitLab · Azure DevOps</span></div><button class="button" id="open-integration" type="button">통합 추가</button></div><div class="management-list" id="integrations"></div></article>
+          <article class="panel"><div class="panel-head"><div><h2>생산자 API 키</h2><span>원문을 제외한 발급·사용 상태</span></div></div><div class="management-list" id="api-keys"></div></article>
+        </section>
+      </main>
+    </div>
+
+    <dialog id="add-dialog">
+      <div class="dialog-head"><h2>Teams 채널 추가</h2><p>링크에서 채널명을 추출하고 게시 계정의 Team 멤버십을 확인합니다. 비공개 채널은 채널 멤버십도 자동으로 추가합니다.</p></div>
+      <form id="add-form">
+        <label for="channel-link">Teams 채널 링크</label><input id="channel-link" type="url" required placeholder="https://teams.cloud.microsoft/l/channel/..." />
+        <label for="channel-name">채널명</label><input id="channel-name" readonly placeholder="채널 링크에서 자동 추출" />
+        <div class="field-help">대상 ID도 이 채널명으로 만들며, 중복되면 -2, -3을 붙입니다.</div>
+        <label for="route">알림 경로</label><input id="route" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value="release-notifications" />
+        <div class="field-help">같은 알림 경로를 지정한 채널들이 하나의 알림을 함께 받습니다.</div>
+        <div class="error" id="add-error"></div>
+        <div class="form-actions"><button class="button" id="cancel-add" type="button">취소</button><button class="button primary" id="submit-add" type="submit">채널 추가</button></div>
+      </form>
+    </dialog>
+    <dialog id="integration-dialog">
+      <div class="dialog-head"><h2>인바운드 통합 추가</h2><p>공급자 원본 Webhook을 인증하고 고정 경로나 채널로 변환합니다. 비밀 값은 환경 변수에 별도로 저장합니다.</p></div>
+      <form id="integration-form">
+        <label for="integration-provider">공급자</label><select id="integration-provider"><option value="github">GitHub</option><option value="gitlab">GitLab</option><option value="azure-devops">Azure DevOps</option></select>
+        <label for="integration-id">통합 ID</label><input id="integration-id" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" placeholder="github-release" />
+        <label for="integration-producer">생산자 ID</label><input id="integration-producer" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value="github" />
+        <label for="integration-route">알림 경로</label><input id="integration-route" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value="release-notifications" />
+        <label for="integration-target">대상 채널</label><select id="integration-target"><option value="">경로의 모든 대상</option></select>
+        <label for="integration-secret-env">인증 비밀 환경 변수</label><input id="integration-secret-env" required pattern="[A-Z][A-Z0-9_]*" value="GITHUB_WEBHOOK_SECRET" />
+        <div id="integration-username-field" hidden><label for="integration-username">Basic 인증 사용자 이름</label><input id="integration-username" value="pyhookkit" /></div>
+        <div class="field-help">GitHub는 Webhook secret, GitLab은 <strong>whsec_</strong> signing token, Azure DevOps는 Basic 인증 password를 지정한 환경 변수에서 읽습니다.</div>
+        <div class="error" id="integration-error"></div>
+        <div class="form-actions"><button class="button" id="cancel-integration" type="button">취소</button><button class="button primary" id="submit-integration" type="submit">통합 추가</button></div>
+      </form>
+    </dialog>
+    <dialog class="webhook-dialog" id="webhook-dialog">
+      <div class="dialog-head"><h2 id="webhook-title">웹훅 연동</h2><p>이 URL은 선택한 채널 하나에만 알림을 접수합니다. 기존 워커가 접수된 알림을 해당 Teams 채널로 전송합니다.</p></div>
+      <div class="webhook-content">
+        <div class="delivery-flow" id="webhook-flow"></div>
+        <div class="sample-toolbar"><h3>샘플 코드</h3><select id="webhook-language" aria-label="샘플 코드 언어"><option value="curl">curl</option><option value="python">Python</option></select></div>
+        <div class="sample-code"><button class="icon-button code-copy" data-copy="webhook-sample" type="button" aria-label="샘플 코드 복사" title="샘플 코드 복사"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg></button><pre id="webhook-sample"></pre></div>
+        <div class="code-label"><span>엔드포인트</span></div>
+        <div class="endpoint-action"><input id="webhook-url" readonly /><button class="icon-button" data-copy="webhook-url" type="button" aria-label="엔드포인트 복사" title="엔드포인트 복사"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg></button></div>
+        <div class="credential-grid">
+          <div><label for="webhook-api-key">API 키</label><div class="input-action"><input id="webhook-api-key" type="password" autocomplete="off" placeholder="phk_ API 키를 붙여 넣으세요" /><button class="icon-button" id="generate-webhook-key" type="button" aria-label="새 API 키 생성" title="새 API 키 생성"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18" /><path d="m5.6 5.6 12.8 12.8M18.4 5.6 5.6 18.4" /></svg></button><button class="icon-button" id="toggle-webhook-key" type="button" aria-label="API 키 표시" title="API 키 표시" aria-pressed="false"><svg class="visibility-on" aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" /><circle cx="12" cy="12" r="3" /></svg><svg class="visibility-off" aria-hidden="true" viewBox="0 0 24 24"><path d="m3 3 18 18M10.6 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-2.2 3.2M6.6 6.6C3.6 8.5 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 5.4-1.5M9.9 9.9a3 3 0 0 0 4.2 4.2" /></svg></button><button class="icon-button" data-copy="webhook-api-key" type="button" aria-label="API 키 복사" title="API 키 복사"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg></button></div></div>
+          <div><label for="webhook-producer">생산자 ID</label><input id="webhook-producer" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" value="gitlab" /></div>
+        </div>
+        <p class="secret-note">표준 인증 헤더는 <strong>Authorization: Bearer &lt;your-api-key&gt;</strong>입니다. <strong>생성</strong>은 현재 생산자와 채널에만 사용할 수 있는 256비트 키를 라우터에 등록합니다. 원문은 한 번만 표시되므로 즉시 안전한 비밀 저장소에 복사하세요.</p>
+        <div class="code-label"><span>자동 생성되는 필수 헤더</span></div><div class="code-block"><button class="icon-button code-copy" data-copy="webhook-headers" type="button" aria-label="필수 헤더 복사" title="필수 헤더 복사"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg></button><pre id="webhook-headers"></pre></div>
+        <div class="code-label"><span>Canonical JSON Payload</span></div><div class="code-block"><button class="icon-button code-copy" data-copy="webhook-payload" type="button" aria-label="Payload 복사" title="Payload 복사"><svg aria-hidden="true" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg></button><pre id="webhook-payload"></pre></div>
+        <p class="webhook-warning">GitHub 또는 GitLab의 원본 Webhook Payload를 그대로 보내면 안 됩니다. CI 작업이나 서명 검증 인바운드 어댑터에서 위 canonical 형식으로 변환하세요. <strong>eventId</strong>는 재시도 시 동일하게 유지해야 합니다.</p>
+        <div class="form-actions"><button class="button" id="close-webhook" type="button">닫기</button></div>
+      </div>
+    </dialog>
+    <div class="toast" id="toast" hidden></div>
+
+    <script>
+      let adminToken = "";
+      let activeWebhookTargetId = "";
+      let knownDestinations = [];
+      const byId = (id) => document.getElementById(id);
+      const request = async (path, options = {}) => {
+        const response = await fetch(path, {
+          ...options,
+          headers: { Authorization: `Bearer ${adminToken}`, ...(options.headers || {}) },
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || "요청에 실패했습니다.");
+        return data;
+      };
+      const showToast = (message) => {
+        byId("toast").textContent = message;
+        byId("toast").hidden = false;
+        window.setTimeout(() => { byId("toast").hidden = true; }, 2800);
+      };
+      const localizedError = (message) => {
+        if (message === "Teams channel link tenant does not match configured tenant") return "채널 링크의 테넌트가 현재 TeamsNotifyApp 테넌트와 다릅니다.";
+        if (message.startsWith("shared Teams channels")) return "공유 채널은 테넌트 경계를 포함할 수 있어 현재 지원하지 않습니다.";
+        if (message.includes("Teams channel link")) return "Teams에서 복사한 전체 채널 링크를 확인하세요.";
+        return message;
+      };
+      const resetAddForm = () => {
+        byId("add-form").reset();
+        byId("channel-name").value = "";
+        byId("add-error").textContent = "";
+      };
+      const closeAddDialog = () => {
+        resetAddForm();
+        byId("add-dialog").close();
+      };
+      const closeWebhookDialog = () => {
+        byId("webhook-api-key").value = "";
+        byId("webhook-dialog").close();
+      };
+      const closeOnBackdrop = (dialog, closeDialog) => {
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog) closeDialog();
+        });
+      };
+      const renderWebhookIntegration = () => {
+        const producer = byId("webhook-producer").value.trim() || "<PRODUCER_ID>";
+        const apiKey = byId("webhook-api-key").value || "<your-api-key>";
+        const endpoint = byId("webhook-url").value;
+        const payload = byId("webhook-payload").textContent;
+        const continuation = "\\";
+        byId("webhook-headers").textContent = [
+          `Authorization: Bearer ${apiKey}`,
+          `X-PyHookKit-Producer: ${producer}`,
+          "Content-Type: application/json",
+        ].join("\n");
+        byId("webhook-sample").textContent = byId("webhook-language").value === "python"
+          ? [
+              "import httpx",
+              "",
+              `endpoint = ${JSON.stringify(endpoint)}`,
+              `api_key = ${JSON.stringify(apiKey)}`,
+              "",
+              "response = httpx.post(",
+              "    endpoint,",
+              "    headers={",
+              '        "Authorization": f"Bearer {api_key}",',
+              `        "X-PyHookKit-Producer": ${JSON.stringify(producer)},`,
+              "    },",
+              `    json=${payload.split("\n").join("\n    ")},`,
+              "    timeout=10,",
+              ")",
+              "response.raise_for_status()",
+              "print(response.json())",
+            ].join("\n")
+          : [
+              `curl --fail-with-body --request POST ${continuation}`,
+              `  --url ${JSON.stringify(endpoint)} ${continuation}`,
+              `  --header ${JSON.stringify(`Authorization: Bearer ${apiKey}`)} ${continuation}`,
+              `  --header ${JSON.stringify(`X-PyHookKit-Producer: ${producer}`)} ${continuation}`,
+              `  --header "Content-Type: application/json" ${continuation}`,
+              "  --data-binary @- <<'JSON'",
+              payload,
+              "JSON",
+            ].join("\n");
+      };
+      const openWebhook = (item) => {
+        const payload = {
+          schemaVersion: "1.0",
+          eventId: "deploy-2026-001",
+          route: item.route,
+          title: "배포 결과",
+          body: "staging 배포가 완료되었습니다.",
+          severity: "success",
+        };
+        byId("webhook-title").textContent = `#${item.channelName || item.targetId} 웹훅 연동`;
+        activeWebhookTargetId = item.targetId;
+        byId("webhook-flow").textContent = `POST 요청 → SQLite 큐 → 전송 워커 → #${item.channelName || item.targetId}`;
+        byId("webhook-url").value = item.webhookUrl;
+        byId("webhook-api-key").value = "";
+        byId("webhook-api-key").type = "password";
+        byId("toggle-webhook-key").setAttribute("aria-pressed", "false");
+        byId("toggle-webhook-key").setAttribute("aria-label", "API 키 표시");
+        byId("toggle-webhook-key").title = "API 키 표시";
+        byId("webhook-payload").textContent = JSON.stringify(payload, null, 2);
+        renderWebhookIntegration();
+        byId("webhook-dialog").showModal();
+      };
+      const renderChannels = (items) => {
+        const root = byId("channels");
+        root.replaceChildren();
+        if (!items.length) { root.innerHTML = '<div class="empty">등록된 Teams 채널이 없습니다.</div>'; return; }
+        for (const item of items) {
+          const row = document.createElement("div"); row.className = "channel";
+          const icon = document.createElement("div");
+          const isPrivate = item.membershipType === "private";
+          icon.className = `channel-icon${isPrivate ? " private" : ""}`;
+          icon.setAttribute("role", "img");
+          icon.tabIndex = 0;
+          icon.setAttribute("aria-label", isPrivate ? "비공개 채널" : "표준 채널");
+          icon.title = isPrivate ? "비공개 채널" : "표준 채널";
+          if (isPrivate) {
+            icon.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg>';
+          } else {
+            icon.textContent = "#";
+          }
+          const detail = document.createElement("div");
+          const name = document.createElement("strong"); name.textContent = item.channelName || item.targetId;
+          const meta = document.createElement("small"); meta.textContent = `${item.route} · ${item.targetId}`;
+          detail.append(name, meta);
+          const actions = document.createElement("div"); actions.className = "channel-actions";
+          const state = document.createElement("span"); state.className = "pill"; state.textContent = item.enabled ? "활성" : "비활성";
+          const webhook = document.createElement("button"); webhook.type = "button"; webhook.className = "webhook-button"; webhook.disabled = !item.enabled; webhook.textContent = "웹훅 연동";
+          webhook.addEventListener("click", () => openWebhook(item));
+          const test = document.createElement("button"); test.type = "button"; test.className = "test-button"; test.disabled = !item.enabled; test.textContent = item.enabled ? "테스트 발송" : "사용 불가";
+          test.addEventListener("click", async () => {
+            test.disabled = true; test.textContent = "발송 중…";
+            try {
+              const result = await request(`/admin/api/destinations/${encodeURIComponent(item.targetId)}/test`, { method: "POST", body: "{}" });
+              test.textContent = "발송 성공"; await load(); showToast(`#${result.channelName} 채널로 테스트 알림을 보냈습니다.`);
+              window.setTimeout(() => { test.textContent = "테스트 발송"; }, 2200);
+            } catch (error) { test.textContent = "다시 시도"; showToast(`테스트 발송 실패: ${localizedError(error.message)}`); }
+            finally { test.disabled = false; }
+          });
+          actions.append(state, webhook, test); row.append(icon, detail, actions); root.append(row);
+        }
+      };
+      const renderNotifications = (items) => {
+        const root = byId("notifications"); root.replaceChildren();
+        if (!items.length) { root.innerHTML = '<div class="empty">아직 접수된 알림이 없습니다.</div>'; return; }
+        for (const item of items) {
+          const row = document.createElement("div"); row.className = "event";
+          const top = document.createElement("div"); top.className = "event-top";
+          const id = document.createElement("strong"); id.textContent = item.eventId;
+          const state = document.createElement("span"); state.className = `state ${item.state}`; state.textContent = item.state;
+          const meta = document.createElement("p"); meta.textContent = `${item.producer} · ${new Date(item.createdAt).toLocaleString()}`;
+          top.append(id, state); row.append(top, meta); root.append(row);
+        }
+      };
+      const renderIntegrations = (items) => {
+        const root = byId("integrations"); root.replaceChildren();
+        if (!items.length) { root.innerHTML = '<div class="empty">등록된 인바운드 통합이 없습니다.</div>'; return; }
+        for (const item of items) {
+          const row = document.createElement("div"); row.className = "management-item";
+          const detail = document.createElement("div");
+          const name = document.createElement("strong");
+          const badge = document.createElement("span"); badge.className = "provider-badge"; badge.textContent = item.provider;
+          name.append(badge, document.createTextNode(item.integrationId));
+          const meta = document.createElement("small"); meta.textContent = `${item.producer} · ${item.targetId || item.route}`;
+          const state = document.createElement("span"); state.className = "pill"; state.textContent = item.secretConfigured ? "사용 가능" : "비밀 필요";
+          detail.append(name, meta); row.append(detail, state); root.append(row);
+        }
+      };
+      const renderApiKeys = (items) => {
+        const root = byId("api-keys"); root.replaceChildren();
+        if (!items.length) { root.innerHTML = '<div class="empty">발급된 생산자 API 키가 없습니다.</div>'; return; }
+        for (const item of items) {
+          const row = document.createElement("div"); row.className = "management-item";
+          const detail = document.createElement("div");
+          const name = document.createElement("strong"); name.textContent = `${item.producer} · ${item.keyId}`;
+          const meta = document.createElement("small"); meta.textContent = `${item.targetId || item.route || "제한 없음"} · ${item.lastUsedAt ? "사용됨" : "미사용"}`;
+          detail.append(name, meta); row.append(detail);
+          if (item.state === "active") {
+            const revoke = document.createElement("button"); revoke.className = "danger-button"; revoke.type = "button"; revoke.textContent = "폐기";
+            revoke.addEventListener("click", async () => {
+              try { await request(`/admin/api/api-keys/${item.keyId}`, { method: "DELETE" }); await load(); showToast("API 키를 폐기했습니다."); }
+              catch (error) { showToast(error.message); }
+            });
+            row.append(revoke);
+          } else {
+            const state = document.createElement("span"); state.className = "state failed"; state.textContent = "폐기됨"; row.append(state);
+          }
+          root.append(row);
+        }
+      };
+      const populateIntegrationTargets = () => {
+        const select = byId("integration-target");
+        select.replaceChildren(new Option("경로의 모든 대상", ""));
+        for (const item of knownDestinations) select.append(new Option(`#${item.channelName || item.targetId}`, item.targetId));
+      };
+      const updateIntegrationProvider = () => {
+        const provider = byId("integration-provider").value;
+        byId("integration-producer").value = provider;
+        byId("integration-secret-env").value = provider === "github" ? "GITHUB_WEBHOOK_SECRET" : provider === "gitlab" ? "GITLAB_WEBHOOK_SIGNING_TOKEN" : "AZURE_DEVOPS_WEBHOOK_PASSWORD";
+        byId("integration-username-field").hidden = provider !== "azure-devops";
+      };
+      const load = async () => {
+        const [destinations, notifications, integrations, apiKeys] = await Promise.all([request("/admin/api/destinations"), request("/admin/api/notifications"), request("/admin/api/integrations"), request("/admin/api/api-keys")]);
+        knownDestinations = destinations.items;
+        renderChannels(destinations.items); renderNotifications(notifications.items);
+        renderIntegrations(integrations.items); renderApiKeys(apiKeys.items);
+        byId("channel-count").textContent = destinations.items.filter((item) => item.enabled).length;
+        byId("notification-count").textContent = notifications.items.length;
+        byId("success-count").textContent = notifications.items.filter((item) => item.state === "delivered").length;
+        byId("status-dot").classList.add("online"); byId("status-text").textContent = "라우터 데이터베이스 연결됨";
+      };
+      byId("login-form").addEventListener("submit", async (event) => {
+        event.preventDefault(); adminToken = byId("token").value;
+        try { await load(); byId("login").hidden = true; byId("dashboard").hidden = false; byId("header-actions").hidden = false; }
+        catch (error) { adminToken = ""; byId("login-error").textContent = error.message; }
+      });
+      byId("refresh").addEventListener("click", async () => { try { await load(); showToast("최신 상태로 갱신했습니다."); } catch (error) { showToast(error.message); } });
+      byId("open-add").addEventListener("click", () => { resetAddForm(); byId("add-dialog").showModal(); });
+      byId("open-integration").addEventListener("click", () => { byId("integration-form").reset(); byId("integration-error").textContent = ""; populateIntegrationTargets(); updateIntegrationProvider(); byId("integration-dialog").showModal(); });
+      byId("cancel-add").addEventListener("click", closeAddDialog);
+      byId("close-webhook").addEventListener("click", closeWebhookDialog);
+      closeOnBackdrop(byId("add-dialog"), closeAddDialog);
+      closeOnBackdrop(byId("webhook-dialog"), closeWebhookDialog);
+      closeOnBackdrop(byId("integration-dialog"), () => byId("integration-dialog").close());
+      byId("cancel-integration").addEventListener("click", () => byId("integration-dialog").close());
+      byId("integration-provider").addEventListener("change", updateIntegrationProvider);
+      byId("webhook-producer").addEventListener("input", renderWebhookIntegration);
+      byId("webhook-api-key").addEventListener("input", renderWebhookIntegration);
+      byId("webhook-language").addEventListener("change", renderWebhookIntegration);
+      byId("generate-webhook-key").addEventListener("click", async () => {
+        const button = byId("generate-webhook-key");
+        button.disabled = true;
+        try {
+          const issued = await request("/admin/api/api-keys", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ producer: byId("webhook-producer").value, targetId: activeWebhookTargetId }),
+          });
+          byId("webhook-api-key").value = issued.apiKey;
+          renderWebhookIntegration();
+          showToast("대상 제한 API 키를 발급했습니다. 이 값은 다시 표시되지 않습니다.");
+        } catch (error) { showToast(`API 키 발급 실패: ${error.message}`); }
+        finally { button.disabled = false; }
+      });
+      byId("toggle-webhook-key").addEventListener("click", () => {
+        const input = byId("webhook-api-key");
+        input.type = input.type === "password" ? "text" : "password";
+        const visible = input.type === "text";
+        byId("toggle-webhook-key").setAttribute("aria-pressed", String(visible));
+        byId("toggle-webhook-key").setAttribute("aria-label", visible ? "API 키 숨기기" : "API 키 표시");
+        byId("toggle-webhook-key").title = visible ? "API 키 숨기기" : "API 키 표시";
+      });
+      for (const button of document.querySelectorAll("[data-copy]")) {
+        button.addEventListener("click", async () => {
+          const source = byId(button.dataset.copy);
+          const value = source instanceof HTMLInputElement ? source.value : source.textContent;
+          if (!value) { showToast("복사할 값이 없습니다."); return; }
+          await navigator.clipboard.writeText(value);
+          showToast("클립보드에 복사했습니다.");
+        });
+      }
+      byId("channel-link").addEventListener("input", (event) => {
+        try {
+          const parts = new URL(event.target.value).pathname.split("/");
+          const channelName = decodeURIComponent(parts[4] || "");
+          byId("channel-name").value = channelName;
+        } catch { byId("channel-name").value = ""; }
+      });
+      byId("add-form").addEventListener("submit", async (event) => {
+        event.preventDefault(); byId("submit-add").disabled = true; byId("add-error").textContent = "";
+        try {
+          const result = await request("/admin/api/destinations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ route: byId("route").value, channelLink: byId("channel-link").value }) });
+          byId("add-dialog").close(); resetAddForm(); await load(); showToast(`${result.channelName} 채널을 추가했습니다.`);
+        } catch (error) { byId("add-error").textContent = localizedError(error.message); }
+        finally { byId("submit-add").disabled = false; }
+      });
+      byId("integration-form").addEventListener("submit", async (event) => {
+        event.preventDefault(); byId("submit-integration").disabled = true; byId("integration-error").textContent = "";
+        const provider = byId("integration-provider").value;
+        try {
+          const result = await request("/admin/api/integrations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              integrationId: byId("integration-id").value,
+              provider,
+              producer: byId("integration-producer").value,
+              secretEnvironmentVariable: byId("integration-secret-env").value,
+              route: byId("integration-route").value,
+              targetId: byId("integration-target").value || null,
+              username: provider === "azure-devops" ? byId("integration-username").value : null,
+              enabled: true,
+            }),
+          });
+          byId("integration-dialog").close(); await load(); showToast(`${result.provider} 통합을 추가했습니다.`);
+        } catch (error) { byId("integration-error").textContent = localizedError(error.message); }
+        finally { byId("submit-integration").disabled = false; }
+      });
+    </script>
+  </body>
+</html>

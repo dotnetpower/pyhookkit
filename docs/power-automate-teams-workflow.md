@@ -95,9 +95,9 @@ Configure the Teams connection user as follows:
 1. Create or designate a dedicated, licensed Microsoft 365 user. Do not use a
    departing employee's account or a tenant administrator.
 2. Add the user as a member of every Team that contains an approved
-   destination. Explicit membership is also needed to discover private or
-   shared channels, although the Teams connector action used here does not
-   support posting to private channels.
+   destination. For a private channel, also add the user to that channel. This
+   repository can automate Team and private-channel membership with
+   `TeamsNotifyApp`. Shared channels are not supported.
 3. Sign in as that user in the target Power Platform environment, open
    **Connections**, create the Microsoft Teams connection, and complete the
    tenant's consent, MFA, and Conditional Access requirements.

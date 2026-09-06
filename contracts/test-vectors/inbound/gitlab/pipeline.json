@@ -1,0 +1,9 @@
+{
+  "object_attributes": {
+    "status": "success",
+    "url": "https://gitlab.example/example/service/-/pipelines/1001"
+  },
+  "project": {
+    "path_with_namespace": "example/service"
+  }
+}

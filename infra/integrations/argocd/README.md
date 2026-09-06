@@ -64,6 +64,13 @@ creating the Secret, and change the trigger `send` values to
 dedicated to Argo CD. Do not enable both GitLab and router templates for the
 same trigger.
 
+The configuration also includes `bookinfo-router-health-degraded` and
+`on-bookinfo-router-health-degraded` for the `incident-alerts` route. Subscribe
+only after that route has an enabled destination. For one destination, define a
+separate Webhook service URL using
+`/v1/destinations/{targetId}/notifications`. See the
+[producer integrations guide](../../../docs/producer-integrations.md#argo-cd-notifications).
+
 `context.teamsDelivery` selects `workflow` (default) or `logic-app` for
 deployment-result notifications. Configure the corresponding protected GitLab
 variables before choosing Logic App.

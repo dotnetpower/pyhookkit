@@ -1,6 +1,7 @@
 """Azure CLI TeamsNotifyApp bootstrap tests."""
 
 import json
+from typing import cast
 from uuid import UUID
 
 import pytest
@@ -15,7 +16,10 @@ _APP_OBJECT_ID = UUID("22222222-2222-4222-8222-222222222222")
 _CLIENT_ID = UUID("33333333-3333-4333-8333-333333333333")
 _SP_ID = UUID("44444444-4444-4444-8444-444444444444")
 _USER_ID = UUID("55555555-5555-4555-8555-555555555555")
-_ROLE_ID = UUID("66666666-6666-4666-8666-666666666666")
+_READ_ROLE_ID = UUID("66666666-6666-4666-8666-666666666666")
+_WRITE_ROLE_ID = UUID("88888888-8888-4888-8888-888888888888")
+_CHANNEL_ROLE_ID = UUID("99999999-9999-4999-8999-999999999999")
+_CHANNEL_MEMBER_ROLE_ID = UUID("aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")
 _CREDENTIAL_ID = UUID("77777777-7777-4777-8777-777777777777")
 
 
@@ -23,7 +27,16 @@ class FakeAzureCli:
     def __init__(self, *, existing: bool) -> None:
         self.existing = existing
         self.calls: list[tuple[str, ...]] = []
-        self.assignment_created = existing
+        self.assignments: set[UUID] = (
+            {
+                _CHANNEL_MEMBER_ROLE_ID,
+                _CHANNEL_ROLE_ID,
+                _READ_ROLE_ID,
+                _WRITE_ROLE_ID,
+            }
+            if existing
+            else set()
+        )
         self.credentials: set[UUID] = set()
 
     def __call__(self, arguments: tuple[str, ...]) -> str:
@@ -48,10 +61,25 @@ class FakeAzureCli:
                 {
                     "appRoles": [
                         {
-                            "id": str(_ROLE_ID),
-                            "value": "GroupMember.ReadWrite.All",
+                            "id": str(_CHANNEL_ROLE_ID),
+                            "value": "Channel.ReadBasic.All",
                             "allowedMemberTypes": ["Application"],
-                        }
+                        },
+                        {
+                            "id": str(_CHANNEL_MEMBER_ROLE_ID),
+                            "value": "ChannelMember.ReadWrite.All",
+                            "allowedMemberTypes": ["Application"],
+                        },
+                        {
+                            "id": str(_READ_ROLE_ID),
+                            "value": "TeamMember.Read.All",
+                            "allowedMemberTypes": ["Application"],
+                        },
+                        {
+                            "id": str(_WRITE_ROLE_ID),
+                            "value": "TeamMember.ReadWriteNonOwnerRole.All",
+                            "allowedMemberTypes": ["Application"],
+                        },
                     ]
                 }
             )
@@ -59,11 +87,16 @@ class FakeAzureCli:
             return ""
         if operation[0] == "rest":
             if "GET" in arguments:
-                assignments = (
-                    [{"appRoleId": str(_ROLE_ID)}] if self.assignment_created else []
-                )
+                assignments = [
+                    {"appRoleId": str(role_id)} for role_id in self.assignments
+                ]
                 return json.dumps({"value": assignments})
-            self.assignment_created = True
+            raw_body: object = json.loads(arguments[arguments.index("--body") + 1])
+            assert isinstance(raw_body, dict)
+            body = cast(dict[str, object], raw_body)
+            raw_role_id = body["appRoleId"]
+            assert isinstance(raw_role_id, str)
+            self.assignments.add(UUID(raw_role_id))
             return ""
         if operation == ("ad", "user", "show"):
             return str(_USER_ID)
@@ -88,7 +121,12 @@ def _application(*, include_role: bool) -> dict[str, object]:
         access.append(
             {
                 "resourceAppId": "00000003-0000-0000-c000-000000000000",
-                "resourceAccess": [{"id": str(_ROLE_ID), "type": "Role"}],
+                "resourceAccess": [
+                    {"id": str(_CHANNEL_MEMBER_ROLE_ID), "type": "Role"},
+                    {"id": str(_CHANNEL_ROLE_ID), "type": "Role"},
+                    {"id": str(_READ_ROLE_ID), "type": "Role"},
+                    {"id": str(_WRITE_ROLE_ID), "type": "Role"},
+                ],
             }
         )
     return {

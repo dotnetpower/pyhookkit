@@ -11,6 +11,7 @@ const repositoryUrl = 'https://github.com/dotnetpower/pyhookkit';
 const siteBase = '/pyhookkit';
 
 const docsDirectory = path.join(repositoryRoot, 'docs');
+const tabbedDocuments = new Set(['docs/teams-webhook-quickstart.md', 'docs/teams-webhook-quickstart.ko.md']);
 const documentationFiles = (await readdir(docsDirectory, { withFileTypes: true }))
   .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
   .map((entry) => path.join(docsDirectory, entry.name));
@@ -24,19 +25,25 @@ const sources = [
 function sourceMetadata(source) {
   const relative = path.relative(repositoryRoot, source).replaceAll(path.sep, '/');
   const korean = relative.endsWith('.ko.md');
+  const mdx = tabbedDocuments.has(relative);
   const localeRoot = korean ? path.join(outputRoot, 'ko') : outputRoot;
 
   if (relative === 'README.md' || relative === 'README.ko.md') {
     return {
       korean,
+      mdx,
       relative,
       target: path.join(localeRoot, 'docs', 'project-overview.md'),
     };
   }
 
-  const fileName = path.basename(source).replace(/\.ko\.md$/, '.md');
+  const fileName = path
+    .basename(source)
+    .replace(/\.ko\.md$/, '.md')
+    .replace(/\.md$/, mdx ? '.mdx' : '.md');
   return {
     korean,
+    mdx,
     relative,
     target: path.join(localeRoot, 'docs', fileName === 'README.md' ? 'index.md' : fileName),
   };
@@ -51,7 +58,10 @@ function splitDestination(destination) {
 }
 
 function publishedRoute(target) {
-  const relative = path.relative(outputRoot, target).replaceAll(path.sep, '/').replace(/\.md$/, '');
+  const relative = path
+    .relative(outputRoot, target)
+    .replaceAll(path.sep, '/')
+    .replace(/\.mdx?$/, '');
   const route = relative.endsWith('/index') ? relative.slice(0, -'/index'.length) : relative;
   return `${siteBase}/${route}/`.replace(/\/{2,}/g, '/');
 }
@@ -133,18 +143,39 @@ function rewriteAlerts(markdown) {
   );
 }
 
+function rewriteTabs(markdown) {
+  return markdown.replace(/<!-- starlight-tabs:start -->\n([\s\S]*?)<!-- starlight-tabs:end -->/g, (_match, body) => {
+    const tabs = body
+      .trim()
+      .split(/^### /m)
+      .filter(Boolean)
+      .map((section) => {
+        const newline = section.indexOf('\n');
+        if (newline < 0) throw new Error('A tab heading must have content');
+        const label = section.slice(0, newline).trim();
+        const content = section.slice(newline + 1).trim();
+        return `<TabItem label=${JSON.stringify(label)}>\n\n${content}\n\n</TabItem>`;
+      });
+    return `<Tabs>\n\n${tabs.join('\n\n')}\n\n</Tabs>`;
+  });
+}
+
 function prepareDocument(sourceText, entry) {
   const heading = sourceText.match(/^#\s+(.+)$/m);
   if (!heading) throw new Error(`Document has no level-one heading: ${entry.relative}`);
 
   const title = heading[1].replace(/[`*_]/g, '').trim();
   const withoutHeading = sourceText.replace(/^#\s+.+\n+/, '');
-  const content = rewriteAlerts(rewriteLinks(withoutHeading, entry));
+  const content = rewriteAlerts(rewriteLinks(rewriteTabs(withoutHeading), entry));
+  const componentImport = entry.mdx ? "import { TabItem, Tabs } from '@astrojs/starlight/components';\n\n" : '';
+  const generatedComment = entry.mdx
+    ? `{/* Generated from ${entry.relative}; edit the canonical source file instead. */}`
+    : `<!-- Generated from ${entry.relative}; edit the canonical source file instead. -->`;
   const editUrl = `${repositoryUrl}/edit/main/${entry.relative}`;
 
   return `---\ntitle: ${JSON.stringify(title)}\ndescription: ${JSON.stringify(
     entry.korean ? 'Microsoft Teams Webhook 알림 가이드' : 'Microsoft Teams Webhook notification guidance'
-  )}\neditUrl: ${JSON.stringify(editUrl)}\n---\n\n<!-- Generated from ${entry.relative}; edit the canonical source file instead. -->\n\n${content}`;
+  )}\neditUrl: ${JSON.stringify(editUrl)}\n---\n\n${componentImport}${generatedComment}\n\n${content}`;
 }
 
 await rm(outputRoot, { recursive: true, force: true });

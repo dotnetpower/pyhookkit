@@ -74,3 +74,10 @@ Slack are short-lived credentials and must not be logged.
 See [Provider configuration](configuration.md) for local setup and rotation
 guidance and the [Power Automate Teams Workflow
 guide](power-automate-teams-workflow.md) for callback storage.
+
+## Official security references
+
+- [Validating GitHub Webhook deliveries](https://docs.github.com/webhooks/using-webhooks/validating-webhook-deliveries)
+- [Verifying requests from Slack](https://docs.slack.dev/authentication/verifying-requests-from-slack/)
+- [GitLab Webhook security](https://docs.gitlab.com/user/project/integrations/webhooks/)
+- [Azure DevOps Web Hooks](https://learn.microsoft.com/azure/devops/service-hooks/services/webhooks?view=azure-devops)

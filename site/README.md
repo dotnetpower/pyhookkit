@@ -30,6 +30,24 @@ npm run check
 npm run build
 ```
 
+## Search indexing
+
+GitHub Pages publishes this repository as a project site under `/pyhookkit/`.
+Submit the following sitemap directly in Google Search Console and Bing
+Webmaster Tools because this repository cannot control the host-root
+`https://dotnetpower.github.io/robots.txt`:
+
+```text
+https://dotnetpower.github.io/pyhookkit/sitemap-index.xml
+```
+
+Set repository variables `GOOGLE_SITE_VERIFICATION_ID` and
+`BING_SITE_VERIFICATION_ID` to inject their public verification tokens during
+the Pages build. These values are identifiers, not credentials.
+
+The project also publishes `llms.txt`, JSON Schema contracts, and the central
+router OpenAPI document under the `/pyhookkit/` base path.
+
 ## Attribution
 
 The site is derived from the MIT-licensed

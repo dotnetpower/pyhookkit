@@ -30,6 +30,7 @@ pnpm-workspace.yaml
 # Generated from the repository's canonical Markdown by scripts/sync-docs.mjs
 src/content/docs/
 public/docs-assets/
+public/contracts/
 
 # Unused images shipped by the upstream AstroWind demo.
 src/assets/images/

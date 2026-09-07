@@ -1,0 +1,37 @@
+# PyHookKit Teams Webhook Guide
+
+> PyHookKit documents direct Microsoft Teams Webhook delivery and provides an optional provider-neutral notification router with Slack and Teams semantic parity.
+
+The first Teams notification does not require the PyHookKit router or a Microsoft Graph app. Start with the direct Power Automate Workflow quickstart. Add TeamsNotifyApp only for membership automation, and add the central router only for authenticated intake, fan-out, status, or migration.
+
+## Start here
+
+- [English documentation](https://dotnetpower.github.io/pyhookkit/docs/)
+- [한국어 문서](https://dotnetpower.github.io/pyhookkit/ko/docs/)
+- [10-minute Teams Webhook quickstart](https://dotnetpower.github.io/pyhookkit/docs/teams-webhook-quickstart/)
+- [Power Automate Teams Workflow](https://dotnetpower.github.io/pyhookkit/docs/power-automate-teams-workflow/)
+- [Central notification router](https://dotnetpower.github.io/pyhookkit/docs/central-notification-router/)
+
+## Contracts and API
+
+- [Canonical notification JSON Schema](https://dotnetpower.github.io/pyhookkit/contracts/notification.schema.json)
+- [Delivery result JSON Schema](https://dotnetpower.github.io/pyhookkit/contracts/delivery-result.schema.json)
+- [Central router OpenAPI](https://dotnetpower.github.io/pyhookkit/openapi.json)
+- [Notification parity](https://dotnetpower.github.io/pyhookkit/docs/notification-parity/)
+- [SQLite data model](https://dotnetpower.github.io/pyhookkit/docs/central-router-sqlite-data-model/)
+
+## Operations and security
+
+- [Provider integrations](https://dotnetpower.github.io/pyhookkit/docs/producer-integrations/)
+- [TeamsNotifyApp bootstrap](https://dotnetpower.github.io/pyhookkit/docs/teams-notify-app-bootstrap/)
+- [Teams delivery options](https://dotnetpower.github.io/pyhookkit/docs/teams-delivery-options/)
+- [Security](https://dotnetpower.github.io/pyhookkit/docs/security/)
+- [Integrated Bookinfo scenario](https://dotnetpower.github.io/pyhookkit/docs/integrated-bookinfo-scenario/)
+
+## Project
+
+- [Source repository](https://github.com/dotnetpower/pyhookkit)
+- [License](https://github.com/dotnetpower/pyhookkit/blob/main/LICENSE)
+- [Canonical contract sources](https://github.com/dotnetpower/pyhookkit/tree/main/contracts)
+
+All examples use synthetic identifiers, URLs, routes, and payloads. Never infer real credentials or tenant details from screenshots or examples.

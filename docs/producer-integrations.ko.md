@@ -229,3 +229,10 @@ uv run python -m pyhookkit.entrypoints.notification_router \
   공급자 응답을 기록하지 마세요.
 - 하나의 SQLite 데이터베이스에는 라우터 복제본 하나만 사용하세요. 수평
   확장 전에는 관리형 트랜잭션 저장소 또는 내구성 큐로 이전하세요.
+
+## 공급자 공식 참고 자료
+
+- [GitHub Webhook 만들기](https://docs.github.com/webhooks/using-webhooks/creating-webhooks)
+- [GitLab 프로젝트 Webhook](https://docs.gitlab.com/user/project/integrations/webhooks/)
+- [Argo CD 일반 Webhook 서비스](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/webhook/)
+- [Azure DevOps Web Hooks](https://learn.microsoft.com/azure/devops/service-hooks/services/webhooks?view=azure-devops)

@@ -356,6 +356,10 @@ The process exposes:
 - `POST /v1/inbound/{provider}/{integrationId}`;
 - `GET /v1/notifications/{notificationId}`.
 
+Use the [central router OpenAPI document](https://dotnetpower.github.io/pyhookkit/openapi.json)
+for machine-readable paths, authentication, request schemas, and redacted
+response models.
+
 The POST endpoint returns `202` after SQLite commits the notification and all
 target records. Delivery occurs in the worker; `202` is not provider delivery
 evidence. Query the returned notification ID for `queued`, `delivering`,

@@ -76,3 +76,10 @@ Workflow URL 및 TeamsNotifyApp 클라이언트 비밀을 자격 증명으로
 로컬 설정 및 교체 지침은 [공급자 구성](configuration.ko.md)을, 콜백 저장은
 [Power Automate Teams Workflow 가이드](power-automate-teams-workflow.ko.md)를
 참조하세요.
+
+## 공식 보안 참고 자료
+
+- [GitHub Webhook 전송 검증](https://docs.github.com/webhooks/using-webhooks/validating-webhook-deliveries)
+- [Slack 요청 검증](https://docs.slack.dev/authentication/verifying-requests-from-slack/)
+- [GitLab Webhook 보안](https://docs.gitlab.com/user/project/integrations/webhooks/)
+- [Azure DevOps Web Hooks](https://learn.microsoft.com/azure/devops/service-hooks/services/webhooks?view=azure-devops)

@@ -2,13 +2,18 @@ import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promi
 import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { renderMermaidSVG } from 'beautiful-mermaid';
+
+import { descriptions, gitLastModified, seoTitles } from './document-metadata.mjs';
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const repositoryRoot = path.resolve(siteRoot, '..');
 const outputRoot = path.join(siteRoot, 'src', 'content', 'docs');
 const publicAssetsRoot = path.join(siteRoot, 'public', 'docs-assets');
+const publicContractsRoot = path.join(siteRoot, 'public', 'contracts');
 const repositoryUrl = 'https://github.com/dotnetpower/pyhookkit';
 const siteBase = '/pyhookkit';
+const generatedDiagrams = [];
 
 const docsDirectory = path.join(repositoryRoot, 'docs');
 const tabbedDocuments = new Set(['docs/teams-webhook-quickstart.md', 'docs/teams-webhook-quickstart.ko.md']);
@@ -160,26 +165,57 @@ function rewriteTabs(markdown) {
   });
 }
 
+function rewriteMermaid(markdown, entry, documentTitle) {
+  let diagramIndex = 0;
+  return markdown.replace(/```mermaid\n([\s\S]*?)```/g, (_match, diagram, offset) => {
+    diagramIndex += 1;
+    const preceding = markdown.slice(0, offset);
+    const headings = [...preceding.matchAll(/^#{1,6}\s+(.+)$/gm)];
+    const heading = (headings.at(-1)?.[1] ?? documentTitle).replace(/[`*_]/g, '').trim();
+    const label = `${heading}${entry.korean ? ' 다이어그램' : ' diagram'}`;
+    const baseName = path.basename(entry.relative, '.md').replace(/\.ko$/, '');
+    const fileName = `${baseName}${entry.korean ? '-ko' : ''}-${diagramIndex}.svg`;
+    generatedDiagrams.push({
+      fileName,
+      content: renderMermaidSVG(diagram.trim(), {
+        bg: '#ffffff',
+        fg: '#171827',
+        accent: '#4f46e5',
+      }),
+    });
+    return `![${label}](${siteBase}/docs-assets/generated/${fileName})`;
+  });
+}
+
 function prepareDocument(sourceText, entry) {
   const heading = sourceText.match(/^#\s+(.+)$/m);
   if (!heading) throw new Error(`Document has no level-one heading: ${entry.relative}`);
 
   const title = heading[1].replace(/[`*_]/g, '').trim();
   const withoutHeading = sourceText.replace(/^#\s+.+\n+/, '');
-  const content = rewriteAlerts(rewriteLinks(rewriteTabs(withoutHeading), entry));
+  const content = rewriteAlerts(rewriteLinks(rewriteTabs(rewriteMermaid(withoutHeading, entry, title)), entry));
   const componentImport = entry.mdx ? "import { TabItem, Tabs } from '@astrojs/starlight/components';\n\n" : '';
   const generatedComment = entry.mdx
     ? `{/* Generated from ${entry.relative}; edit the canonical source file instead. */}`
     : `<!-- Generated from ${entry.relative}; edit the canonical source file instead. -->`;
   const editUrl = `${repositoryUrl}/edit/main/${entry.relative}`;
+  const description = descriptions[entry.relative];
+  if (!description) throw new Error(`Document has no description: ${entry.relative}`);
+  const lastUpdated = gitLastModified([entry.relative, 'site/scripts/document-metadata.mjs']);
+  if (!lastUpdated) throw new Error(`Document has no Git modification date: ${entry.relative}`);
+  const customTitle = seoTitles[entry.relative];
+  const customHead = customTitle ? `head:\n  - tag: title\n    content: ${JSON.stringify(customTitle)}\n` : '';
 
   return `---\ntitle: ${JSON.stringify(title)}\ndescription: ${JSON.stringify(
-    entry.korean ? 'Microsoft Teams Webhook 알림 가이드' : 'Microsoft Teams Webhook notification guidance'
-  )}\neditUrl: ${JSON.stringify(editUrl)}\n---\n\n${componentImport}${generatedComment}\n\n${content}`;
+    description
+  )}\nlastUpdated: ${lastUpdated}\n${customHead}editUrl: ${JSON.stringify(
+    editUrl
+  )}\n---\n\n${componentImport}${generatedComment}\n\n${content}`;
 }
 
 await rm(outputRoot, { recursive: true, force: true });
 await rm(publicAssetsRoot, { recursive: true, force: true });
+await rm(publicContractsRoot, { recursive: true, force: true });
 await mkdir(outputRoot, { recursive: true });
 
 for (const entry of entries) {
@@ -193,6 +229,17 @@ await cp(sourceAssets, publicAssetsRoot, {
   recursive: true,
   filter: (source) => !source.endsWith('.md'),
 });
+
+const generatedDiagramsRoot = path.join(publicAssetsRoot, 'generated');
+await mkdir(generatedDiagramsRoot, { recursive: true });
+for (const diagram of generatedDiagrams) {
+  await writeFile(path.join(generatedDiagramsRoot, diagram.fileName), diagram.content, 'utf8');
+}
+
+await mkdir(publicContractsRoot, { recursive: true });
+for (const fileName of ['notification.schema.json', 'delivery-result.schema.json']) {
+  await cp(path.join(repositoryRoot, 'contracts', fileName), path.join(publicContractsRoot, fileName));
+}
 
 const generated = await stat(outputRoot);
 if (!generated.isDirectory()) throw new Error('Documentation output was not created');

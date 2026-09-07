@@ -16,7 +16,8 @@ import type { AstroIntegration } from 'astro';
 import astrowind from './vendor/integration';
 import loadConfig from './vendor/integration/utils/loadConfig';
 
-import { responsiveTablesRehypePlugin } from './src/utils/frontmatter';
+import { documentationRemarkPlugin, responsiveTablesRehypePlugin } from './src/utils/frontmatter';
+import { gitLastModified, sourcePathsForUrl } from './scripts/document-metadata.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -75,11 +76,24 @@ export default defineConfig({
   integrations: [
     sitemap({
       filter: (page) => !noindexTaxonomyPaths.some((prefix) => new URL(page).pathname.startsWith(prefix)),
+      i18n: {
+        defaultLocale: 'en',
+        locales: { en: 'en', ko: 'ko' },
+      },
+      serialize(item) {
+        const lastmod = gitLastModified(sourcePathsForUrl(item.url));
+        const links = item.links ? [...item.links] : [];
+        const english = links.find((link) => link.lang === 'en');
+        if (english && !links.some((link) => link.lang === 'x-default')) {
+          links.push({ lang: 'x-default', url: english.url });
+        }
+        return { ...item, lastmod, links: links.length > 0 ? links : undefined };
+      },
     }),
     starlight({
       title: {
-        en: 'Teams Webhook Guide',
-        ko: 'Teams Webhook 알림 가이드',
+        en: 'PyHookKit',
+        ko: 'PyHookKit',
       },
       description: 'Send Microsoft Teams Adaptive Card notifications through one shared Power Automate Webhook flow.',
       defaultLocale: 'root',
@@ -188,6 +202,7 @@ export default defineConfig({
 
   markdown: {
     processor: unified({
+      remarkPlugins: [documentationRemarkPlugin],
       rehypePlugins: [responsiveTablesRehypePlugin],
     }),
   },

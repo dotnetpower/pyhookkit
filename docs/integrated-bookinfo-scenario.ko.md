@@ -273,3 +273,10 @@ az group delete --name "$RESOURCE_GROUP"
 
 다른 리소스 그룹에서 만든 리소스와 공유 Teams API 연결은 이 명령으로
 삭제되지 않습니다.
+
+## 플랫폼 공식 참고 자료
+
+- [GitHub 배포 보호 규칙](https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment)
+- [GitLab 파이프라인 트리거 API](https://docs.gitlab.com/api/pipeline_triggers/)
+- [Argo CD Notifications](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/)
+- [Azure Kubernetes Service 문서](https://learn.microsoft.com/azure/aks/)

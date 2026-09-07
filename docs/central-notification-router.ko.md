@@ -356,6 +356,10 @@ uv run python -m pyhookkit.entrypoints.notification_router \
 - `POST /v1/inbound/{provider}/{integrationId}`
 - `GET /v1/notifications/{notificationId}`
 
+머신 판독 가능한 경로, 인증, 요청 스키마 및 민감 정보가 제거된 응답 모델은
+[중앙 라우터 OpenAPI 문서](https://dotnetpower.github.io/pyhookkit/openapi.json)를
+참조하세요.
+
 POST 엔드포인트는 SQLite가 알림과 모든 대상 레코드를 커밋한 후 `202`를
 반환합니다. 전송은 워커에서 이루어지며 `202`는 공급자 전송 증거가
 아닙니다. 반환된 알림 ID를 조회하여 `queued`, `delivering`, `delivered`,

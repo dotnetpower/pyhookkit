@@ -638,17 +638,17 @@ Automate에서는 대상별로 하나의 실행이 성공했는지 확인합니�
 
 | 예제 | Slack | Microsoft Teams |
 |---|---|---|
-| [F01 Hello World](examples/python/fundamentals/01_hello_world) | <img src="./docs/assets/card-previews/hello-world-slack.png" alt="Slack Hello World 알림."> | <img src="./docs/assets/card-previews/hello-world-teams.png" alt="Microsoft Teams Hello World 알림."> |
-| [F02 Basic notification](examples/python/fundamentals/02_basic_notification) | <img src="./docs/assets/card-previews/basic-notification-slack.png" alt="Slack 기본 알림."> | <img src="./docs/assets/card-previews/basic-notification-teams.png" alt="Microsoft Teams 기본 알림."> |
-| [F03 Rich card](examples/python/fundamentals/03_rich_card) | <img src="./docs/assets/card-previews/rich-card-slack.png" alt="Slack 리치 카드 알림."> | <img src="./docs/assets/card-previews/rich-card-teams.png" alt="Microsoft Teams 리치 카드 알림."> |
-| [F04 Mention](examples/python/fundamentals/04_mention) | <img src="./docs/assets/card-previews/mention-slack.png" alt="Slack 멘션 알림."> | <img src="./docs/assets/card-previews/mention-teams.png" alt="Microsoft Teams 멘션 알림."><ul><li><sub>그룹 알림에는 추가 Microsoft Graph 멤버 확장 설정이 필요합니다.</sub></li><li><sub>논리적 별칭을 대입하면 멘션 대상을 잘못 표시할 수 있으므로 Teams는 설정된 사용자 이름을 표시합니다.</sub></li></ul> |
-| [F05 Link and action](examples/python/fundamentals/05_link_and_action) | <img src="./docs/assets/card-previews/link-and-action-slack.png" alt="Slack 링크 및 작업 알림."> | <img src="./docs/assets/card-previews/link-and-action-teams.png" alt="Microsoft Teams 링크 및 작업 알림."> |
-| [F06 Image](examples/python/fundamentals/06_image) | <img src="./docs/assets/card-previews/image-slack.png" alt="Slack 이미지 알림."> | <img src="./docs/assets/card-previews/image-teams.png" alt="Microsoft Teams 이미지 알림."> |
-| [F07 Routing](examples/python/fundamentals/07_routing) | <img src="./docs/assets/card-previews/route-slack.png" alt="Slack 경로 알림."> | <img src="./docs/assets/card-previews/route-teams.png" alt="Microsoft Teams 경로 알림."> |
-| [Deployment result](examples/python/scenarios/deployment_result) | _스크린샷 준비 중: `deployment-result-slack.png`_ | <img src="./docs/assets/card-previews/deployment-result-teams.png" alt="Microsoft Teams Bookinfo 배포 결과."> |
-| [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | _스크린샷 준비 중: `incident-alert-acknowledgment-slack.png`_ | <img src="./docs/assets/card-previews/incident-alert-acknowledgment-teams.png" alt="Microsoft Teams Bookinfo 인시던트 알림."> |
-| [Approval request](examples/python/scenarios/approval_request) | _스크린샷 준비 중: `approval-request-slack.png`_ | <img src="./docs/assets/card-previews/approval-request-teams.png" alt="Microsoft Teams Bookinfo 배포 승인 요청."> |
-| [Maintenance notice](examples/python/scenarios/maintenance_notice) | _스크린샷 준비 중: `maintenance-notice-slack.png`_ | <img src="./docs/assets/card-previews/maintenance-notice-teams.png" alt="Microsoft Teams 예정된 유지 관리 알림."> |
+| [F01 Hello World](examples/python/fundamentals/01_hello_world) | ![Slack Hello World 알림.](./docs/assets/card-previews/hello-world-slack.png) | ![Microsoft Teams Hello World 알림.](./docs/assets/card-previews/hello-world-teams.png) |
+| [F02 Basic notification](examples/python/fundamentals/02_basic_notification) | ![Slack 기본 알림.](./docs/assets/card-previews/basic-notification-slack.png) | ![Microsoft Teams 기본 알림.](./docs/assets/card-previews/basic-notification-teams.png) |
+| [F03 Rich card](examples/python/fundamentals/03_rich_card) | ![Slack 리치 카드 알림.](./docs/assets/card-previews/rich-card-slack.png) | ![Microsoft Teams 리치 카드 알림.](./docs/assets/card-previews/rich-card-teams.png) |
+| [F04 Mention](examples/python/fundamentals/04_mention) | ![Slack 멘션 알림.](./docs/assets/card-previews/mention-slack.png) | ![Microsoft Teams 멘션 알림.](./docs/assets/card-previews/mention-teams.png)<ul><li><sub>그룹 알림에는 추가 Microsoft Graph 멤버 확장 설정이 필요합니다.</sub></li><li><sub>논리적 별칭을 대입하면 멘션 대상을 잘못 표시할 수 있으므로 Teams는 설정된 사용자 이름을 표시합니다.</sub></li></ul> |
+| [F05 Link and action](examples/python/fundamentals/05_link_and_action) | ![Slack 링크 및 작업 알림.](./docs/assets/card-previews/link-and-action-slack.png) | ![Microsoft Teams 링크 및 작업 알림.](./docs/assets/card-previews/link-and-action-teams.png) |
+| [F06 Image](examples/python/fundamentals/06_image) | ![Slack 이미지 알림.](./docs/assets/card-previews/image-slack.png) | ![Microsoft Teams 이미지 알림.](./docs/assets/card-previews/image-teams.png) |
+| [F07 Routing](examples/python/fundamentals/07_routing) | ![Slack 경로 알림.](./docs/assets/card-previews/route-slack.png) | ![Microsoft Teams 경로 알림.](./docs/assets/card-previews/route-teams.png) |
+| [Deployment result](examples/python/scenarios/deployment_result) | _스크린샷 준비 중: `deployment-result-slack.png`_ | ![Microsoft Teams Bookinfo 배포 결과.](./docs/assets/card-previews/deployment-result-teams.png) |
+| [Incident alert and acknowledgment](examples/python/scenarios/incident_alert_acknowledgment) | _스크린샷 준비 중: `incident-alert-acknowledgment-slack.png`_ | ![Microsoft Teams Bookinfo 인시던트 알림.](./docs/assets/card-previews/incident-alert-acknowledgment-teams.png) |
+| [Approval request](examples/python/scenarios/approval_request) | _스크린샷 준비 중: `approval-request-slack.png`_ | ![Microsoft Teams Bookinfo 배포 승인 요청.](./docs/assets/card-previews/approval-request-teams.png) |
+| [Maintenance notice](examples/python/scenarios/maintenance_notice) | _스크린샷 준비 중: `maintenance-notice-slack.png`_ | ![Microsoft Teams 예정된 유지 관리 알림.](./docs/assets/card-previews/maintenance-notice-teams.png) |
 
 ## 저장소 구조
 

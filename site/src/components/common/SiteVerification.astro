@@ -1,5 +1,9 @@
 ---
 import { SITE } from 'astrowind:config';
+
+const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION_ID || SITE.googleSiteVerificationId;
+const bingVerification = import.meta.env.PUBLIC_BING_SITE_VERIFICATION_ID;
 ---
 
-{SITE.googleSiteVerificationId && <meta name="google-site-verification" content={SITE.googleSiteVerificationId} />}
+{googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+{bingVerification && <meta name="msvalidate.01" content={bingVerification} />}

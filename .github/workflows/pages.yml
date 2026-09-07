@@ -46,15 +46,22 @@ jobs:
 
       - name: Check website
         working-directory: site
-        run: npm run check:astro
+        run: npm run check
 
       - name: Build website
         working-directory: site
+        env:
+          PUBLIC_GOOGLE_SITE_VERIFICATION_ID: ${{ vars.GOOGLE_SITE_VERIFICATION_ID }}
+          PUBLIC_BING_SITE_VERIFICATION_ID: ${{ vars.BING_SITE_VERIFICATION_ID }}
         run: npm run build
 
       - name: Check generated links
         working-directory: site
         run: npm run check:links
+
+      - name: Check generated SEO signals
+        working-directory: site
+        run: npm run check:seo
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v5

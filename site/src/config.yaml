@@ -1,5 +1,5 @@
 site:
-  name: Teams Webhook Guide
+  name: PyHookKit
   site: 'https://dotnetpower.github.io'
   base: '/pyhookkit'
   trailingSlash: true
@@ -9,18 +9,18 @@ site:
 # Default SEO metadata
 metadata:
   title:
-    default: Teams Webhook Guide
-    template: '%s — Teams Webhook Guide'
+    default: PyHookKit
+    template: '%s — PyHookKit'
   description: 'Send Microsoft Teams Adaptive Card notifications through one shared Power Automate flow, much like a Slack Incoming Webhook.'
   robots:
     index: true
     follow: true
   openGraph:
-    site_name: Microsoft Teams Webhook Guide
+    site_name: PyHookKit
     images:
-      - url: '/pyhookkit/brand/og.svg'
+      - url: '/pyhookkit/brand/og.png'
         width: 1200
-        height: 628
+        height: 630
     type: website
   twitter:
     cardType: summary_large_image

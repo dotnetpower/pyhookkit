@@ -63,6 +63,13 @@ Graph 앱이 필요하지 않습니다.
 - [통합 Bookinfo 시나리오](integrated-bookinfo-scenario.ko.md)
 - [마이그레이션](migration.ko.md)
 
+## 머신 판독 가능 리소스
+
+- [정규 알림 JSON Schema](https://dotnetpower.github.io/pyhookkit/contracts/notification.schema.json)
+- [전송 결과 JSON Schema](https://dotnetpower.github.io/pyhookkit/contracts/delivery-result.schema.json)
+- [중앙 라우터 OpenAPI](https://dotnetpower.github.io/pyhookkit/openapi.json)
+- [AI용 문서 인덱스](https://dotnetpower.github.io/pyhookkit/llms.txt)
+
 커밋되는 모든 지침에서는 합성 이름, ID, URL, 경로 및 대상을 사용합니다.
 자격 증명, 콜백 서명, 계정 ID 또는 실제 환경 식별자가 포함된 화면이나 명령
 출력을 추가하지 마세요.

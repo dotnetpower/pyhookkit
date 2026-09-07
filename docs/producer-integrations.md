@@ -226,3 +226,10 @@ notification; inspect notification status for provider delivery evidence.
   containing credentials, or provider responses.
 - One SQLite database supports one router replica. Use a managed transactional
   store or durable queue before horizontal scaling.
+
+## Official provider references
+
+- [Creating GitHub Webhooks](https://docs.github.com/webhooks/using-webhooks/creating-webhooks)
+- [GitLab project Webhooks](https://docs.gitlab.com/user/project/integrations/webhooks/)
+- [Argo CD generic Webhook service](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/services/webhook/)
+- [Azure DevOps Web Hooks](https://learn.microsoft.com/azure/devops/service-hooks/services/webhooks?view=azure-devops)

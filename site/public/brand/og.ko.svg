@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
-  <title id="title">PyHookKit</title>
-  <desc id="description">Direct Teams Webhook delivery and optional notification routing with PyHookKit.</desc>
+  <title id="title">PyHookKit Teams Webhook 가이드</title>
+  <desc id="description">Teams Webhook 직접 전송과 선택적 알림 라우팅 가이드</desc>
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#11131f"/>
@@ -17,15 +17,15 @@
   <g transform="translate(76 72)">
     <rect width="1048" height="486" rx="30" fill="#fff" fill-opacity=".06" stroke="#fff" stroke-opacity=".16"/>
     <text x="54" y="102" fill="#b9c7ff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700" letter-spacing="4">PYHOOKKIT · MICROSOFT TEAMS</text>
-    <text x="54" y="200" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="62" font-weight="800">Teams Webhook notification guide</text>
-    <text x="54" y="270" fill="#e6e9ff" font-family="Inter,Arial,sans-serif" font-size="30">Start direct. Add routing only when needed.</text>
+    <text x="54" y="200" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="62" font-weight="800">Teams Webhook 알림 가이드</text>
+    <text x="54" y="270" fill="#e6e9ff" font-family="Inter,Arial,sans-serif" font-size="30">직접 전송으로 시작하고 필요할 때만 라우팅하세요.</text>
     <g transform="translate(54 336)">
       <rect width="270" height="82" rx="20" fill="#2563eb"/>
-      <text x="34" y="53" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700">1. Posting identity</text>
+      <text x="34" y="53" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700">1. 게시 계정</text>
       <rect x="292" width="310" height="82" rx="20" fill="#9333ea"/>
       <text x="326" y="53" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700">2. Power Automate</text>
       <rect x="624" width="310" height="82" rx="20" fill="#0369a1"/>
-      <text x="658" y="53" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700">3. Optional router</text>
+      <text x="658" y="53" fill="#fff" font-family="Inter,Arial,sans-serif" font-size="24" font-weight="700">3. 선택적 라우터</text>
     </g>
   </g>
 </svg>

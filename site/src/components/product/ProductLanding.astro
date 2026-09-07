@@ -10,6 +10,7 @@ import CallToAction from '~/components/widgets/CallToAction.astro';
 import TeamsSetupShowcase from './TeamsSetupShowcase.astro';
 import DeliveryArchitecture from './DeliveryArchitecture.astro';
 import { getPermalink } from '~/utils/permalinks';
+import { gitLastModified, sourcePathsForUrl } from '../../../scripts/document-metadata.mjs';
 
 interface Props {
   locale?: 'en' | 'ko';
@@ -24,15 +25,19 @@ const flowGuideHref = getPermalink(`${prefix}/docs/power-automate-teams-workflow
 const appGuideHref = getPermalink(`${prefix}/docs/teams-notify-app-bootstrap/`);
 const routerGuideHref = getPermalink(`${prefix}/docs/central-notification-router/`);
 const alternateHref = getPermalink(isKorean ? '/' : '/ko/');
+const englishUrl = 'https://dotnetpower.github.io/pyhookkit/';
+const koreanUrl = 'https://dotnetpower.github.io/pyhookkit/ko/';
+const canonicalUrl = isKorean ? koreanUrl : englishUrl;
+const lastModified = gitLastModified(sourcePathsForUrl(canonicalUrl));
 
 const copy = isKorean
   ? {
-      metadataTitle: '10분 안에 Microsoft Teams Webhook 알림 보내기',
+      metadataTitle: 'PyHookKit Teams Webhook 및 알림 라우팅 가이드',
       metadataDescription:
-        'Slack Incoming Webhook처럼 공통 Power Automate 흐름 하나로 Microsoft Teams 표준 채널에 Adaptive Card 알림을 보내세요.',
+        'Microsoft Teams Webhook 직접 전송부터 Slack·Teams 알림 동등성, 선택적 중앙 라우터 및 멤버십 자동화까지 검증된 PyHookKit 가이드입니다.',
       tagline: '익숙한 Webhook 방식으로 Teams 알림 보내기',
       title:
-        'Slack에서 하던 Webhook 알림,<br /><span class="text-accent dark:text-indigo-300">Teams에서도 10분이면 시작합니다.</span>',
+        'Teams Webhook 알림을 직접 보내고,<br /> <span class="text-accent dark:text-indigo-300">필요할 때만 라우팅을 추가하세요.</span>',
       subtitle:
         'Microsoft 365 관리 센터에서 서비스 계정을 만들고 공통 Power Automate 흐름 하나를 구성하세요. 채널 링크와 콜백 URL로 첫 Adaptive Card를 보낼 수 있습니다.',
       start: '10분 빠른 시작',
@@ -66,12 +71,12 @@ const copy = isKorean
       alternate: 'English site',
     }
   : {
-      metadataTitle: 'Send a Microsoft Teams Webhook notification in 10 minutes',
+      metadataTitle: 'PyHookKit — Teams Webhook and notification routing guide',
       metadataDescription:
-        'Send an Adaptive Card to a standard Microsoft Teams channel through one shared Power Automate flow, much like a Slack Incoming Webhook.',
+        'Verified PyHookKit guidance for direct Microsoft Teams Webhook delivery, Slack and Teams notification parity, optional routing, and membership automation.',
       tagline: 'Teams notifications as simple as Slack Webhooks',
       title:
-        'The Webhook workflow you know from Slack,<br /><span class="text-accent dark:text-indigo-300">ready for Teams in 10 minutes.</span>',
+        'Send Teams Webhook notifications directly,<br /> <span class="text-accent dark:text-indigo-300">then add routing only when needed.</span>',
       subtitle:
         'Create a service account in the Microsoft 365 admin center and configure one shared Power Automate flow. A channel link and callback URL are enough for the first Adaptive Card.',
       start: 'Start the 10-minute guide',
@@ -301,6 +306,49 @@ const optionalItems = isKorean
         callToAction: { text: 'View the optional router', href: routerGuideHref, icon: 'tabler:arrow-right' },
       },
     ];
+
+const structuredData = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${englishUrl}#website`,
+      url: englishUrl,
+      name: 'PyHookKit Teams Webhook Guide',
+      alternateName: 'Teams Webhook Guide',
+      inLanguage: ['en', 'ko'],
+    },
+    {
+      '@type': 'SoftwareSourceCode',
+      '@id': 'https://github.com/dotnetpower/pyhookkit#software',
+      name: 'PyHookKit',
+      description: copy.metadataDescription,
+      url: canonicalUrl,
+      codeRepository: 'https://github.com/dotnetpower/pyhookkit',
+      license: 'https://github.com/dotnetpower/pyhookkit/blob/main/LICENSE',
+      programmingLanguage: 'Python',
+      runtimePlatform: 'Python 3.12',
+      ...(lastModified ? { dateModified: lastModified } : {}),
+      author: {
+        '@type': 'Person',
+        name: 'dotnetpower',
+        url: 'https://github.com/dotnetpower',
+      },
+      inLanguage: isKorean ? 'ko' : 'en',
+    },
+    {
+      '@type': 'WebPage',
+      '@id': `${canonicalUrl}#webpage`,
+      url: canonicalUrl,
+      name: copy.metadataTitle,
+      description: copy.metadataDescription,
+      ...(lastModified ? { dateModified: lastModified } : {}),
+      inLanguage: isKorean ? 'ko' : 'en',
+      isPartOf: { '@id': `${englishUrl}#website` },
+      about: { '@id': 'https://github.com/dotnetpower/pyhookkit#software' },
+    },
+  ],
+}).replaceAll('<', '\\u003c');
 ---
 
 <Layout
@@ -309,9 +357,25 @@ const optionalItems = isKorean
     title: copy.metadataTitle,
     ignoreTitleTemplate: true,
     description: copy.metadataDescription,
-    openGraph: { locale: isKorean ? 'ko_KR' : 'en_US' },
+    openGraph: {
+      locale: isKorean ? 'ko_KR' : 'en_US',
+      images: [
+        {
+          url: isKorean ? '/pyhookkit/brand/og.ko.png' : '/pyhookkit/brand/og.png',
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
   }}
 >
+  <Fragment slot="head">
+    <link rel="alternate" hreflang="en" href={englishUrl} />
+    <link rel="alternate" hreflang="ko" href={koreanUrl} />
+    <link rel="alternate" hreflang="x-default" href={englishUrl} />
+    <meta property="og:locale:alternate" content={isKorean ? 'en_US' : 'ko_KR'} />
+    <script is:inline type="application/ld+json" set:html={structuredData} />
+  </Fragment>
   <Hero
     tagline={copy.tagline}
     actions={[

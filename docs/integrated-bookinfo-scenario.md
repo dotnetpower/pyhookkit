@@ -277,3 +277,10 @@ az group delete --name "$RESOURCE_GROUP"
 
 Resources created in other resource groups, including shared Teams API
 connections, are not removed by this command.
+
+## Official platform references
+
+- [GitHub deployment protection rules](https://docs.github.com/actions/managing-workflow-runs-and-deployments/managing-deployments/managing-environments-for-deployment)
+- [GitLab pipeline trigger API](https://docs.gitlab.com/api/pipeline_triggers/)
+- [Argo CD Notifications](https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/)
+- [Azure Kubernetes Service documentation](https://learn.microsoft.com/azure/aks/)

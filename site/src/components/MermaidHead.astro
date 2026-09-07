@@ -1,65 +1,142 @@
 ---
-import Default from '@astrojs/starlight/components/Head.astro';
+const route = Astro.locals.starlightRoute;
+const isKorean = route.lang.startsWith('ko');
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site);
+const siteUrl = new URL('/pyhookkit/', Astro.site);
+const docsUrl = new URL(isKorean ? '/pyhookkit/ko/docs/' : '/pyhookkit/docs/', Astro.site);
+const imageUrl = new URL(isKorean ? '/pyhookkit/brand/og.ko.png' : '/pyhookkit/brand/og.png', Astro.site);
+const title = route.entry.data.title;
+const description = route.entry.data.description;
+const isDocsIndex = canonicalUrl.pathname === docsUrl.pathname;
+const isQuickstart = canonicalUrl.pathname.endsWith('/docs/teams-webhook-quickstart/');
+const contentEntity = {
+  '@type': isDocsIndex ? 'CollectionPage' : 'TechArticle',
+  '@id': `${canonicalUrl.href}#content`,
+  url: canonicalUrl.href,
+  name: title,
+  ...(isDocsIndex ? {} : { headline: title }),
+  description,
+  inLanguage: isKorean ? 'ko' : 'en',
+  isPartOf: { '@id': `${siteUrl.href}#website` },
+  about: { '@id': 'https://github.com/dotnetpower/pyhookkit#software' },
+  author: {
+    '@type': 'Person',
+    name: 'dotnetpower',
+    url: 'https://github.com/dotnetpower',
+  },
+  ...(route.lastUpdated ? { dateModified: route.lastUpdated.toISOString() } : {}),
+  mainEntityOfPage: canonicalUrl.href,
+};
+const breadcrumbItems = [
+  {
+    '@type': 'ListItem',
+    position: 1,
+    name: isKorean ? '홈' : 'Home',
+    item: new URL(isKorean ? '/pyhookkit/ko/' : '/pyhookkit/', Astro.site).href,
+  },
+  {
+    '@type': 'ListItem',
+    position: 2,
+    name: isKorean ? '문서' : 'Documentation',
+    item: docsUrl.href,
+  },
+  ...(!isDocsIndex
+    ? [
+        {
+          '@type': 'ListItem',
+          position: 3,
+          name: title,
+          item: canonicalUrl.href,
+        },
+      ]
+    : []),
+];
+const howToEntity = isQuickstart
+  ? {
+      '@type': 'HowTo',
+      '@id': `${canonicalUrl.href}#howto`,
+      name: title,
+      description,
+      totalTime: 'PT10M',
+      inLanguage: isKorean ? 'ko' : 'en',
+      supply: [
+        { '@type': 'HowToSupply', name: isKorean ? '표준 Microsoft Teams 채널' : 'Standard Microsoft Teams channel' },
+        {
+          '@type': 'HowToSupply',
+          name: isKorean ? 'Teams 및 Power Automate 사용 권한' : 'Teams and Power Automate entitlements',
+        },
+      ],
+      tool: [{ '@type': 'HowToTool', name: 'Python 3' }],
+      step: [
+        {
+          '@type': 'HowToStep',
+          position: 1,
+          name: isKorean ? 'Microsoft 365 서비스 계정 만들기' : 'Create the Microsoft 365 service account',
+          text: isKorean
+            ? '일반 사용자를 만들고 Teams 및 Power Automate 사용 권한을 할당한 다음 대상 Team의 멤버로 추가합니다.'
+            : 'Create an ordinary user, assign Teams and Power Automate entitlements, and add it to the target Team.',
+        },
+        {
+          '@type': 'HowToStep',
+          position: 2,
+          name: isKorean ? '공통 Power Automate 흐름 만들기' : 'Create the shared Power Automate flow',
+          text: isKorean
+            ? 'Teams Webhook 요청 트리거와 동적 Team·채널 Adaptive Card 게시 작업을 연결합니다.'
+            : 'Connect the Teams Webhook request trigger to a dynamically routed Teams Adaptive Card action.',
+        },
+        {
+          '@type': 'HowToStep',
+          position: 3,
+          name: isKorean ? '첫 알림 보내기' : 'Send the first notification',
+          text: isKorean
+            ? '서명된 콜백 URL과 채널 링크를 설정하고 표준 라이브러리 예제를 실행합니다.'
+            : 'Set the signed callback URL and channel link, then run the standard-library example.',
+        },
+      ],
+    }
+  : undefined;
+const structuredData = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl.href}#website`,
+      url: siteUrl.href,
+      name: 'PyHookKit Teams Webhook Guide',
+      inLanguage: ['en', 'ko'],
+    },
+    {
+      '@type': 'SoftwareSourceCode',
+      '@id': 'https://github.com/dotnetpower/pyhookkit#software',
+      name: 'PyHookKit',
+      codeRepository: 'https://github.com/dotnetpower/pyhookkit',
+      license: 'https://github.com/dotnetpower/pyhookkit/blob/main/LICENSE',
+      programmingLanguage: 'Python',
+      runtimePlatform: 'Python 3.12',
+    },
+    contentEntity,
+    ...(howToEntity ? [howToEntity] : []),
+    {
+      '@type': 'BreadcrumbList',
+      '@id': `${canonicalUrl.href}#breadcrumb`,
+      itemListElement: breadcrumbItems,
+    },
+  ],
+}).replaceAll('<', '\\u003c');
+const localizedHead = route.head.map((entry) =>
+  entry.tag === 'meta' && entry.attrs?.property === 'og:locale'
+    ? { ...entry, attrs: { ...entry.attrs, content: isKorean ? 'ko_KR' : 'en_US' } }
+    : entry
+);
 ---
 
-<Default {...Astro.props} />
-
-<script>
-  let mermaidDiagramId = 0;
-
-  const diagramLabel = (frame: Element) => {
-    const content = frame.closest('.sl-markdown-content');
-    const headings = content ? Array.from(content.querySelectorAll('h1, h2, h3, h4, h5, h6')) : [];
-    const heading = headings.findLast((candidate) =>
-      Boolean(candidate.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING)
-    );
-    const headingText = heading?.textContent?.trim();
-    if (headingText) {
-      return document.documentElement.lang.startsWith('ko') ? `${headingText} 다이어그램` : `${headingText} diagram`;
-    }
-    return document.documentElement.lang.startsWith('ko') ? '문서 다이어그램' : 'Documentation diagram';
-  };
-
-  const renderMermaidDiagrams = async () => {
-    const blocks = Array.from(
-      document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]:not([data-mermaid-pending])')
-    );
-    if (blocks.length === 0) return;
-
-    for (const block of blocks) block.dataset.mermaidPending = 'true';
-
-    const { default: mermaid } = await import('mermaid');
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      theme: 'neutral',
-      fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
-    });
-
-    for (const [index, block] of blocks.entries()) {
-      const codeLines = Array.from(block.querySelectorAll<HTMLElement>('.ec-line .code'));
-      const source = (
-        codeLines.length > 0 ? codeLines.map((line) => line.textContent).join('\n') : block.innerText
-      ).trim();
-      const frame = block.closest('figure');
-      if (!source || !frame) continue;
-
-      try {
-        const { svg, bindFunctions } = await mermaid.render(`mermaid-${mermaidDiagramId++}-${index}`, source);
-        const diagram = document.createElement('div');
-        diagram.className = 'mermaid-diagram not-content';
-        diagram.setAttribute('role', 'img');
-        diagram.setAttribute('aria-label', diagramLabel(frame));
-        diagram.innerHTML = svg;
-        frame.replaceWith(diagram);
-        bindFunctions?.(diagram);
-      } catch (error) {
-        delete block.dataset.mermaidPending;
-        console.error('Unable to render Mermaid diagram.', error);
-      }
-    }
-  };
-
-  document.addEventListener('astro:page-load', () => void renderMermaidDiagrams());
-  void renderMermaidDiagrams();
-</script>
+{localizedHead.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+<meta property="og:image" content={imageUrl.href} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content={title} />
+<meta property="og:locale:alternate" content={isKorean ? 'en_US' : 'ko_KR'} />
+{route.lastUpdated && <meta property="article:modified_time" content={route.lastUpdated.toISOString()} />}
+<meta property="article:author" content="https://github.com/dotnetpower" />
+<meta name="twitter:image" content={imageUrl.href} />
+<script is:inline type="application/ld+json" set:html={structuredData} />

@@ -286,3 +286,9 @@ az resource delete \
 ```
 
 Removing the Logic App does not delete the shared Teams API connection.
+
+## Microsoft references
+
+- [Microsoft Teams connector](https://learn.microsoft.com/connectors/teams/)
+- [Automate deployment for Azure Logic Apps](https://learn.microsoft.com/azure/logic-apps/logic-apps-azure-resource-manager-templates-overview)
+- [Secure access and data in Azure Logic Apps](https://learn.microsoft.com/azure/logic-apps/logic-apps-securing-a-logic-app)

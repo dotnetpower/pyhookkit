@@ -62,6 +62,13 @@ permission when only a few Teams are involved.
 - [Integrated Bookinfo scenario](integrated-bookinfo-scenario.md)
 - [Migration](migration.md)
 
+## Machine-readable resources
+
+- [Canonical notification JSON Schema](https://dotnetpower.github.io/pyhookkit/contracts/notification.schema.json)
+- [Delivery result JSON Schema](https://dotnetpower.github.io/pyhookkit/contracts/delivery-result.schema.json)
+- [Central router OpenAPI](https://dotnetpower.github.io/pyhookkit/openapi.json)
+- [AI-oriented documentation index](https://dotnetpower.github.io/pyhookkit/llms.txt)
+
 All committed guidance uses synthetic names, IDs, URLs, routes, and
 destinations. Do not add screens or command output containing credentials,
 callback signatures, account identities, or real environment identifiers.

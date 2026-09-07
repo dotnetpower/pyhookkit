@@ -289,3 +289,9 @@ az resource delete \
 ```
 
 Logic App을 제거해도 공유된 Teams API 연결은 삭제되지 않습니다.
+
+## Microsoft 참고 자료
+
+- [Microsoft Teams 커넥터](https://learn.microsoft.com/connectors/teams/)
+- [Azure Logic Apps 배포 자동화](https://learn.microsoft.com/azure/logic-apps/logic-apps-azure-resource-manager-templates-overview)
+- [Azure Logic Apps 액세스 및 데이터 보호](https://learn.microsoft.com/azure/logic-apps/logic-apps-securing-a-logic-app)

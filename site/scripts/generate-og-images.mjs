@@ -18,8 +18,8 @@ const fonts = {
 const cards = [
   {
     locale: 'en',
-    fileName: 'og-en-v2',
-    legacyFileName: 'og',
+    fileName: 'og-en-v3',
+    aliases: ['og', 'og-en-v2'],
     eyebrow: 'PYHOOKKIT · MICROSOFT TEAMS',
     title: 'Teams Webhook notification guide',
     subtitle: 'Start direct. Add routing only when needed.',
@@ -27,8 +27,8 @@ const cards = [
   },
   {
     locale: 'ko',
-    fileName: 'og-ko-v2',
-    legacyFileName: 'og.ko',
+    fileName: 'og-ko-v3',
+    aliases: ['og.ko', 'og-ko-v2'],
     eyebrow: 'PYHOOKKIT · MICROSOFT TEAMS',
     title: 'Teams Webhook 알림 가이드',
     subtitle: '직접 전송으로 시작하고 필요할 때만 라우팅하세요.',
@@ -95,12 +95,11 @@ function svg(card) {
 
 for (const card of cards) {
   const source = svg(card);
-  await sharp(Buffer.from(source))
-    .png()
-    .toFile(path.join(outputRoot, `${card.fileName}.png`));
-  await sharp(Buffer.from(source))
-    .png()
-    .toFile(path.join(outputRoot, `${card.legacyFileName}.png`));
+  const image = await sharp(Buffer.from(source)).flatten({ background: '#11131f' }).removeAlpha().png().toBuffer();
+  await sharp(image).toFile(path.join(outputRoot, `${card.fileName}.png`));
+  for (const alias of card.aliases) {
+    await sharp(image).toFile(path.join(outputRoot, `${alias}.png`));
+  }
 }
 
 console.log(`Generated ${cards.length} localized Open Graph images with embedded fonts.`);

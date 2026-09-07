@@ -18,7 +18,7 @@ metadata:
   openGraph:
     site_name: PyHookKit
     images:
-      - url: '/pyhookkit/brand/og-en-v2.png'
+      - url: '/pyhookkit/brand/og-en-v3.png'
         width: 1200
         height: 630
     type: website

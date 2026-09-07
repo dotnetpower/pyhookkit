@@ -361,7 +361,7 @@ const structuredData = JSON.stringify({
       locale: isKorean ? 'ko_KR' : 'en_US',
       images: [
         {
-          url: isKorean ? '/pyhookkit/brand/og-ko-v2.png' : '/pyhookkit/brand/og-en-v2.png',
+          url: isKorean ? '/pyhookkit/brand/og-ko-v3.png' : '/pyhookkit/brand/og-en-v3.png',
           width: 1200,
           height: 630,
         },
@@ -374,6 +374,12 @@ const structuredData = JSON.stringify({
     <link rel="alternate" hreflang="ko" href={koreanUrl} />
     <link rel="alternate" hreflang="x-default" href={englishUrl} />
     <meta property="og:locale:alternate" content={isKorean ? 'en_US' : 'ko_KR'} />
+    <meta
+      property="og:image:secure_url"
+      content={isKorean
+        ? 'https://dotnetpower.github.io/pyhookkit/brand/og-ko-v3.png'
+        : 'https://dotnetpower.github.io/pyhookkit/brand/og-en-v3.png'}
+    />
     <meta property="og:image:type" content="image/png" />
     <script is:inline type="application/ld+json" set:html={structuredData} />
   </Fragment>

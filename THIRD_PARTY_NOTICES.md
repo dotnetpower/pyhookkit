@@ -64,3 +64,24 @@ The GitOps examples reference the
 sample container images. The images are not redistributed by this repository.
 Istio is licensed under the
 [Apache License 2.0](https://github.com/istio/istio/blob/master/LICENSE).
+
+## Noto Sans KR
+
+The localized Open Graph preview images are generated with
+[Noto Sans KR](https://github.com/notofonts/noto-cjk), distributed through
+[Fontsource](https://fontsource.org/fonts/noto-sans-kr), under the SIL Open Font
+License 1.1.
+
+Copyright Google Inc.
+
+The font files are build inputs. The generated PNG preview images contain only
+rasterized glyph output. The complete license text remains available in the
+installed `@fontsource/noto-sans-kr` package.
+
+## beautiful-mermaid
+
+Documentation Mermaid diagrams are rendered to static SVG files at build time
+with [beautiful-mermaid](https://github.com/craftdocs/beautiful-mermaid) under
+the MIT License.
+
+Copyright (c) 2026 Craft Docs.

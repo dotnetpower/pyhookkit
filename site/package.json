@@ -7,7 +7,8 @@
     "node": ">=22.22.3"
   },
   "scripts": {
-    "sync:docs": "node scripts/sync-docs.mjs",
+    "generate:og": "node scripts/generate-og-images.mjs",
+    "sync:docs": "npm run generate:og && node scripts/sync-docs.mjs",
     "dev": "npm run sync:docs && astro dev",
     "start": "npm run dev",
     "build": "npm run sync:docs && astro build",
@@ -41,6 +42,7 @@
     "@astrojs/mdx": "^8.0.0",
     "@astrojs/partytown": "^2.1.7",
     "@eslint/js": "^10.0.1",
+    "@fontsource/noto-sans-kr": "^5.3.0",
     "@iconify-json/flat-color-icons": "^1.2.3",
     "@iconify-json/tabler": "^1.2.38",
     "@redocly/cli": "^2.51.2",

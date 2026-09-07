@@ -92,8 +92,8 @@ export default defineConfig({
     }),
     starlight({
       title: {
-        en: 'PyHookKit',
-        ko: 'PyHookKit',
+        en: 'Teams Webhook Guide',
+        ko: 'Teams Webhook 알림 가이드',
       },
       description: 'Send Microsoft Teams Adaptive Card notifications through one shared Power Automate Webhook flow.',
       defaultLocale: 'root',

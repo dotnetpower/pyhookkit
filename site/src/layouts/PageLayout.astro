@@ -17,7 +17,7 @@ const { metadata, locale = 'en' } = Astro.props;
 const headerData = getHeaderData(locale);
 const footerData = getFooterData(locale);
 const homeHref = getPermalink(locale === 'ko' ? '/ko/' : '/');
-const siteName = 'PyHookKit';
+const siteName = locale === 'ko' ? 'Teams Webhook 가이드' : 'Teams Webhook Guide';
 ---
 
 <Layout metadata={metadata} locale={locale}>

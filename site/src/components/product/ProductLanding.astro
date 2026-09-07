@@ -37,7 +37,7 @@ const copy = isKorean
         'Microsoft Teams Webhook 직접 전송부터 Slack·Teams 알림 동등성, 선택적 중앙 라우터 및 멤버십 자동화까지 검증된 PyHookKit 가이드입니다.',
       tagline: '익숙한 Webhook 방식으로 Teams 알림 보내기',
       title:
-        'Teams Webhook 알림을 직접 보내고,<br /> <span class="text-accent dark:text-indigo-300">필요할 때만 라우팅을 추가하세요.</span>',
+        'Slack에서 하던 Webhook 알림,<br /> <span class="text-accent dark:text-indigo-300">Teams에서도 10분이면 시작합니다.</span>',
       subtitle:
         'Microsoft 365 관리 센터에서 서비스 계정을 만들고 공통 Power Automate 흐름 하나를 구성하세요. 채널 링크와 콜백 URL로 첫 Adaptive Card를 보낼 수 있습니다.',
       start: '10분 빠른 시작',
@@ -76,7 +76,7 @@ const copy = isKorean
         'Verified PyHookKit guidance for direct Microsoft Teams Webhook delivery, Slack and Teams notification parity, optional routing, and membership automation.',
       tagline: 'Teams notifications as simple as Slack Webhooks',
       title:
-        'Send Teams Webhook notifications directly,<br /> <span class="text-accent dark:text-indigo-300">then add routing only when needed.</span>',
+        'The Webhook workflow you know from Slack,<br /> <span class="text-accent dark:text-indigo-300">ready for Teams in 10 minutes.</span>',
       subtitle:
         'Create a service account in the Microsoft 365 admin center and configure one shared Power Automate flow. A channel link and callback URL are enough for the first Adaptive Card.',
       start: 'Start the 10-minute guide',
@@ -361,7 +361,7 @@ const structuredData = JSON.stringify({
       locale: isKorean ? 'ko_KR' : 'en_US',
       images: [
         {
-          url: isKorean ? '/pyhookkit/brand/og.ko.png' : '/pyhookkit/brand/og.png',
+          url: isKorean ? '/pyhookkit/brand/og-ko-v2.png' : '/pyhookkit/brand/og-en-v2.png',
           width: 1200,
           height: 630,
         },
@@ -374,6 +374,7 @@ const structuredData = JSON.stringify({
     <link rel="alternate" hreflang="ko" href={koreanUrl} />
     <link rel="alternate" hreflang="x-default" href={englishUrl} />
     <meta property="og:locale:alternate" content={isKorean ? 'en_US' : 'ko_KR'} />
+    <meta property="og:image:type" content="image/png" />
     <script is:inline type="application/ld+json" set:html={structuredData} />
   </Fragment>
   <Hero

@@ -151,7 +151,7 @@ def validate_pages(errors: list[str]) -> int:
         expected_locale = "ko_KR" if relative.startswith("ko/") else "en_US"
         if meta_content(parser.metas, "property", "og:locale") != expected_locale:
             errors.append(f"{relative}: incorrect og:locale")
-        if relative.startswith("ko/") and not required["og:image"].endswith("/brand/og.ko.png"):
+        if relative.startswith("ko/") and not required["og:image"].endswith("/brand/og-ko-v2.png"):
             errors.append(f"{relative}: Korean page does not use the Korean OG image")
         if parser.mermaid_source_count:
             errors.append(f"{relative}: Mermaid source was not pre-rendered")

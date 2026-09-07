@@ -96,6 +96,15 @@ GitHub-hosted Runner는 HTTPS Gateway를 사용해야 합니다. self-hosted Run
 `review_requested` 동작을 지원합니다. GitHub가 처음 보내는 `ping`은 설정된
 경로나 대상에 연결 검증 알림 하나로 전송합니다.
 
+![GitHub Webhooks 목록에서 임시 PyHookKit 수신 URL의 마지막 전송이 성공한 상태를 확인하는 화면입니다.](assets/producer-integrations/github-webhook-success.png)
+
+2026년 9월 6일 실제 검증에서는 임시 GitHub Webhook을 만들고 GitHub의
+서명된 `ping`을 임시 HTTPS 터널로 전송했습니다. 라우터는 생산자 `github`의
+요청으로 접수하여 설정된 Teams 대상 하나만 큐에 추가했고, 한 번의 시도로
+`succeeded` 상태를 기록했습니다. 검증 직후 임시 Webhook, 터널, 인바운드
+통합 및 노출된 테스트 secret을 모두 삭제했습니다. 영구 구성에는 새로 만든
+secret을 사용하세요.
+
 ## GitLab CI
 
 보호되고 마스킹된 `NOTIFICATION_ROUTER_TOKEN`과

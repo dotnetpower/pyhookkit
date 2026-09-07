@@ -9,6 +9,7 @@
 |---|---|
 | `github-webhook-settings.png` | 합성 수신 URL, JSON 콘텐츠 형식, 합성 secret, SSL 검증 및 개별 이벤트 선택을 표시한 GitHub Add webhook 폼 |
 | `github-actions-secret.png` | 합성 라우터 API 키를 사용한 저장 전 GitHub Actions Repository Secret 폼 |
+| `github-webhook-success.png` | 임시 HTTPS 터널을 통한 실제 ping 전송 성공 상태만 표시하도록 민감 정보를 제거한 GitHub Webhook 목록 |
 
 캡처는 유용한 최소 폼 영역으로 자르고 합성 값만 사용하세요. 메타데이터를
 제거하고 문서 캡처만을 목적으로 공급자 통합을 저장하지 마세요.

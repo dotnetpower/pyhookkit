@@ -94,6 +94,15 @@ The receiver verifies `X-Hub-Signature-256` over the unchanged raw body and uses
 `review_requested` actions. GitHub's initial `ping` becomes a single
 connection-verification notification for the configured route or target.
 
+![GitHub Webhooks list showing that the last delivery to a temporary PyHookKit inbound URL succeeded.](assets/producer-integrations/github-webhook-success.png)
+
+The live verification on September 6, 2026 created a temporary GitHub Webhook,
+sent GitHub's signed `ping` through an ephemeral HTTPS tunnel, accepted it as
+producer `github`, queued only the configured Teams destination, and completed
+delivery with state `succeeded` in one attempt. The temporary Webhook, tunnel,
+inbound integration, and exposed test secret were deleted immediately after
+verification. Use a newly generated secret for a permanent configuration.
+
 ## GitLab CI
 
 Set protected and masked `NOTIFICATION_ROUTER_TOKEN`, set

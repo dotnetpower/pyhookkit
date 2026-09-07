@@ -131,7 +131,7 @@ HTTP 트리거 설정과 Teams 커넥터는 실행의 서로 다른 부분에 �
 트리거에서 **Any user in my tenant** 또는 **Specific users in my tenant**를
 선택하는 것은 그대로 적용할 수 있는 강화 변경이 아닙니다. 해당 모드에는
 현재의 서명된 URL 어댑터가 구현하지 않는 OAuth 지원 호출자와 토큰 검증이
-필요합니다. 콜백 비밀 저장소, 라우터 측 대상 허용 목록, 생성자별 라우터
+필요합니다. 콜백 비밀 저장소, 라우터 측 대상 허용 목록, 생산자별 라우터
 자격 증명 및 노출이 의심될 때의 콜백 순환을 함께 사용하는 경우에만
 **Anyone**을 유지하세요.
 
@@ -168,7 +168,7 @@ HTTP 트리거 설정과 Teams 커넥터는 실행의 서로 다른 부분에 �
 문서화되어 있습니다. 이 설계에서 Teams Webhook 트리거에는 사용자 지정
 스키마 필드가 없습니다. 아래 식을 사용하여 최상위 라우팅 속성을 읽으세요.
 
-더 엄격한 생성자 측 계약은
+더 엄격한 생산자 측 계약은
 [`routed-request.schema.json`](../infra/teams-workflows/routed-request.schema.json)로
 유지됩니다. 본문은 최상위 `teamId`와 `channelId` 속성 및 하나의 Adaptive
 Card 첨부 파일이 있는 Teams `message` 봉투입니다. 중앙 라우터는 채널
@@ -179,15 +179,17 @@ Card 첨부 파일이 있는 Teams `message` 봉투입니다. 중앙 라우터�
 
 ## 대상 검증
 
-채널 링크를 Power Automate로 보내지 말고 중앙 라우터에 등록하세요. 등록은
-현재의 `teams.cloud.microsoft` 링크 및 레거시 `teams.microsoft.com`
-링크를 수락합니다. GUID 형식의 `groupId` 하나와 GUID 형식의 `tenantId`
-하나, 지원되는 채널 ID 및 비어 있지 않은 채널 이름이 필요합니다. SQLite는
-원본 링크와 파생된 메타데이터를 별도 열에 저장합니다.
+채널 링크 자체를 Power Automate 요청에 포함하지 마세요. 중앙 라우터를
+사용하면 링크를 라우터에 등록하고, 직접 전송 예제에서는 보호된 런타임
+구성에서 링크를 읽어 Team 및 채널 ID를 파생합니다. 두 경로 모두 현재의
+`teams.cloud.microsoft` 링크와 레거시 `teams.microsoft.com` 링크를
+수락합니다. GUID 형식의 `groupId` 하나와 `tenantId` 하나, 지원되는 채널 ID
+및 비어 있지 않은 채널 이름이 필요합니다. 중앙 라우터는 원본 링크와 파생된
+메타데이터를 SQLite의 별도 열에 저장합니다.
 
-워크플로 콜백은 권한 있는 전송 자격 증명입니다. 흐름은 라우터가 제공한
-검증된 `teamId`와 `channelId`를 신뢰하므로 해당 URL을 일반 생성자에게
-노출하지 마세요.
+워크플로 콜백은 권한 있는 전송 자격 증명입니다. 흐름은 중앙 라우터 또는
+승인된 직접 호출자가 제공한 검증된 `teamId`와 `channelId`를 신뢰하므로
+해당 URL을 일반 생산자에게 노출하지 마세요.
 
 ## Teams 작업 구성
 

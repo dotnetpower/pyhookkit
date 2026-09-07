@@ -180,15 +180,18 @@ metadata; the signed Workflow URL is never stored in SQLite.
 
 ## Destination validation
 
-Register channel links in the central router rather than sending them to Power
-Automate. Registration accepts current `teams.cloud.microsoft` links and legacy
-`teams.microsoft.com` links. It requires one GUID `groupId`, one GUID
-`tenantId`, a supported channel ID, and a non-empty channel name. SQLite stores
-the original link and the derived metadata in separate columns.
+Do not include the channel link itself in a Power Automate request. With the
+central router, register the link in the router. Direct-delivery examples read
+it from protected runtime configuration and derive the Team and channel IDs.
+Both paths accept current `teams.cloud.microsoft` links and legacy
+`teams.microsoft.com` links. A link requires one GUID `groupId`, one GUID
+`tenantId`, a supported channel ID, and a non-empty channel name. The central
+router stores the original link and derived metadata in separate SQLite
+columns.
 
 The Workflow callback is a privileged delivery credential. The flow trusts the
-validated `teamId` and `channelId` supplied by the router, so do not expose its
-URL to general producers.
+validated `teamId` and `channelId` supplied by the central router or an approved
+direct caller, so do not expose its URL to general producers.
 
 ## Configure the Teams action
 

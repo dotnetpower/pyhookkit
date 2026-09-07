@@ -2,16 +2,17 @@
 
 [한국어](central-notification-router.ko.md)
 
-The central router is an optional SQLite-backed example for sending the same
-canonical notification from GitLab, Argo CD, or another producer through one
-routing boundary. Existing direct Slack and Teams commands remain available for
-local testing, migration, and a deliberately selected fallback.
+The central router is an optional SQLite-backed example for sending canonical
+notifications from GitHub, GitLab, Argo CD, Azure DevOps, or another producer
+through one routing boundary. Existing direct Slack and Teams commands remain
+available for local testing, migration, and a deliberately selected fallback.
 
 ```text
-GitLab ──────┐
+GitHub ──────┐
+GitLab ──────┤
 Argo CD ─────┼── canonical JSON ──> router ──> SQLite outbox
-other source ┘                                  ├─ Slack webhook
-                                                └─ Teams Workflow
+Azure DevOps ┤                                  ├─ Slack webhook
+other source ┘                                  └─ Teams Workflow
 ```
 
 The router owns fan-out. Power Automate still receives one destination per
@@ -25,15 +26,19 @@ The example provides:
 - producer-specific bearer credentials;
 - route-to-many-destinations configuration;
 - transactional SQLite notification and target-delivery records;
-- idempotency for each producer and `eventId`;
-- an at-least-once leased worker;
+- duplicate-submission idempotency keyed by producer and `eventId`;
+- an at-least-once leased worker, which can duplicate a provider message if a
+  process stops after provider acceptance but before SQLite records success;
 - redacted aggregate and per-target delivery status;
 - existing Slack and Teams renderer and retry-policy reuse.
 
-It intentionally omits an administration API, automatic identity lookup,
-dead-letter replay UI, and multi-node worker coordination. SQLite is suitable
-for this single-process example and modest notification volume. Use a
-queue-backed store before running multiple router replicas.
+The loopback-only administration dashboard and API provide channel
+registration, producer API-key management, inbound integration management, and
+delivery-status visibility. The example intentionally omits remote
+administration authentication, a dead-letter replay UI, and multi-node worker
+coordination. SQLite is suitable for this single-process example and modest
+notification volume. Move to a managed transactional store or durable queue
+before running multiple router replicas.
 
 See the [central router SQLite data model](central-router-sqlite-data-model.md)
 for table relationships, columns, state transitions, and retention scope.
@@ -134,7 +139,7 @@ after the replacement succeeds.
 | Create and edit the Flow | Flow author | Power Platform **Environment Maker** in the target environment |
 | Authorize the Teams connector | `svc-teams-notification` | Licensed Microsoft 365/Teams and Power Automate user; no Entra administrator role |
 | Configure channel type and memberships at runtime | `TeamsNotifyApp` service principal | Microsoft Graph application permissions `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and `TeamMember.ReadWriteNonOwnerRole.All` |
-| Submit notifications | GitLab, Argo CD, or another producer | Router bearer credential only; no Graph or Power Platform role |
+| Submit notifications | GitHub, GitLab, Argo CD, Azure DevOps, or another producer | Producer-specific router bearer credential only; no Graph or Power Platform role |
 
 Microsoft Graph application permissions require tenant-wide admin consent.
 **Privileged Role Administrator** is the least privileged built-in role that can

@@ -95,6 +95,9 @@ export default defineConfig({
           href: 'https://github.com/dotnetpower/pyhookkit',
         },
       ],
+      components: {
+        Head: './src/components/MermaidHead.astro',
+      },
       sidebar: [
         {
           label: 'Start here',

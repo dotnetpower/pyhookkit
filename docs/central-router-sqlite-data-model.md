@@ -5,7 +5,7 @@
 This guide describes how the optional central notification router stores routes,
 notifications, and per-target delivery state in SQLite. The source of truth for
 table definitions is
-[`SqliteRouteStore._initialize()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L405-L454).
+[`SqliteRouteStore._initialize()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L627-L679).
 
 ## Database creation and location
 
@@ -25,7 +25,7 @@ database and related WAL files together.
 > data model as a reference and replace the adapter. This repository currently
 > ships only the SQLite adapter, so passing another database connection string
 > to `--database` is not sufficient. Implement a store against
-> [`NotificationRouteStore`](../examples/python/src/pyhookkit/ports/notification_routing.py#L15-L51)
+> [`NotificationRouteStore`](../examples/python/src/pyhookkit/ports/notification_routing.py#L15-L59)
 > and wire it into the composition root. Preserve atomic notification and
 > target creation, `(producer, event_id)` idempotency, per-target state,
 > delivery leasing, and referential integrity.
@@ -123,7 +123,7 @@ time of a successfully authenticated event.
 There is no external SQL migration file or schema-version table. Startup uses
 `CREATE TABLE IF NOT EXISTS`, then automatically adds missing Teams metadata
 columns to older `route_destinations` tables. See
-[`_migrate_destination_metadata()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L456-L493)
+[`_migrate_destination_metadata()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L681-L723)
 for the implementation.
 
 Back up the database before a schema change and run `doctor` with the new code to

@@ -1,0 +1,65 @@
+---
+import Default from '@astrojs/starlight/components/Head.astro';
+---
+
+<Default {...Astro.props} />
+
+<script>
+  let mermaidDiagramId = 0;
+
+  const diagramLabel = (frame: Element) => {
+    const content = frame.closest('.sl-markdown-content');
+    const headings = content ? Array.from(content.querySelectorAll('h2, h3, h4, h5, h6')) : [];
+    const heading = headings.findLast((candidate) =>
+      Boolean(candidate.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING)
+    );
+    const headingText = heading?.textContent?.trim();
+    if (headingText) {
+      return document.documentElement.lang.startsWith('ko') ? `${headingText} 다이어그램` : `${headingText} diagram`;
+    }
+    return document.documentElement.lang.startsWith('ko') ? '문서 다이어그램' : 'Documentation diagram';
+  };
+
+  const renderMermaidDiagrams = async () => {
+    const blocks = Array.from(
+      document.querySelectorAll<HTMLElement>('pre[data-language="mermaid"]:not([data-mermaid-pending])')
+    );
+    if (blocks.length === 0) return;
+
+    for (const block of blocks) block.dataset.mermaidPending = 'true';
+
+    const { default: mermaid } = await import('mermaid');
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: 'strict',
+      theme: 'neutral',
+      fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
+    });
+
+    for (const [index, block] of blocks.entries()) {
+      const codeLines = Array.from(block.querySelectorAll<HTMLElement>('.ec-line .code'));
+      const source = (
+        codeLines.length > 0 ? codeLines.map((line) => line.textContent).join('\n') : block.innerText
+      ).trim();
+      const frame = block.closest('figure');
+      if (!source || !frame) continue;
+
+      try {
+        const { svg, bindFunctions } = await mermaid.render(`mermaid-${mermaidDiagramId++}-${index}`, source);
+        const diagram = document.createElement('div');
+        diagram.className = 'mermaid-diagram not-content';
+        diagram.setAttribute('role', 'img');
+        diagram.setAttribute('aria-label', diagramLabel(frame));
+        diagram.innerHTML = svg;
+        frame.replaceWith(diagram);
+        bindFunctions?.(diagram);
+      } catch (error) {
+        delete block.dataset.mermaidPending;
+        console.error('Unable to render Mermaid diagram.', error);
+      }
+    }
+  };
+
+  document.addEventListener('astro:page-load', () => void renderMermaidDiagrams());
+  void renderMermaidDiagrams();
+</script>

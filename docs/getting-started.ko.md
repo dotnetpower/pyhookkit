@@ -25,8 +25,9 @@ python fundamentals/00_http_request/slack.py
 python fundamentals/00_http_request/teams.py
 ```
 
-명령은 기본적으로 공급자 페이로드를 렌더링합니다. `.env`를 로드한 후 둘 중
-하나를 의도적으로 배달하려면 `--send`를 추가합니다.
+Python 스크립트를 실행하면 기본적으로 공급자 페이로드를 렌더링합니다.
+`.env`를 로드한 후 둘 중 하나를 의도적으로 전송하려면 `--send`를
+추가합니다.
 
 ## PyHookKit 쌍 예제 실행
 

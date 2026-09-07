@@ -105,6 +105,19 @@ GitHub-hosted Runner는 HTTPS Gateway를 사용해야 합니다. self-hosted Run
 통합 및 노출된 테스트 secret을 모두 삭제했습니다. 영구 구성에는 새로 만든
 secret을 사용하세요.
 
+### 구성 결과 확인
+
+GitHub Actions의 `workflow_run` 이벤트를 수신하면 라우터가 이벤트를 정규
+알림으로 변환하고 설정된 Teams 채널로 전달합니다. 다음 화면에서는 저장소,
+워크플로 및 실행 결론이 Adaptive Card에 표시되고 **Open in GitHub** 작업이
+원래 GitHub 실행으로 연결되는 것을 확인할 수 있습니다.
+
+![Teams 채널에 전달된 GitHub workflow success Adaptive Card에서 저장소, 워크플로, 성공 결론 및 Open in GitHub 작업을 확인하는 화면입니다.](assets/power-automate-teams-workflow/github-webhook.png)
+
+이 결과는 `github-webhook` 생산자가 `release-notifications` 경로로 제출한
+알림입니다. 카드의 `SUCCESS` 상태와 `CONCLUSION` 값이 모두 `success`인지
+확인하세요.
+
 ## GitLab CI
 
 보호되고 마스킹된 `NOTIFICATION_ROUTER_TOKEN`과

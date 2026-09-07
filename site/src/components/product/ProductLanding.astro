@@ -39,7 +39,7 @@ const copy = isKorean
       docs: '문서 홈 보기',
       noteTitle: '첫 알림에 필요한 것',
       noteDescription:
-        '서비스 계정을 만들 관리자 권한, 할당할 Teams 라이선스, 표준 채널, 공통 Power Automate 흐름 하나가 필요합니다. Graph 앱과 PyHookKit 서버는 선택 사항입니다.',
+        '사용자·라이선스 준비 담당자, Power Platform 환경의 흐름 작성자, Team 소유자, 할당 가능한 Teams 및 Power Automate 사용 권한과 표준 채널이 필요합니다. Graph 앱과 PyHookKit 서버는 선택 사항입니다.',
       setupTagline: '10분 직접 전송 경로',
       setupTitle: '세 단계로 첫 Teams 알림 보내기',
       setupSubtitle:
@@ -78,7 +78,7 @@ const copy = isKorean
       docs: 'Open documentation',
       noteTitle: 'All the first delivery needs',
       noteDescription:
-        'Administrator access to create the service account, an available Teams license, a standard channel, and one shared flow. The Graph app and PyHookKit server are optional.',
+        'A user and licensing operator, a flow author in the Power Platform environment, a Team owner, available Teams and Power Automate entitlements, and a standard channel. The Graph app and PyHookKit server are optional.',
       setupTagline: '10-minute direct path',
       setupTitle: 'Send the first Teams notification in three steps',
       setupSubtitle:
@@ -168,7 +168,8 @@ const sendItems = isKorean
       },
       {
         title: '3. F00 예제 실행',
-        description: '<code>python3 teams.py --send</code>로 패키지나 라우터 없이 직접 전송합니다.',
+        description:
+          '<code>python3 examples/python/fundamentals/00_http_request/teams.py --send</code>로 저장소 루트에서 패키지나 라우터 없이 직접 전송합니다.',
         icon: 'tabler:terminal-2',
       },
       {
@@ -190,7 +191,8 @@ const sendItems = isKorean
       },
       {
         title: '3. Run the F00 example',
-        description: 'Use <code>python3 teams.py --send</code> to deliver without the package or router.',
+        description:
+          'From the repository root, use <code>python3 examples/python/fundamentals/00_http_request/teams.py --send</code> to deliver without the package or router.',
         icon: 'tabler:terminal-2',
       },
       {
@@ -271,7 +273,7 @@ const optionalItems = isKorean
       {
         title: 'TeamsNotifyApp — 멤버십 자동화',
         description:
-          '여러 Team에 게시 계정을 반복해서 추가해야 할 때만 사용합니다. Graph의 <code>GroupMember.ReadWrite.All</code>로 Team 기반 Microsoft 365 그룹 멤버십을 관리하며 메시지는 게시하지 않습니다.',
+          '게시 계정을 여러 Team 또는 비공개 채널에 자동으로 추가하거나 중앙 라우터 대시보드에서 채널을 등록할 때 사용합니다. <code>Channel.ReadBasic.All</code>, <code>ChannelMember.ReadWrite.All</code>, <code>TeamMember.Read.All</code> 및 <code>TeamMember.ReadWriteNonOwnerRole.All</code> 애플리케이션 권한이 필요하며 메시지는 게시하지 않습니다.',
         icon: 'tabler:users-plus',
         callToAction: { text: '선택적 Graph 설정 보기', href: appGuideHref, icon: 'tabler:arrow-right' },
       },
@@ -287,7 +289,7 @@ const optionalItems = isKorean
       {
         title: 'TeamsNotifyApp — membership automation',
         description:
-          'Use it only when repeatedly adding the posting identity to many Teams. It manages backing Microsoft 365 Group membership with <code>GroupMember.ReadWrite.All</code>; it does not post messages.',
+          'Use it to add the posting identity automatically to multiple Teams or private channels, or when registering channels through the central router dashboard. It requires the <code>Channel.ReadBasic.All</code>, <code>ChannelMember.ReadWrite.All</code>, <code>TeamMember.Read.All</code>, and <code>TeamMember.ReadWriteNonOwnerRole.All</code> application permissions; it does not post messages.',
         icon: 'tabler:users-plus',
         callToAction: { text: 'View optional Graph setup', href: appGuideHref, icon: 'tabler:arrow-right' },
       },
@@ -303,7 +305,12 @@ const optionalItems = isKorean
 
 <Layout
   locale={locale}
-  metadata={{ title: copy.metadataTitle, ignoreTitleTemplate: true, description: copy.metadataDescription }}
+  metadata={{
+    title: copy.metadataTitle,
+    ignoreTitleTemplate: true,
+    description: copy.metadataDescription,
+    openGraph: { locale: isKorean ? 'ko_KR' : 'en_US' },
+  }}
 >
   <Hero
     tagline={copy.tagline}

@@ -14,6 +14,7 @@
 | `team-member2.png` | 서비스 계정을 추가한 후 **Member** 역할 확인 |
 | `channel-copy-link.png` | 대상 Teams 채널의 **...** 메뉴에서 **Copy link** 선택 |
 | `hello-world.png` | Teams 채널에 게시된 **Hello, world!** Adaptive Card 전송 결과 |
+| `github-webhook.png` | GitHub `workflow_run` Webhook을 통해 Teams 채널에 전달된 성공 Adaptive Card |
 | `azure-portal-entra.png` | Azure Portal에서 **Microsoft Entra ID** 검색 및 선택 |
 | `app-registration.png` | `TeamsNotifyApp`의 Microsoft Graph 애플리케이션 권한과 관리자 동의 상태 |
 | `automated-cloud-flow.png` | Power Automate의 **Automated cloud flow** 선택 타일 |

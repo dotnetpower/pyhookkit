@@ -52,3 +52,20 @@ header.header {
 .sl-markdown-content code:not(:where(.expressive-code *)) {
   border-radius: 0.35rem;
 }
+
+.sl-markdown-content .mermaid-diagram {
+  overflow-x: auto;
+  padding: clamp(1rem, 3vw, 2rem);
+  border: 1px solid var(--sl-color-gray-5);
+  border-radius: 0.85rem;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(20 24 55 / 10%);
+}
+
+.sl-markdown-content .mermaid-diagram svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 42rem;
+  margin-inline: auto;
+}

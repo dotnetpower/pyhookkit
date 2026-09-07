@@ -89,7 +89,11 @@ const koreanFooterData = {
     },
     {
       title: '프로젝트',
-      links: englishFooterData.links[2].links,
+      links: [
+        { text: '소스 코드', href: 'https://github.com/dotnetpower/pyhookkit' },
+        { text: '예제', href: 'https://github.com/dotnetpower/pyhookkit/tree/main/examples' },
+        { text: '계약', href: 'https://github.com/dotnetpower/pyhookkit/tree/main/contracts' },
+      ],
     },
   ],
   secondaryLinks: [

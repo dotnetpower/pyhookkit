@@ -28,6 +28,11 @@ HTTP notification request
 Do not create one Power Automate flow per channel. One flow reads the request's
 `teamId`, `channelId`, and Adaptive Card and serves multiple standard channels.
 
+After configuration, the **Hello, world!** Adaptive Card appears in the Teams
+channel as shown below.
+
+![Configuration result showing the Hello, world! Adaptive Card posted by Workflows in the Teams channel.](assets/power-automate-teams-workflow/hello-world.png)
+
 ## Prerequisites
 
 Prepare:
@@ -301,9 +306,8 @@ A successful result resembles:
 
 Confirm a successful Power Automate run and a **Hello, World!** card in the
 target Teams channel. The successful `2xx` status can differ by tenant policy or
-connector version.
-
-![Successful delivery showing the Hello, world! Adaptive Card posted by Workflows in the Teams channel.](assets/power-automate-teams-workflow/hello-world.png)
+connector version. The card should resemble the screen shown under **Result**
+above.
 
 ## Optional: Automate membership with TeamsNotifyApp
 
@@ -319,6 +323,20 @@ the account only when it is absent.
 `TeamsNotifyApp` does not post messages, replace the Power Automate connection
 or MFA. For a private channel, it automates both Team and channel membership.
 Shared channels are not supported.
+
+> [!NOTE]
+> Register `TeamsNotifyApp` to add the Power Automate posting identity,
+> `svc-teams-notification`, to notification destinations automatically—not to
+> send notifications itself. Standard channels inherit Team membership, so the
+> app adds the identity to the Team. Private channels require membership in both
+> the Team and channel.
+>
+> `TeamsNotifyApp` is required when using **Add channel** in the central router
+> administration dashboard. The dashboard uses the app's Graph permissions to
+> inspect the channel type and configure posting-identity membership. The app
+> is not required for router delivery alone when a Team owner manages the
+> posting identity manually and an operator registers destinations through the
+> CLI.
 
 Automation requires the admin-consented Graph application permission
 `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All`, and

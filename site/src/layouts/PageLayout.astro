@@ -4,6 +4,7 @@ import Header from '~/components/widgets/Header.astro';
 import Footer from '~/components/widgets/Footer.astro';
 
 import { getHeaderData, getFooterData } from '~/navigation';
+import { getPermalink } from '~/utils/permalinks';
 
 import type { MetaData } from '~/types';
 
@@ -15,17 +16,27 @@ export interface Props {
 const { metadata, locale = 'en' } = Astro.props;
 const headerData = getHeaderData(locale);
 const footerData = getFooterData(locale);
+const homeHref = getPermalink(locale === 'ko' ? '/ko/' : '/');
+const siteName = locale === 'ko' ? 'Teams Webhook 가이드' : 'Teams Webhook Guide';
 ---
 
 <Layout metadata={metadata} locale={locale}>
   <slot name="announcement" />
   <slot name="header">
-    <Header {...headerData} isSticky showToggleTheme />
+    <Header
+      {...headerData}
+      homeHref={homeHref}
+      navigationLabel={locale === 'ko' ? '주 탐색' : 'Main navigation'}
+      menuLabel={locale === 'ko' ? '메뉴 전환' : 'Toggle menu'}
+      themeLabel={locale === 'ko' ? '밝은 테마와 어두운 테마 전환' : 'Toggle between light and dark themes'}
+      isSticky
+      showToggleTheme
+    />
   </slot>
   <main>
     <slot />
   </main>
   <slot name="footer">
-    <Footer {...footerData} />
+    <Footer {...footerData} homeHref={homeHref} siteName={siteName} />
   </slot>
 </Layout>

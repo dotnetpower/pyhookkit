@@ -13,6 +13,7 @@ These redacted captures accompany the
 | `team-member2.png` | Confirm the service account has the **Member** role after adding it |
 | `channel-copy-link.png` | Select **Copy link** from the target Teams channel's **...** menu |
 | `hello-world.png` | Delivered **Hello, world!** Adaptive Card in the Teams channel |
+| `github-webhook.png` | Successful Adaptive Card delivered to Teams from a GitHub `workflow_run` Webhook |
 | `azure-portal-entra.png` | Search for and select **Microsoft Entra ID** in Azure Portal |
 | `app-registration.png` | Microsoft Graph application permission and admin-consent status for `TeamsNotifyApp` |
 | `automated-cloud-flow.png` | Power Automate **Automated cloud flow** selection tile |

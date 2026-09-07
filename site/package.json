@@ -30,6 +30,7 @@
     "astro-seo": "^1.2.0",
     "limax": "4.2.3",
     "lodash.merge": "^4.6.2",
+    "mermaid": "^11.17.2",
     "unpic": "^4.2.2"
   },
   "devDependencies": {

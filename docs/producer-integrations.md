@@ -103,6 +103,19 @@ delivery with state `succeeded` in one attempt. The temporary Webhook, tunnel,
 inbound integration, and exposed test secret were deleted immediately after
 verification. Use a newly generated secret for a permanent configuration.
 
+### Verify the configuration result
+
+When the router receives a GitHub Actions `workflow_run` event, it transforms
+the event into a canonical notification and delivers it to the configured Teams
+channel. The following card preserves the repository, workflow, and conclusion,
+and its **Open in GitHub** action links to the originating run.
+
+![GitHub workflow success Adaptive Card delivered to Teams, showing the repository, workflow, successful conclusion, and Open in GitHub action.](assets/power-automate-teams-workflow/github-webhook.png)
+
+This result was submitted by producer `github-webhook` on route
+`release-notifications`. Verify that both the card status and `CONCLUSION` value
+are `success`.
+
 ## GitLab CI
 
 Set protected and masked `NOTIFICATION_ROUTER_TOKEN`, set

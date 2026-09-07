@@ -2,8 +2,7 @@
 
 [English](configuration.md)
 
-이 저장소는 공급자 대상 자격 증명을 위해 하나의 로컬 환경 파일을
-사용합니다.
+공급자 대상 자격 증명을 저장할 로컬 환경 파일을 만드세요.
 
 ```shell
 cp .env.example .env

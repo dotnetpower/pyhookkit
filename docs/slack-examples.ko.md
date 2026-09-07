@@ -2,9 +2,9 @@
 
 [English](slack-examples.md)
 
-Slack 참조는 종속성 없는 HTTP 요청에서 시작하여 라이브러리 기반 렌더링을
-거쳐 명시적인 Web API 경계까지 진행됩니다. `examples/python`에서 명령을
-실행하세요.
+이 가이드에서는 종속성 없는 HTTP 요청부터 라이브러리 기반 렌더링과
+명시적인 Web API 경계까지 단계별 Slack 예제를 실행합니다.
+`examples/python`에서 명령을 실행하세요.
 
 ## 원시 HTTP 부트스트랩
 

@@ -49,7 +49,7 @@ Graph 앱이 필요하지 않습니다.
 | 콜백과 자격 증명 보호하기 | [보안](security.ko.md) |
 | 여러 Team의 게시 계정 멤버십 자동화하기 | [TeamsNotifyApp 부트스트랩](teams-notify-app-bootstrap.ko.md) |
 | 선택적 팬아웃 라우터 실행하기 | [중앙 알림 라우터](central-notification-router.ko.md) |
-| 웹에서 채널과 최근 알림 관리하기 | [중앙 라우터 관리 대시보드](central-notification-router.ko.md#관리-대시보드-실행) |
+| 웹에서 채널과 최근 알림 관리하기 | [관리 대시보드 실행](central-notification-router.ko.md#관리-대시보드-실행) |
 | GitHub, GitLab, Argo CD 및 Azure DevOps 연결하기 | [생산자 통합](producer-integrations.ko.md) |
 | 중앙 라우터의 SQLite 테이블 이해하기 | [SQLite 데이터 모델](central-router-sqlite-data-model.ko.md) |
 | Slack과 Teams 의미 동등성 이해하기 | [알림 동등성](notification-parity.ko.md) |

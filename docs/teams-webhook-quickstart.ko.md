@@ -28,6 +28,11 @@ Power Automate 흐름은 채널마다 만들지 않습니다. 요청의 `teamId`
 `channelId` 및 Adaptive Card를 읽는 흐름 하나를 여러 표준 채널에서
 공유합니다.
 
+구성을 완료하면 다음과 같이 Teams 채널에 **Hello, world!** Adaptive Card가
+표시됩니다.
+
+![Teams 채널에 Workflows가 게시한 Hello, world! Adaptive Card가 표시된 구성 결과 화면입니다.](assets/power-automate-teams-workflow/hello-world.png)
+
 ## 시작하기 전에
 
 다음 항목을 준비하세요.
@@ -297,9 +302,8 @@ curl --fail-with-body --silent --show-error \
 
 Power Automate 실행 기록이 성공했고 대상 Teams 채널에 **Hello, World!**
 카드가 표시되는지 확인합니다. 테넌트 정책이나 커넥터 버전에 따라 성공 응답은
-다른 `2xx` 상태일 수 있습니다.
-
-![Teams 채널에 Workflows가 게시한 Hello, world! Adaptive Card가 표시된 전송 성공 화면입니다.](assets/power-automate-teams-workflow/hello-world.png)
+다른 `2xx` 상태일 수 있습니다. 카드 모양은 상단 **구성 결과**의 화면과
+같습니다.
 
 ## 선택 사항: TeamsNotifyApp으로 멤버십 자동화하기
 
@@ -314,6 +318,18 @@ Team마다 한 번만 추가합니다. `TeamsNotifyApp`은 채널 등록 시 해
 `TeamsNotifyApp`은 메시지를 게시하거나 Power Automate 연결과 MFA를
 대체하지 않습니다. 비공개 채널이면 Team과 채널 멤버십을 모두 자동화합니다.
 공유 채널은 지원하지 않습니다.
+
+> [!NOTE]
+> `TeamsNotifyApp`을 등록하는 목적은 알림을 직접 보내는 것이 아니라, Power
+> Automate에서 알림을 게시하는 `svc-teams-notification` 계정을 대상에 자동으로
+> 추가하는 것입니다. 표준 채널은 Team 멤버십을 상속하므로 계정을 해당
+> Team에 추가하고, 비공개 채널은 Team과 채널에 모두 추가합니다.
+>
+> 중앙 알림 라우터의 관리 대시보드에서 **채널 추가**를 사용하려면
+> `TeamsNotifyApp` 구성이 필수입니다. 대시보드는 채널 유형을 확인하고 게시
+> 계정의 멤버십을 자동으로 구성할 때 이 앱의 Graph 권한을 사용합니다. Team
+> 소유자가 게시 계정의 멤버십을 수동으로 관리하고 CLI로 대상을 등록하는
+> 경우에는 중앙 라우터의 전송 기능만을 위해 이 앱을 등록할 필요가 없습니다.
 
 자동화에는 관리자 동의가 부여된 Graph 애플리케이션 권한
 `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및

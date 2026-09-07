@@ -61,7 +61,7 @@ uv sync --extra dev --python 3.12
 | 흐름 작성자 | Power Automate 흐름 생성 및 Teams 연결 바인딩 | 대상 Power Platform 환경의 **Environment Maker** |
 | Teams 연결 사용자 | Teams 커넥터 승인 및 카드 전송 | Microsoft 365/Teams 및 Power Automate 라이선스. Entra 관리자 역할은 필요하지 않습니다. |
 | `TeamsNotifyApp` 런타임 | 채널 유형을 확인하고 Teams 연결 사용자를 Team 및 비공개 채널 멤버로 추가 | Microsoft Graph 애플리케이션 권한 `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및 `TeamMember.ReadWriteNonOwnerRole.All` |
-| 알림 생산자 | 정규 알림 제출 | 생산자별 중앙 라우터 전달자 토큰만 필요 |
+| 알림 생산자 | 정규 알림 제출 | 생산자별 중앙 라우터 Bearer 토큰만 필요 |
 
 테넌트 정책에서 일반 사용자의 애플리케이션 등록을 허용하면 부트스트랩
 앱 생성자는 새 앱의 소유자가 되며 해당 앱의 자격 증명을 관리할 수 있습니다.

@@ -4,7 +4,7 @@
 
 이 문서에서는 선택적 중앙 알림 라우터가 경로, 알림 및 대상별 전송 상태를
 SQLite에 저장하는 방법을 설명합니다. 테이블 정의의 기준은
-[`SqliteRouteStore._initialize()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L405-L454)입니다.
+[`SqliteRouteStore._initialize()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L627-L679)입니다.
 
 ## 데이터베이스 생성 및 위치
 
@@ -22,7 +22,7 @@ SQLite 연결은 외래 키 검사를 활성화하고 WAL 모드를 사용합니
 > SQL Server 등 선호하는 DB가 있으면 이 데이터 모델을 참고하여 대체할 수
 > 있습니다. 현재 저장소에는 SQLite 어댑터만 있으므로 `--database`에 다른 DB
 > 연결 문자열을 넣는 것만으로는 전환되지 않습니다. 새 저장소 어댑터를
-> [`NotificationRouteStore`](../examples/python/src/pyhookkit/ports/notification_routing.py#L15-L51)에
+> [`NotificationRouteStore`](../examples/python/src/pyhookkit/ports/notification_routing.py#L15-L59)에
 > 맞게 구현하고 구성 루트에 연결해야 합니다. 알림과 대상 레코드의 원자적
 > 생성, `(producer, event_id)` 멱등성, 대상별 상태, 전송 임대 및 외래 키
 > 무결성은 동일하게 유지하세요.
@@ -68,12 +68,12 @@ producer_api_keys                    inbound_integrations
 | 열 | 제약 조건 | 의미 |
 |---|---|---|
 | `notification_id` | 기본 키 | 라우터가 생성한 알림 UUID |
-| `producer` | 필수 | 알림을 제출한 생성자 이름 |
-| `event_id` | 필수 | 생성자가 제공한 멱등성 ID |
+| `producer` | 필수 | 알림을 제출한 생산자 이름 |
+| `event_id` | 필수 | 생산자가 제공한 멱등성 ID |
 | `payload_json` | 필수 | 검증된 정규 알림 JSON |
 | `created_at` | 필수 | UTC 생성 시각 |
 
-`(producer, event_id)`는 고유합니다. 같은 생성자와 `event_id`로 동일한
+`(producer, event_id)`는 고유합니다. 같은 생산자와 `event_id`로 동일한
 페이로드를 다시 제출하면 기존 알림을 반환하고, 다른 페이로드를 제출하면
 충돌로 거부합니다.
 
@@ -121,7 +121,7 @@ GitLab signing token 또는 Azure DevOps Basic password 원문은 저장하지
 `CREATE TABLE IF NOT EXISTS`로 구조를 확인하고, 이전 데이터베이스의
 `route_destinations`에 Teams 메타데이터 열이 없으면 자동으로 추가합니다.
 자세한 구현은
-[`_migrate_destination_metadata()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L456-L493)을
+[`_migrate_destination_metadata()`](../examples/python/src/pyhookkit/adapters/outbound/sqlite_route_store.py#L681-L723)을
 참조하세요.
 
 스키마 변경 전에는 데이터베이스를 백업하고 새 코드로 `doctor`를 실행하여

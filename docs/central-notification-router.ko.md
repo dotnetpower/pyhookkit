@@ -2,16 +2,17 @@
 
 [English](central-notification-router.md)
 
-중앙 라우터는 GitLab, Argo CD 또는 다른 생성자가 보낸 동일한 정규 알림을
-하나의 라우팅 경계를 통해 전송하는 선택적 SQLite 기반 예제입니다. 기존의
-Slack 및 Teams 직접 명령은 로컬 테스트, 마이그레이션 및 의도적으로 선택한
-대체 경로에 계속 사용할 수 있습니다.
+중앙 라우터는 GitHub, GitLab, Argo CD, Azure DevOps 또는 다른 생산자가
+보낸 정규 알림을 하나의 라우팅 경계를 통해 전송하는 선택적 SQLite 기반
+예제입니다. 기존의 Slack 및 Teams 직접 명령은 로컬 테스트, 마이그레이션
+및 의도적으로 선택한 대체 경로에 계속 사용할 수 있습니다.
 
 ```text
-GitLab ──────┐
-Argo CD ─────┼── canonical JSON ──> router ──> SQLite outbox
-other source ┘                                  ├─ Slack webhook
-                                                └─ Teams Workflow
+GitHub ──────┐
+GitLab ──────┤
+Argo CD ─────┼── 정규 JSON ──> router ──> SQLite outbox
+Azure DevOps ┤                              ├─ Slack Webhook
+other source ┘                              └─ Teams Workflow
 ```
 
 팬아웃은 라우터가 담당합니다. Power Automate는 여전히 요청당 하나의 대상만
@@ -22,18 +23,21 @@ other source ┘                                  ├─ Slack webhook
 이 예제는 다음을 제공합니다.
 
 - 엄격한 정규 알림 구문 분석
-- 생성자별 전달자 자격 증명
+- 생산자별 Bearer 자격 증명
 - 하나의 경로를 여러 대상으로 연결하는 구성
 - 트랜잭션 방식의 SQLite 알림 및 대상 전송 레코드
-- 각 생성자와 `eventId`에 대한 멱등성
-- 최소 1회 전송을 보장하는 임대 기반 워커
+- 생산자와 `eventId`가 같은 중복 제출에 대한 멱등성
+- 최소 1회 전송을 보장하는 임대 기반 워커. 공급자가 메시지를 수락한 후
+  SQLite에 성공을 기록하기 전에 프로세스가 중지되면 공급자 메시지가
+  중복될 수 있음
 - 민감 정보가 제거된 집계 및 대상별 전송 상태
 - 기존 Slack 및 Teams 렌더러와 재시도 정책 재사용
 
-관리 API, 자동 ID 조회, 배달 못 한 편지 재생 UI 및 다중 노드 워커 조정은
-의도적으로 제외합니다. SQLite는 이 단일 프로세스 예제와 적당한 알림
-볼륨에 적합합니다. 여러 라우터 복제본을 실행하기 전에 큐 기반 저장소를
-사용하세요.
+루프백 전용 관리 대시보드와 관리 API는 채널 등록, 생산자 API 키, 인바운드
+통합 및 전송 상태 조회를 제공합니다. 원격 관리 인증, 배달 못 한 알림 재처리
+UI 및 다중 노드 워커 조정은 의도적으로 제외합니다. SQLite는 이 단일
+프로세스 예제와 적당한 알림 볼륨에 적합합니다. 여러 라우터 복제본을
+실행하기 전에 관리형 트랜잭션 저장소 또는 내구성 큐로 이전하세요.
 
 테이블 관계, 컬럼, 상태 전이 및 보존 범위는 [중앙 라우터 SQLite 데이터
 모델](central-router-sqlite-data-model.ko.md)을 참조하세요.
@@ -136,7 +140,7 @@ uv run python -m pyhookkit.entrypoints.notification_router \
 | 흐름 만들기 및 편집 | 흐름 작성자 | 대상 환경의 Power Platform **Environment Maker** |
 | Teams 커넥터 권한 부여 | `svc-teams-notification` | Microsoft 365/Teams 및 Power Automate 라이선스가 있는 사용자. Entra 관리자 역할 불필요 |
 | 런타임에 채널 유형 및 멤버십 구성 | `TeamsNotifyApp` 서비스 주체 | Microsoft Graph 애플리케이션 권한 `Channel.ReadBasic.All`, `ChannelMember.ReadWrite.All`, `TeamMember.Read.All` 및 `TeamMember.ReadWriteNonOwnerRole.All` |
-| 알림 제출 | GitLab, Argo CD 또는 다른 생성자 | 라우터 전달자 자격 증명만 필요. Graph 또는 Power Platform 역할 불필요 |
+| 알림 제출 | GitHub, GitLab, Argo CD, Azure DevOps 또는 다른 생산자 | 생산자별 라우터 자격 증명만 필요. Graph 또는 Power Platform 역할 불필요 |
 
 Microsoft Graph 애플리케이션 권한에는 테넌트 전체 관리자 동의가 필요합니다.
 **Privileged Role Administrator**는 Microsoft Graph 앱 역할에 동의할 수
@@ -264,7 +268,7 @@ Team과 채널을 확인하고, `TeamsNotifyApp`으로 게시 계정의 Team 멤
 채널 목록의 **테스트 발송**은 선택한 채널 하나에만 **PyHookKit 테스트
 알림** 카드를 직접 보냅니다. 일반 알림 경로에 제출하지 않으므로 같은
 경로의 다른 채널로 팬아웃되지 않습니다. 전송 결과는 **최근 알림**에
-`admin-dashboard` 생성자로 기록됩니다.
+`admin-dashboard` 생산자로 기록됩니다.
 
 채널 옆의 **웹훅 연동**을 선택하면 대상별 POST URL, 필수 헤더 및 정규 JSON
 예제가 표시됩니다. 복사 항목에는 실제 생산자 토큰이 포함되지 않습니다.
@@ -316,7 +320,7 @@ TLS 및 접근 제어를 갖춘 관리 경계 뒤에 별도로 배포하세요.
 
 ## 로컬에서 실행
 
-생성자마다 서로 다른 임의 토큰을 만들고 무시되는 `.env` 또는 다른 비밀
+생산자마다 서로 다른 임의 토큰을 만들고 Git에서 제외된 `.env` 또는 다른 비밀
 저장소에서 공급자 자격 증명을 주입하세요.
 
 ```shell
@@ -448,9 +452,9 @@ GitHub Actions / GitLab CI
 및 토큰 회전을 적용합니다. `/admin` 관리 화면과 SQLite 파일은 외부에
 노출하지 않습니다.
 
-### 라우터가 private network에 있는 경우
+### 라우터가 사설망에 있는 경우
 
-가장 권장하는 방식은 private network에 self-hosted GitHub Actions Runner
+가장 권장하는 방식은 사설망에 self-hosted GitHub Actions Runner
 또는 GitLab Runner를 두는 것입니다. Runner는 GitHub/GitLab로 아웃바운드
 연결을 만들고, 작업이 시작되면 내부 주소로 라우터를 호출합니다. 라우터에
 공개 인바운드 경로를 만들 필요가 없습니다.
@@ -463,7 +467,7 @@ GitHub / GitLab SaaS
 
 Runner를 둘 수 없으면 최소 공개 수신 계층과 내구성 있는 큐를 사용합니다.
 예를 들어 Azure API Management 또는 Azure Functions에서 공급자 서명을
-검증하고 Azure Service Bus에 기록한 다음, private network의 워커가 큐를
+검증하고 Azure Service Bus에 기록한 다음, 사설망의 워커가 큐를
 가져가도록 구성합니다. 이 저장소에는 해당 큐 어댑터가 아직 포함되어 있지
 않습니다.
 
@@ -503,7 +507,7 @@ Argo CD에는 별도의 `bookinfo-router-sync-failed` 및
 
 ## 전송 보장 및 제한 사항
 
-한 생성자의 중복 제출은 원래 알림 ID를 반환합니다. 해당 생성자의
+한 생산자의 중복 제출은 원래 알림 ID를 반환합니다. 해당 생산자의
 `eventId`를 다른 콘텐츠에 재사용하면 충돌이 반환됩니다. 구성된 각 대상은
 독립적인 최종 결과를 가지므로 하나의 실패한 채널은 성공한 채널을 숨기지
 않고 `partial_failed`를 생성합니다.

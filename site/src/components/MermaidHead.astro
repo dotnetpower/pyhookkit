@@ -9,7 +9,7 @@ import Default from '@astrojs/starlight/components/Head.astro';
 
   const diagramLabel = (frame: Element) => {
     const content = frame.closest('.sl-markdown-content');
-    const headings = content ? Array.from(content.querySelectorAll('h2, h3, h4, h5, h6')) : [];
+    const headings = content ? Array.from(content.querySelectorAll('h1, h2, h3, h4, h5, h6')) : [];
     const heading = headings.findLast((candidate) =>
       Boolean(candidate.compareDocumentPosition(frame) & Node.DOCUMENT_POSITION_FOLLOWING)
     );

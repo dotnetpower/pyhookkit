@@ -7,13 +7,25 @@
 예제입니다. 기존의 Slack 및 Teams 직접 명령은 로컬 테스트, 마이그레이션
 및 의도적으로 선택한 대체 경로에 계속 사용할 수 있습니다.
 
-```text
-GitHub ──────┐
-GitLab ──────┤
-Argo CD ─────┼── 정규 JSON ──> router ──> SQLite outbox
-Azure DevOps ┤                              ├─ Slack Webhook
-other source ┘                              └─ Teams Workflow
+```mermaid
+flowchart LR
+  github[GitHub] -->|정규 JSON| router[Router API]
+  gitlab[GitLab] -->|정규 JSON| router
+  argocd[Argo CD] -->|정규 JSON| router
+  azure[Azure DevOps] -->|정규 JSON| router
+  other[Other source] -->|정규 JSON| router
+  router --> outbox[(SQLite outbox)]
+  outbox --> worker[Background worker]
+  worker --> adapter[Configured destination adapter]
+  adapter --> teams[Teams Workflow]
+  adapter --> slack[Slack Incoming Webhook]
 ```
+
+SQLite는 Slack이나 Teams에 직접 연결하지 않습니다. 라우터가 대상별 전송
+작업을 outbox에 저장하면 백그라운드 워커가 작업을 임대하고, 등록된 대상의
+공급자 어댑터가 전송합니다. 그림의 두 출력은 지원되는 대상 유형이며 모든
+설치에서 둘 다 활성화된다는 의미가 아닙니다. 현재 구성을 확인하려면
+`list-destinations`를 실행하세요.
 
 팬아웃은 라우터가 담당합니다. Power Automate는 여전히 요청당 하나의 대상만
 수신하며 라우팅 데이터베이스가 아니라 Teams 전송 어댑터로 유지됩니다.

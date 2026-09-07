@@ -7,13 +7,26 @@ notifications from GitHub, GitLab, Argo CD, Azure DevOps, or another producer
 through one routing boundary. Existing direct Slack and Teams commands remain
 available for local testing, migration, and a deliberately selected fallback.
 
-```text
-GitHub ──────┐
-GitLab ──────┤
-Argo CD ─────┼── canonical JSON ──> router ──> SQLite outbox
-Azure DevOps ┤                                  ├─ Slack webhook
-other source ┘                                  └─ Teams Workflow
+```mermaid
+flowchart LR
+  github[GitHub] -->|Canonical JSON| router[Router API]
+  gitlab[GitLab] -->|Canonical JSON| router
+  argocd[Argo CD] -->|Canonical JSON| router
+  azure[Azure DevOps] -->|Canonical JSON| router
+  other[Other source] -->|Canonical JSON| router
+  router --> outbox[(SQLite outbox)]
+  outbox --> worker[Background worker]
+  worker --> adapter[Configured destination adapter]
+  adapter --> teams[Teams Workflow]
+  adapter --> slack[Slack Incoming Webhook]
 ```
+
+SQLite does not connect directly to Slack or Teams. The router stores one
+delivery job per target in the outbox, the background worker leases each job,
+and the registered target's provider adapter performs delivery. The two output
+branches show supported destination types; they do not imply that every
+installation enables both. Run `list-destinations` to inspect the current
+configuration.
 
 The router owns fan-out. Power Automate still receives one destination per
 request and remains a Teams delivery adapter rather than a routing database.
